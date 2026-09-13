@@ -1,6 +1,6 @@
 # Final Validation Report — v0.3 Mandatory Challenge
 
-Stand 2026-09-14. Repository `dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`, Basis `1094a8b40349dd258e1e716bd6cdfb3ad94974fc`. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1). Kein Merge/Tag/GitHub-Release oder Produktionsdeploy. Nachweisstand dieser Datei: lokale Implementierung validiert; Remote-CI des neuen Commits noch ausstehend, frühere v0.2.1-CI ist kein v0.3-Nachweis.
+Stand 2026-09-14. Repository `dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`, Basis `1094a8b40349dd258e1e716bd6cdfb3ad94974fc`. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1). Kein Merge/Tag/GitHub-Release oder Produktionsdeploy. Implementierungscommit `7ef229fda30966d294fa2b038c6b29d97244d023` tatsächlich gepusht. [Remote-CI 34787960369](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34787960369) vollständig erfolgreich: Installation, Docs, Tests, Build, Dependency-Audit, Reality-Gate, beide HTTP-Smokes, JS-Syntax und Artefaktupload. Frühere v0.2.1-CI wird nicht als v0.3-Nachweis verwendet. Dieser nachfolgende Dokumentationscommit ergänzt den tatsächlich beobachteten Nachweis.
 
 ## Tatsächlicher Implementierungsumfang
 [ADR-004](docs/adr/ADR-004-challenge-before-decision.md): Primary **API-Eingabe** → unveränderliches Result Package → separater HTTP-Challenge-Worker mit eigenem Token → serververifizierter Report → Triage → erforderliche Human Approval → explizite Reviewer-Adoption. Kein Primär-Agentgenerator/LLM/Executor hinzugefügt.
@@ -23,7 +23,7 @@ Fünf reale deterministische Dimensionen: Evidence, Consistency, Alternative, Ca
 | Documentation/OpenAPI | VALIDATED begrenzt | Vier generierte Produkte, formale OpenAPI, lokale Dateilinks, sieben Envvariablen, Test-Docstrings geprüft |
 | No-fake Boundary | TESTED begrenzt | scripts/reality_check.py PASS; enges AST-/Smoke-Gate, kein umfassender semantischer Fake-Detektor |
 | Browser-E2E | NOT RUN | HTTP/JS-Syntax ersetzt keine Browserinteraktion; keine erfundenen Screenshots/Bedienungstests |
-| CI/GitHub | PENDING | Wird nach echtem Push/Lauf gesondert nachgetragen |
+| CI/GitHub | VALIDATED begrenzt | Commit 7ef229f gepusht; Remote-Lauf 34787960369 vollständig erfolgreich, reale CI-Artefakte hochgeladen; PR offen |
 | Sandbox/Hardware/Cloud/Release | NOT IMPLEMENTED / BLOCKED | Keine neuen Adapter, reale Execution-Sandbox, Gerätetests oder Produktionsabnahme |
 
 Wheel-SHA256 des lokalen reproduzierten Builds: `eb42a0f39382db19e11f13bf232f4aa557b63f8ad03a4a008ec2f9551287de57`. Artefakte bleiben außerhalb Git. Dateien: `reports/tests.log`, `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/dependency-audit.json`, `reports/build.log`, `reports/reproducibility.json`, `reports/wheel-install.log`. CI erzeugt eigene commitgebundene Artefakte.
@@ -44,3 +44,8 @@ Frühe Testmigration hatte alte Direkt-Approval-/Smoke-Annahmen; auf zwingenden 
 Remote-CI/PR prüfen; Browser-E2E, bitreproduzierbare sdist-Metadaten, konsistenten Restore und isolierten Workerbetrieb validieren. Anschließend tatsächliche unabhängige Recherche-/Experimentschnittstellen spezifizieren und mit realen Quellen prüfen — erst dann allgemeinere Agententscheidungen freigeben.
 
 [Dokumentationsaudit](DOCUMENTATION_AUDIT.md) · [Integrationsaudit](docs/17-security/reality-audit.md) · [Challenge-Vertrag](docs/02-core/challenge-worker.md) · [Policy](REALITY_POLICY.md)
+
+## Entwicklungs-Preview (kein Produktionsdeploy)
+API auf 0.3.0 neugestartet, Health meldet operational/ok/0.3.0. Runtime meldet OPERATIONAL — NO SEEDED DATA und Production NOT VALIDATED. Separater Worker mit ausschließlich eigener Credential im Kindprozess-Environment gestartet; reale Claim-Aufrufe antworten NO_PENDING_JOB. Tatsächliche Resultliste leer, keine synthetischen Pakete im Betrieb erzeugt. Same-Host-Prozess weiterhin keine OS-Sandbox. Der öffentliche `/openapi.json`-Pfad antwortet absichtlich 404; die aktuelle OpenAPI wird offline generiert, nicht durch einen eingeschalteten Runtime-Dokupfad behauptet.
+
+GitHub meldet eine nicht blockierende Node-20→24-Warnung für gepinnte Actions; Lauf erfolgreich. Browser-E2E und unabhängiges Productionreview bleiben offen.

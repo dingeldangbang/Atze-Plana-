@@ -26,3 +26,6 @@ Kein vollständiger semantischer Beweis jeder Dokumentations-/Codeaussage, kein 
 
 ## Challenge-Abgleich
 ADR-004 vor Implementierung; tatsächliche Result-/Worker-/Report-/Adoptverträge, alle fünf Prüfarten, 500-Quellen-/4-MiB-Grenze, Gate-/Stale-/Stop-/Lease-/Approvalmigration und Rollen dokumentiert. API/OpenAPI einschließlich blockierter direkter fact/decision-Erfassung aktualisiert. UI-/RAG-Doku trennt Primärfreitext, strukturierten Report-Scope und dynamische Decisiongültigkeit. Quickstart enthält separaten Worker ohne Primary-/Reviewer-Environment. Kein Same-Host-Prozess als Sandbox oder Source-Recherche ausgegeben. Aktuelle lokale/Remote-Nachweise im [Validierungsbericht](FINAL_VALIDATION_REPORT.md).
+
+## Remote-Nachweis v0.3
+Commit `7ef229fda30966d294fa2b038c6b29d97244d023`, [CI 34787960369](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34787960369) vollständig erfolgreich. Dokumentations-/OpenAPI-Prüfung und reale Test-/Build-/Smoke-Artefakte im Remote-Lauf. Kein Merge/Release/Produktionsdeploy.
