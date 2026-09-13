@@ -12,6 +12,8 @@ README vom bloßen Projekttitel zur überprüfbaren Funktions- und Statusübersi
 Im ersten Regressionstest gefundene SQLite-WAL-Aktivierung innerhalb einer Transaktion auf Initialisierung außerhalb der Transaktion verlegt.
 
 ### Security
+GitHub Actions auf vollständige, über die GitHub-API aufgelöste Commit-SHAs gepinnt; Repository-Policy blockierte den ersten CI-Start korrekt.
+
 Zunächst gefundene verwundbare transitive Starlette-Version aktualisiert; Advisory-Abgleich erneut ausgeführt. Startup ohne sichere getrennte Tokens blockiert. Keine externen Actions oder Shell-Tools.
 
 ### Breaking Changes
