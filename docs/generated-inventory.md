@@ -1,6 +1,10 @@
 # Source inventory (generated)
 
 - `app/__init__.py`: (package marker)
+- `app/ai_api.py`: register_ai_api
+- `app/ai_gateway.py`: GateDenied, fingerprint, scan, origin, ExternalDataGateway, OpenAICompatibleProvider
+- `app/ai_models.py`: ProviderConfig, AIConfig, AIPolicy, ModelRegistration, AIRequest, AIConsent, ModelProvider, AgentProvider, EmbeddingProvider, VisionProvider, SpeechProvider, RerankerProvider
+- `app/ai_service.py`: policy, prepare, check, execute
 - `app/challenge_api.py`: register_challenge_api
 - `app/challenge_models.py`: Claim, Alternative, ResultInput, Result, ChallengeRequest, Finding, Analysis, WorkItem, Completion, ChallengeReport, JobStatus, Why
 - `app/challenge_rules.py`: normalized, equal_value, analyze
@@ -16,4 +20,4 @@
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
 - `app/triage.py`: evaluate
 
-Environment: `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`
+Environment: `ATZE_AI_CONFIG`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`

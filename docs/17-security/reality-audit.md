@@ -65,3 +65,14 @@ Die oben genannten fehlenden Primary-Agent-/MCP-/Provider-/Hardwareintegrationen
 | Semantische/Online-/Kausalitäts-Gegenprüfung | NO | kein Provider/Experimentvertrag | NOT RUN | BLOCKED/CONDITIONAL | NO |
 
 Kein statisches „Bist du sicher?“ ersetzt Gegenprüfung. Reportresultate stammen aus realen Regeln und Snapshotdaten. Ungeprüfter Primärfreitext wird nicht als Fakt adoptiert. Fehlende Quellen/Alternativen bleiben UNKNOWN, keine Motor-/Sensorbeispiele in der Produktinstanz.
+
+## 0.4.0.dev0 — Modell-Datenschutzfundament
+| Komponente | Implemented | Configured | Tested | Validated | Production Ready |
+|---|---|---|---|---|---|
+| ModelProvider-Vertrag + kompatibler Textadapter | YES, ein HTTP-Textprotokoll | standardmäßig keine Provider | tatsächliche API/HTTP/TLS-Tests | Transport, nicht echte HF-Inferenz | NO |
+| Policy/Kontextfilter/Reviewer-Consent/Audit | YES, bounded single-workspace | Default DENY/local-only | positive/negative Softwarepfade | begrenzte tatsächlich getestete Verträge | NO |
+| Model Registry | YES, manuelle Metadata | leer ohne Reviewer-Erfassung | API/Policybindung | keine Live-/Lizenz-/Revision-Attestation | NO |
+| HF Local Model / autonome AgentRuntime / MCP | NO live installation/integration | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
+| Universal Egress/OS-Sandbox/verschlüsselter Secretcache | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
+
+Alle neuen Tests verwenden isolierte synthetische Daten. Der Testreceiver ist explizit kein Modell und liefert nur einen Hash-Transportbeleg; niemals als Providerintegration oder Modellqualität ausgegeben. [Vollständiger begrenzter Vertrag](../02-core/model-gateway.md).

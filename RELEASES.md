@@ -1,5 +1,9 @@
 # Release management
 
+## 0.4.0.dev0 — Privacy-first foundation, RELEASE BLOCKED
+
+Kein vollständiger HF-Agent-Layer. Text-Adapter/Policy/Context/Consent/Audit implementiert und gegen echte isolierte Transport-/TLS-Sockets geprüft; kein lokales HF-Modell/MCP/smolagents/OS-Sandbox live validiert. Kein universeller Egressbeweis, kein umfassender Secretclassifier oder verschlüsselter Cache. [Vertrag und Gates](docs/02-core/model-gateway.md). Die neue Datenschutzanforderung gilt als Releasebedingung, nicht als behaupteter Ist-Zustand.
+
 ## 0.3.0 — Mandatory Challenge, nicht veröffentlicht
 
 [ADR-004](docs/adr/ADR-004-challenge-before-decision.md) gilt: Result → separater Worker → aktueller Report → Triage → Human Approval/Adoption. Pflichtgate ohne Bypass, einschließlich Legacy-/Stale-/Stopfälle. [Challenge-Scope](docs/02-core/challenge-worker.md) begrenzt alle ACCEPT-Aussagen auf eingereichte strukturierte Claims. Kein semantischer Primärtext-/Online-/Kausalitäts-/Executionnachweis. Zusätzliche Produktionsgates: Worker-/Secret-/OS-Isolation, Liveness-/Leasebetrieb, Last-/Retention-/Restoreabnahme und Browser-E2E. Kein Release allein wegen grüner Software-CI.

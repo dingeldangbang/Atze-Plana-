@@ -20,3 +20,6 @@ Ephemere Worker sind NOT IMPLEMENTED. Unity, Android-Builds, Browser-Crawling un
 
 ## v0.3 Zusatzbudget
 Zusätzlich zum API-Prozess läuft der separate Challenge-Prozess (stdlib HTTP + Pydantic-Regeln, kein LLM). Das frühere Einprozessbudget ist damit nur historische Basis; zusätzliche Python-/Snapshot-/Report-RAMreserve einplanen und tatsächlich messen. Projekt-Evidence max. 4 MiB/500 Datensätze pro Challenge, größere Scopes BLOCKED. Snapshot- und Auditwachstum, serialisierte SQLite-Transaktionen und wiederholte Challenges begrenzen Durchsatz/Storage. Keine 2-GB-Tauglichkeit oder große autonome Workloads durch diese Limits bewiesen.
+
+## KI-Ressourcen
+Core hält keine Modellgewichte und lädt keine Inferenzbibliothek. Große Modelle benötigen einen separat bereitgestellten Worker; RAM/GPU/Modellkapazität wird noch nicht automatisch gemessen oder provisioniert. Gateway-Textgrenzen sind kein 2-GB-Lastnachweis. Socketoperationen können SQLite-Schreibzugriff blockieren; Isolation/harter Deadlinebetrieb vor Produktion abnehmen. Kein automatisches Cloud-Offloading/Fallback.

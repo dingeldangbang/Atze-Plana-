@@ -17,12 +17,13 @@ function list(id, rows, render) {
   rows.forEach(row => { const item = document.createElement('li'); if (row) render(item, row); else item.textContent = 'Keine Einträge vorhanden.'; el(id).append(item); });
 }
 function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
-  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results'].forEach(id => {
+  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers'].forEach(id => {
     const item = document.createElement('li'); item.textContent = message; el(id).replaceChildren(item);
   });
   const option = document.createElement('option'); option.value = ''; option.textContent = message;
   el('context-project').replaceChildren(option);
   el('cache-summary').textContent = 'Keine aktuellen Speicherwerte verfügbar.';
+  el('ai-policy-state').textContent = 'KI-Policy nicht bestätigt.';
   el('stop').textContent = 'Unbekannt — Status nicht bestätigt.';
   el('runtime-mode').textContent = 'Instanzmodus nicht bestätigt.';
   detailRequest++; el('challenge-detail').replaceChildren();
@@ -32,7 +33,7 @@ async function refresh() {
   const current = session;
   const request = ++refreshRequest;
   try {
-    const [projects, evidence, tasks, stop, storage, runtime, results] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results'].map(path => api(path)));
+    const [projects, evidence, tasks, stop, storage, runtime, results, ai] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status'].map(path => api(path)));
     if (current !== session || request !== refreshRequest) return;
     if (!['test', 'operational'].includes(runtime.mode)) throw new Error('Instanzmodus unbekannt; Daten nicht als Betrieb bestätigt.');
     list('projects', projects, (node, row) => { node.textContent = `${row.name} — ${row.description || 'Ohne Beschreibung'} · ${row.id}`; });
@@ -49,6 +50,8 @@ async function refresh() {
     el('challenge-worker-state').textContent = `Challenge Worker: ${runtime.challenge_worker}`;
     detailRequest++; el('challenge-detail').replaceChildren();
     list('results', results, renderResult);
+    el('ai-policy-state').textContent = `KI Privacy Lock: ${ai.policy.privacy_lock ? 'AN' : 'AUS'} · Local-only: ${ai.policy.local_only ? 'JA' : 'NEIN'} · External AI: ${ai.policy.external_ai ? 'ALLOW (weitere Gates erforderlich)' : 'DENY'} · Modellvalidierung: ${ai.model_inference}`;
+    list('ai-providers', ai.providers, (node, row) => { node.textContent = `${row.id} · ${row.mode} · Region (konfiguriert): ${row.region} · ${row.status}`; });
     status('Verbunden. Daten aus dem aktuellen Workspace geladen.');
   } catch (error) { if (current === session && request === refreshRequest) { clearWorkspace('Daten nicht verfügbar — kein Ersatz durch Beispieldaten.'); status(error.message); } }
 }
@@ -121,3 +124,13 @@ function renderResult(node, result) {
   };
   node.append(why, challenge, sources, form);
 }
+
+el('ai-lock').onclick = async () => {
+  const current = session;
+  try {
+    await api('ai/policy', 'POST', {});
+    if (current !== session) return;
+    await refresh();
+    if (current === session) status('KI gesperrt: Local-only, External DENY, alle Allowlists geleert. Bereits laufende Übertragung nicht rückrufbar.');
+  } catch (error) { if (current === session) status(error.message); }
+};

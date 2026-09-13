@@ -21,3 +21,6 @@ Orchestrator, Context Engine, autonome Action Engine und Agent Runtime sind NOT 
 
 ## v0.3 — verbindliche Entscheidungserweiterung
 Die obigen Kern-Inputs/Records bleiben bestehen. Vor jeder freigabefähigen Taskentscheidung ist nun ein aktueller Challenge-Pass zum neuesten Result Package zwingend. Approval enthält zusätzlich result_id/challenge_id/fingerprint. Alte Approvals ohne diese Bindung sind historisch, nicht gültig. Direktes neues fact/decision-Memory ist gesperrt; Ergebnisadoption wird erneut transaktionell durch Triage geprüft. [Vollständiger Vertrag](challenge-worker.md), [Triage-Regeln](triage.md).
+
+## Privacy-first Modellgrenze (experimenteller Teilschritt)
+[Model Gateway](model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.

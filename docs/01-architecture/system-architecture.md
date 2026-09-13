@@ -46,3 +46,6 @@ Das Diagramm oben beschreibt den fortbestehenden Evidence-/Approval-Kern. Die ak
 
 ## Erweiterung v0.3
 Ein realer separater Challenge-Prozess ergänzt die API: Result → serverseitiger Snapshot/Job → workergebundener Lease → fünf deterministische Checks → verifizierter Report → aktuelle Triage → Human Approval/Adoption. [Tatsächliches Sequenzdiagramm und Grenzen](../02-core/challenge-worker.md). Dies ist keine zusätzliche Promptrolle desselben Primary; API-Rechte und Prozess sind getrennt. Gegenprüfung nutzt nur vorhandene eingereichte Evidence, keine unimplementierten Suchprovider. Worker und API teilen Regelcode; keine organisatorische Quellen-/OS-Isolation behauptet.
+
+## Modellpfad 0.4.0.dev0 (kein autonomer Agent)
+Operator → ausgewählter Kontext → konservative Klassifizierung/Secretblock → exakt geprüfte Reviewer-Consent → aktuelle Policy/Stop → ExternalDataGateway → konfigurierter Textendpoint → untrusted Draft. Relevante Schlussfolgerung bleibt anschließend Result/Challenge/Triage-pflichtig. Kein Modell erhält DB-/FS-/Terminal-/Toolobjekte. Kein Modelldownload beim Serverstart. [ADR-005](../adr/ADR-005-private-model-gateway.md).

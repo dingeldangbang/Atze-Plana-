@@ -14,6 +14,7 @@ from app.context_api import register_context_api
 from app.models import (ProjectInput, Project, EvidenceInput, Evidence, Review,
                         TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit)
 from app.store import Store, get, put, listing, audit, stopped, identity, now
+from app.ai_api import register_ai_api
 from app.challenge_api import register_challenge_api
 from app.challenge_service import decide_task
 
@@ -25,8 +26,8 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         settings = settings or Settings.from_env()
     store = None if schema_only else Store(settings.db_path, settings.mode)
     storage = None if schema_only else Storage(settings)
-    app = FastAPI(title='Atze Plana Evidence Core', version='0.3.0',
-                  description='Single-workspace evidence and approval registry. No action execution.',
+    app = FastAPI(title='Atze Plana Evidence Core', version='0.4.0.dev0',
+                  description='Single-workspace evidence registry and explicit policy-gated model drafts. No tool/device execution.',
                   docs_url=None, redoc_url=None, openapi_url=None)
     bearer = HTTPBearer(auto_error=False)
 
@@ -74,7 +75,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     @app.get('/health', tags=['system'])
     def health(db=DB) -> dict[str, str]:
         db.execute('SELECT 1')
-        return {'status': 'ok', 'version': '0.3.0', 'mode': settings.mode}
+        return {'status': 'ok', 'version': '0.4.0.dev0', 'mode': settings.mode}
 
     @app.get('/api/runtime', tags=['system'])
     def runtime(who=Depends(actor)) -> dict[str, str]:
@@ -167,6 +168,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     def audit_log(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(reviewer), db=DB):
         return listing(db, 'audit', limit, offset)
 
+    register_ai_api(app, settings, actor, operator, reviewer, connection, store)
     register_challenge_api(app, settings, actor, operator, reviewer, connection)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)
 

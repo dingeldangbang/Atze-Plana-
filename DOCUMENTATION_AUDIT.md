@@ -1,3 +1,15 @@
+# Documentation Audit — 0.4.0.dev0 privacy-first partial integration
+
+ADR-005 vor Implementierung; fehlende lokale Runtime/HF/MCP/Sandbox ausdrücklich erfasst. [Model Gateway](docs/02-core/model-gateway.md) beschreibt Purpose/Inputs/Outputs/Dependencies/Config/Permissions/Failures/Validation/Tests/Security/API-Workflow und Grenzen. Acht feste Umgebungsnamen plus dynamisch benannte ausschließlich providergebundene Secrets; OpenAPI/Inventar/Testkatalog synchron generiert. README, Betrieb, Ressourcen, UI, Policy, Threatmodel, Releasegates und Integrationsmatrix aktualisiert.
+
+Nicht fälschlich behauptet: HF-Liveinferenz aus HTTP-Receipt, semantische Geheimnisfreiheit aus Regex, PrivateLink aus Mode-Label, OS-Isolation aus Python-Gateway, universeller Privacy Lock aus KI-Policyschalter, AgentRuntime aus bloßer Modellanfrage. Alle Modalitäts-Protokolle ausdrücklich Verträge, keine fertigen Provider.
+
+Dokumentationsprüfung lokal PASS (vier generierte Produkte, OpenAPI, lokale Dateilinks, acht Envvariablen); semantische Vollständigkeit/Anker/externe Links nicht umfassend maschinell bewiesen. Ausgeführte Ergebnisse im [aktuellen Validierungsbericht](FINAL_VALIDATION_REPORT.md). Remote-CI für diesen Schnitt wird nach realem Lauf nachgetragen.
+
+---
+
+## Historisches Dokumentationsaudit v0.3
+
 # Documentation Audit — v0.3 Mandatory Challenge
 
 Stand 2026-09-14. Ausgangspunkt `1094a8b`; keine bestehende Domainfunktion gelöscht. [Verbindliche Policy](REALITY_POLICY.md) und [vollständiges Realitäts-/Integrationsaudit](docs/17-security/reality-audit.md).

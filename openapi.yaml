@@ -1,8 +1,9 @@
 openapi: 3.1.0
 info:
   title: Atze Plana Evidence Core
-  description: Single-workspace evidence and approval registry. No action execution.
-  version: 0.3.0
+  description: Single-workspace evidence registry and explicit policy-gated model
+    drafts. No tool/device execution.
+  version: 0.4.0.dev0
 paths:
   /health:
     get:
@@ -634,6 +635,356 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+  /api/ai/status:
+    get:
+      tags:
+      - ai
+      summary: Status
+      operationId: status_api_ai_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Status Api Ai Status Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: Read-only configuration, never live model validation
+  /api/ai/policy:
+    post:
+      tags:
+      - ai
+      summary: Set Policy
+      operationId: set_policy_api_ai_policy_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIPolicy'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Set Policy Api Ai Policy Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Append policy and audit; invalidates pending requests; no network
+  /api/ai/models:
+    post:
+      tags:
+      - ai
+      summary: Register Model
+      operationId: register_model_api_ai_models_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelRegistration'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Register Model Api Ai Models Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Immutable reviewed manual metadata; no download/discovery/live
+        revision or license validation
+    get:
+      tags:
+      - ai
+      summary: Models
+      operationId: models_api_ai_models_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Models Api Ai Models Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read-only manual model registry
+  /api/ai/requests:
+    post:
+      tags:
+      - ai
+      summary: Request
+      operationId: request_api_ai_requests_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Request Api Ai Requests Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: operator
+      x-side-effects: Prepare bounded same-project/task context; scan and classify;
+        persist local context for reviewer; NO network
+  /api/ai/requests/{request_id}:
+    get:
+      tags:
+      - ai
+      summary: Detail
+      operationId: detail_api_ai_requests__request_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Request Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Detail Api Ai Requests  Request Id  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read exact prepared context for explicit review, not a model
+        answer
+  /api/ai/requests/{request_id}/run:
+    post:
+      tags:
+      - ai
+      summary: Run
+      operationId: run_api_ai_requests__request_id__run_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: request_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Request Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIConsent'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Run Api Ai Requests  Request Id  Run Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Exact context hash + explicit remote consent; recheck policy/stop;
+        authenticated bounded transport through gateway; durable audit; output unchallenged
+        and not stored; NO tools/adoption/fallback
+  /api/ai/attempts/{attempt_id}:
+    get:
+      tags:
+      - ai
+      summary: Attempt
+      operationId: attempt_api_ai_attempts__attempt_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: attempt_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Attempt Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Attempt Api Ai Attempts  Attempt Id  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read audit metadata only; pending outcome is unknown, never
+        automatic retry
   /api/results:
     post:
       tags:
@@ -1506,6 +1857,162 @@ paths:
         originals or memory; audit; stop blocks; failure rolls back page
 components:
   schemas:
+    AIConsent:
+      properties:
+        context_hash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+          title: Context Hash
+        allow_remote:
+          type: boolean
+          title: Allow Remote
+          default: false
+        reason:
+          type: string
+          maxLength: 500
+          minLength: 8
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - context_hash
+      - reason
+      title: AIConsent
+    AIPolicy:
+      properties:
+        privacy_lock:
+          type: boolean
+          title: Privacy Lock
+          default: true
+        local_only:
+          type: boolean
+          title: Local Only
+          default: true
+        external_ai:
+          type: boolean
+          title: External Ai
+          default: false
+        allow_remote:
+          type: boolean
+          title: Allow Remote
+          default: false
+        providers:
+          items:
+            type: string
+          type: array
+          maxItems: 20
+          title: Providers
+        models:
+          items:
+            type: string
+          type: array
+          maxItems: 100
+          title: Models
+        projects:
+          items:
+            type: string
+          type: array
+          maxItems: 100
+          title: Projects
+        tasks:
+          items:
+            type: string
+            enum:
+            - analysis
+            - plan
+            - code
+          type: array
+          maxItems: 3
+          title: Tasks
+        data_classes:
+          items:
+            type: string
+            enum:
+            - PUBLIC
+            - INTERNAL
+            - PROJECT
+            - DEVICE
+            - PERSONAL
+            - CONFIDENTIAL
+            - SECRET
+            - CREDENTIAL
+          type: array
+          maxItems: 8
+          title: Data Classes
+        regions:
+          items:
+            type: string
+          type: array
+          maxItems: 20
+          title: Regions
+        max_context_chars:
+          type: integer
+          maximum: 16000.0
+          minimum: 1.0
+          title: Max Context Chars
+          default: 8000
+        max_output_tokens:
+          type: integer
+          maximum: 512.0
+          minimum: 1.0
+          title: Max Output Tokens
+          default: 128
+      additionalProperties: false
+      type: object
+      title: AIPolicy
+    AIRequest:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        model_id:
+          type: string
+          title: Model Id
+        purpose:
+          type: string
+          enum:
+          - analysis
+          - plan
+          - code
+          title: Purpose
+        classification:
+          type: string
+          enum:
+          - PUBLIC
+          - INTERNAL
+          - PROJECT
+          - DEVICE
+          - PERSONAL
+          - CONFIDENTIAL
+          - SECRET
+          - CREDENTIAL
+          title: Classification
+          default: CONFIDENTIAL
+        prompt:
+          type: string
+          maxLength: 8000
+          minLength: 1
+          title: Prompt
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 8
+          title: Evidence Ids
+        memory_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 8
+          title: Memory Ids
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - model_id
+      - purpose
+      - prompt
+      title: AIRequest
     Action:
       type: string
       enum:
@@ -2473,6 +2980,76 @@ components:
       - category
       - content
       title: MemoryInput
+    ModelRegistration:
+      properties:
+        provider_id:
+          type: string
+          maxLength: 64
+          title: Provider Id
+        model:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Model
+        revision:
+          type: string
+          pattern: ^[a-f0-9]{40,64}$
+          title: Revision
+        license:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: License
+        capabilities:
+          items:
+            type: string
+            enum:
+            - analysis
+            - plan
+            - code
+          type: array
+          maxItems: 3
+          minItems: 1
+          title: Capabilities
+        context_length:
+          type: integer
+          maximum: 10000000.0
+          minimum: 1.0
+          title: Context Length
+        quantization:
+          anyOf:
+          - type: string
+            maxLength: 80
+          - type: 'null'
+          title: Quantization
+        hardware:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Hardware
+        evaluation:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Evaluation
+        security_review:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Security Review
+      additionalProperties: false
+      type: object
+      required:
+      - provider_id
+      - model
+      - revision
+      - license
+      - capabilities
+      - context_length
+      - hardware
+      - evaluation
+      - security_review
+      title: ModelRegistration
     MoveInput:
       properties:
         target:

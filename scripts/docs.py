@@ -29,7 +29,7 @@ def products():
              '- One workspace, two shared role tokens; no per-user identity or tenant isolation.',
              '- No application rate limiter. Production requires a trusted ingress with body/time/rate limits.',
              '- 401 missing/invalid token; 403 wrong role; 404 absent entity; 409 state conflict;',
-             '  422 schema/reference validation; 503 unavailable/locked storage. No external provider errors.',
+             '  422 schema/reference validation; 503 unavailable/locked storage. AI run returns explicit BLOCKED/UNAVAILABLE/DRAFT_UNCHALLENGED envelopes; never infer success from HTTP 200.',
              '- Lists: `limit=1..100` (default 100), `offset>=0` (default 0), insertion order.',
              '- Request and response field constraints are in [OpenAPI](../../openapi.yaml).',
              '- Runnable creation example: [Quickstart](../../QUICKSTART.md).', '',

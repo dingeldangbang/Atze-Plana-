@@ -16,6 +16,8 @@ class Settings:
     mode: str = "operational"
     challenge_token: str = field(default="", repr=False)
 
+    ai_config_path: Path | None = None
+
     def __post_init__(self):
         if self.challenge_token and (len(self.challenge_token) < 32 or self.challenge_token in {self.operator_token, self.reviewer_token}):
             raise ValueError('Challenge credential must be separate and at least 32 characters')
@@ -33,4 +35,5 @@ class Settings:
                    Path(os.getenv('ATZE_STORAGE_ROOT')) if os.getenv('ATZE_STORAGE_ROOT') else None,
                    Path(os.getenv('ATZE_SD_ROOT')) if os.getenv('ATZE_SD_ROOT') else None,
                    os.getenv('ATZE_MODE', 'operational'),
-                   os.getenv('ATZE_CHALLENGE_TOKEN', ''))
+                   os.getenv('ATZE_CHALLENGE_TOKEN', ''),
+                   Path(os.environ['ATZE_AI_CONFIG']) if os.getenv('ATZE_AI_CONFIG') else None)

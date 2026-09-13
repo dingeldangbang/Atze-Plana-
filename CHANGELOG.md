@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Privacy-first model boundary, partial integration
+- Provider-neutral contracts and real OpenAI-compatible text transport through an explicit model data gate. LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER policy categories, empty defaults.
+- Reviewer-only metadata/policy/exact-context consent, local-only lock, allowlists, selected same-project/task context, conservative classification and secret-pattern rejection, durable unknown-outcome audit, no automatic fallback/tool execution/adoption.
+- Actual isolated HTTP/TLS security tests; NOT a local HF model/agent/MCP validation. Full requested integration remains BLOCKED; see model-gateway contract and validation report.
+
 ## 0.3.0 — unreleased / 2026-09-14
 
 ### Added

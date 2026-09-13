@@ -1,6 +1,6 @@
 # Atze Plana
 
-Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.3.0 ist ein begrenzter, lauffähiger Kern, nicht die vollständige Plattform der Master-Anforderung.** Das Ausgangsrepository enthielt nur einen Titel; siehe [Bestandsaufnahme](PROJECT_BASELINE.md).
+Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungsstand 0.4.0.dev0 ist ein begrenzter, lauffähiger Kern, nicht die vollständige Plattform der Master-Anforderung.** Das Ausgangsrepository enthielt nur einen Titel; siehe [Bestandsaufnahme](PROJECT_BASELINE.md).
 
 ## Tatsächlicher Status
 | Bereich | Status | Nachweis / Grenze |
@@ -9,6 +9,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.3.0 i
 | Python-Paket, OpenAPI, Dokumentationskonsistenz | VALIDATED lokal | [Validierungsbericht](FINAL_VALIDATION_REPORT.md) |
 | Memory / Archive / Cache / lokale FTS-Suche | IMPLEMENTED / TESTED | [Neue Context-/Storage-Architektur](docs/20-context-storage/architecture.md); kein MCP-/Cloud-/Offline-Sync-Adapter |
 | Challenge Worker / Result Packages | IMPLEMENTED / begrenzt | [Eigener Prozess, Token, fünf Checks, Staleness-/Adopt-Gate](docs/02-core/challenge-worker.md); keine unabhängige Online-Recherche |
+| Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; kein live-validiertes HF-Modell, MCP oder Agentensandbox |
 | Dashboard | IMPLEMENTED | Projektanlage, Listen, Triage, Storage/Context, Warum?/Herausfordern/Quellen; Browser-E2E noch offen |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
@@ -50,3 +51,6 @@ Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit
 
 ## Every Decision Must Survive Challenge
 [ADR-004](docs/adr/ADR-004-challenge-before-decision.md). Ohne konfigurierten und separat laufenden Worker bleiben Tasks blockiert. Worker separat mit nur seinem Service-Token starten: `python -m app.challenge_worker --url http://127.0.0.1:8000`. [Scope, Limits und Betriebsanleitung](docs/02-core/challenge-worker.md). ACCEPT gilt nur für eingereichte strukturierte Claims, nicht für unvalidierte Primärtexte, Geräte-/Kausalitäts-/Produktionsaussagen.
+
+## Privacy-first Modellgrenze (experimenteller Teilschritt)
+[Model Gateway](docs/02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.

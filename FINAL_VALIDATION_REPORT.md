@@ -1,4 +1,48 @@
-# Final Validation Report — v0.3 Mandatory Challenge
+# Final Validation Report — 0.4.0.dev0 Privacy-first foundation
+
+Stand 2026-09-14; Basis `9413bf5d4608e21cbdbf6894d4033c807b32a8ee`, Branch `arena/01a09c9d-atze-plana`. **Teilimplementierung, vollständige HF-/Agent-/MCP-Abnahme BLOCKED.** Kein Release/Produktionsdeploy. [ADR-005](docs/adr/ADR-005-private-model-gateway.md), [implementierter Vertrag](docs/02-core/model-gateway.md).
+
+## Prüfung vor Implementierung / Konsequenz
+Bestehende Netzwerk-/Context-/Rollen-/Challenge-/Build-/CI-Pfade geprüft. Keine Modellruntime/Weights installiert, keine HF-/MCP-/Tool-Sandboxintegration vorhanden. Bestehende Domainfunktionen nicht ersetzt. Keine Modellgewichte/ausführbaren Modellrepositorys heruntergeladen; keine externe Inferenz mit Projektinhalten durchgeführt. Zusatzabhängigkeiten: keine. Neuer Core bleibt modellfrei; inferiert nur über explizit konfigurierte kompatible Textserver. Abstrakte Modalitätsverträge sind KEINE implementierten Modalitätsprovider.
+
+## Tatsächlich implementiert
+LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Local-only/Privacy Lock/External DENY/empty allowlists. Manuell reviewergebundenes Modellregister, begrenzte Same-Project-/Same-Task-Kontextauswahl, konservative Klassifizierung und Secret-Patternblock, exakte Context-Hash-Consent, erneut geprüfte Policy/Stop/Config vor I/O. Reale authentifizierte Text-HTTP/TLS-Anbindung, keine Redirects/Proxies/Fallbacks/Tools. Durable Pending-Outcome-Audit vor I/O, kein automatisches Retry nach unklarem Ausgang. Antwort bleibt DRAFT_UNCHALLENGED, keine direkte Result-/Memory-/Decisionadoption. UI zeigt tatsächlichen KI-Policystatus und bietet reviewergebundenen KI-Local-only-Lock.
+
+## Aktuell ausgeführte lokale Gates
+| Gate | Ergebnis | Grenze / Evidence |
+|---|---|---|
+| Gesamtsuite | **115 passed**, 2 sichtbare Deprecation-Warnungen | `reports/ai-tests.log`, JUnit; 90 bestehende + 25 neue parametrisierte Fälle |
+| Statement-Coverage | **97,78%**, 1484 Statements /33 nicht parent-gemessen | Challenge-Kindprozesse nicht in Parent-Coverage; keine Requirements-/Browserabdeckung behauptet |
+| Privacy-/Rollen-/Leak-/Context-/Memory-/Replay-/Stop-/Policytests | TESTED | echte APIs/SQLite, abgewiesene Anfragen ohne Transport; AI-001..013 |
+| TLS | TESTED begrenzt | echter Loopback-TLS-Handshake: unbekanntes Zertifikat abgewiesen, explizit vertrautes temporäres Testzertifikat akzeptiert; TLSminimum1.2; keine echte PrivateLink-/Remoteproviderabnahme |
+| Text-HTTP-Transport | TESTED, **kein Modelltest** | isolierter Receiver berechnet Hash-Transportbeleg, kein Modell/Fakeprovider in Runtime; HTTP-/Redirect-/Tools-/Malformed-/Oversize-Grenzen |
+| Bestehender realer HTTP-Smoke | PASS | 29 Responses und zwei separate Challenge-Workerprozesse, auch unter python -O |
+| Dependencies/Security | pip check PASS, pip-audit keine bekannten Treffer | keine unabhängige Sicherheitsabnahme/OS-Egressgarantie |
+| Docs/OpenAPI/No-fake/JS | PASS | vier generierte Produkte, acht feste Envvariablen, lokale Dateilinks, AST-Gate, node --check |
+| Wheel/sdist Build | PASS 0.4.0.dev0 | tatsächlich erzeugt, keine APK/Modellartefakte |
+| Installiertes Wheel | PASS begrenzt | zweite locked venv, python -I lädt site-packages; isolierte DB/API/default deny/HTML geprüft |
+| Reproduzierbarkeit | CONDITIONAL | zwei Builds mit SOURCE_DATE_EPOCH1789344000: Wheel bytegleich; sdist-Dateien/Inhalte gleich, Archivbytes verschieden |
+| Remote-CI dieses Schnitts | PENDING | wird nach tatsächlichem Commit/Push/Lauf ergänzt |
+| Browser E2E | NOT RUN | Syntax/HTTP sind kein Bedienungsnachweis |
+| Gesamte HF-Agent-Integration / Release | **BLOCKED** | lokale HF-Inferenz, AgentRuntime/MCP/OS-Sandbox/full privacy/cost/offload noch nicht umgesetzt/validiert |
+
+Lokaler wiederholter Wheel-SHA256: `eebb8028dd990785310754735ddbb895e8308fcaef660abeb302b5de257e822f`. Weitere ignorierte Laufartefakte: `reports/ai-build.log`, `reports/ai-wheel-install.log`, `reports/ai-reproducibility.json`, `reports/dependency-audit.json`, `reports/smoke*.json`. CI erzeugt eigene commitgebundene Artefakte. Erster Gesamtlauf: 110 bestanden/1 Docsfehler wegen noch fehlendem ATZE_AI_CONFIG in YAML-Spiegel; Spiegel ergänzt, Generator und Gesamtsuite danach neu ausgeführt. Kein Test umgangen.
+
+## Nicht als erfüllt ausgegebene Akzeptanzkriterien
+- **Local Hugging Face model / autonome Agent Runtime / MCP / Multimodel Challenge:** NOT RUN/NOT IMPLEMENTED. Kein Modelloutput oder MCP-Erfolg erfunden. Bestehender deterministischer separater Challenge-Worker ist kein unabhängiges zweites KI-Modell.
+- **RAG/Memory/Context/Challenge/Triage/Audit:** bestehende reale Softwarepfade regressionsgeprüft; Modellkontext nur explizite Evidence/Memory-Auswahl, keine gesamte Datenbank oder automatisch freigegebene externe RAG-Suche.
+- **Universal ExternalDataGateway/Full Privacy Lock/No plaintext external transmission:** neue Modellkommunikation gegated, aber keine plattformweite OS-Egressgarantie. Bestehender Challenge-Control-Transport weiterhin separat. Ingress/TLS-Termination/Hostadmins/Plugins/andere künftige Adapter separat absichern. Kein universal erfülltes Security-Audit behauptet.
+- **Secrets/Cache:** bekannte Muster und explizite SECRET/CREDENTIAL blockiert; kein umfassender semantischer/Encoded-Secret-Detektor. Legacy Memory/Cache/Core DB nicht verschlüsselt-at-rest; keine globale Secretcachegarantie. Exakte menschliche Kontextprüfung bleibt notwendig.
+- **Authenticated/Region/Revision/License/Private Endpoint:** Bearer wird an administrativ konfigurierten Endpoint geschickt, TLS geprüft; regionale Speicherung/Providerverhalten/private Netzwerktopologie/geladene Modellrevision nicht attestiert. Ein Moduslabel ist keine PrivateLink-Bereitstellung.
+- **Kosten/Ressourcen/Offloading/2-GB-Core:** keine Kostenberechnung/Provisionierung/GPU-Messung oder Lastgarantie. Core hält keine Gewichte; Inferenzthread hält zeitweise DB-Schreiblock. Sockettimeout ist keine harte Gesamtdeadline. In-flight Daten können durch Policyänderung nicht zurückgeholt werden.
+
+Nächster realer Integrationsschritt: geprüften separaten lokalen Modellworker mit konkreter Runtime, Modelllizenz, gepinnter Revision und Hardwarebudget bereitstellen; reale Inferenz und danach eigenständige Agent-/MCP-/Sandboxpfade jeweils durch eigene Abnahmegates führen. Keine Remote-Inferenz im Produkt automatisch aktivieren.
+
+---
+
+## Historischer Bericht des vorherigen v0.3-Schnitts (keine aktuellen 0.4-Buildhashes/CI-Ergebnisse)
+
+### v0.3 Mandatory Challenge
 
 Stand 2026-09-14. Repository `dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`, Basis `1094a8b40349dd258e1e716bd6cdfb3ad94974fc`. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1). Kein Merge/Tag/GitHub-Release oder Produktionsdeploy. Implementierungscommit `7ef229fda30966d294fa2b038c6b29d97244d023` tatsächlich gepusht. [Remote-CI 34787960369](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34787960369) vollständig erfolgreich: Installation, Docs, Tests, Build, Dependency-Audit, Reality-Gate, beide HTTP-Smokes, JS-Syntax und Artefaktupload. Frühere v0.2.1-CI wird nicht als v0.3-Nachweis verwendet. Dieser nachfolgende Dokumentationscommit ergänzt den tatsächlich beobachteten Nachweis.
 

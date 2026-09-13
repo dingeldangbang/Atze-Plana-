@@ -14,6 +14,19 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 
 | Test ID / purpose / expected result | Executable case |
 |---|---|
+| AI-001 | Defaults/roles | isolated DB | prepare/run without policy | BLOCK, zero sockets | response/count asserted. | [test_ai_privacy.py: test_ai_default_and_roles](../../tests/test_ai_privacy.py) |
+| AI-002 | Real HTTP transport | explicit policy/consent | send once | untrusted receipt, no result/memory, replay blocked | asserted. | [test_ai_privacy.py: test_ai_actual_transport_and_no_adoption](../../tests/test_ai_privacy.py) |
+| AI-003 | Recognized secrets | isolated request | submit patterns | 409 before persistence/egress | response/socket count asserted. | [test_ai_privacy.py: test_ai_secret_rejection](../../tests/test_ai_privacy.py) |
+| AI-004 | Context boundary | second project evidence | select foreign ID | BLOCK; own selection confidential | asserted. | [test_ai_privacy.py: test_ai_context_isolation](../../tests/test_ai_privacy.py) |
+| AI-005 | Consent freshness | prepared request | change policy/hash/stop | BLOCK, no egress | asserted. | [test_ai_privacy.py: test_ai_stale_policy_hash_and_stop](../../tests/test_ai_privacy.py) |
+| AI-006 | Real receiver failure responses | allowed request | redirect/tools/bad JSON/oversize | no fallback/adoption | asserted. | [test_ai_privacy.py: test_ai_transport_failures_no_fallback](../../tests/test_ai_privacy.py) |
+| AI-007 | Origin constraints | bad startup config | construct gateway | reject before socket | ValueError asserted. | [test_ai_privacy.py: test_ai_reject_unsafe_origin](../../tests/test_ai_privacy.py) |
+| AI-008 | Actual TLS | ephemeral self-signed test cert | untrusted then trusted handshake | cert failure then receipt | no model claim. | [test_ai_privacy.py: test_ai_real_tls](../../tests/test_ai_privacy.py) |
+| AI-009 | Remote policy | configured HTTPS endpoint without connection | default lock/external deny | blocked before transport. | [test_ai_privacy.py: test_ai_remote_privacy_lock](../../tests/test_ai_privacy.py) |
+| AI-010 | Limits/task Memory | actual local records | duplicate/oversize/foreign-task context | blocked before egress. | [test_ai_privacy.py: test_ai_bounds_and_task_memory](../../tests/test_ai_privacy.py) |
+| AI-011 | Auth/output/read contracts | configured transport | missing/reused token and empty output | block, audit readable. | [test_ai_privacy.py: test_ai_missing_auth_invalid_output_and_reads](../../tests/test_ai_privacy.py) |
+| AI-012 | No action privilege | write task and missing provider | actual APIs | BLOCK with zero transmission. | [test_ai_privacy.py: test_ai_write_task_and_unconfigured_model](../../tests/test_ai_privacy.py) |
+| AI-013 | Startup ambiguity | duplicate configured IDs | load config | reject, not last-wins. | [test_ai_privacy.py: test_ai_duplicate_startup_config](../../tests/test_ai_privacy.py) |
 | CH-001: pending blocks; a real report enables bounded triage; reviewer adoption stores only checked-scope references, not unchecked primary text. | [test_challenge.py: test_mandatory_challenge_and_explicit_adoption](../../tests/test_challenge.py) |
 | CH-002: operator/reviewer cannot act as worker; worker cannot write primary evidence; forged PASS and replay are rejected. | [test_challenge.py: test_worker_credentials_separate_and_forgery_rejected](../../tests/test_challenge.py) |
 | CH-003: missing service credential leaves pending result blocked; no in-process auto-report or approval path. | [test_challenge.py: test_unconfigured_worker_has_no_fallback](../../tests/test_challenge.py) |

@@ -26,3 +26,6 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 
 ## v0.3 — Every Decision Must Survive Challenge
 [ADR-004](adr/ADR-004-challenge-before-decision.md) · [Challenge Worker, fünf Prüfarten, API, Grenzen und Recovery](02-core/challenge-worker.md) · [aktuelle Triage](02-core/triage.md). Primary-Text bleibt unvalidiert; akzeptierte strukturierte Decision-Snapshots benötigen Gegenprüfung und explizite Übernahme. Kein allgemeiner Agent-/Webresearch-/Executor-Anspruch.
+
+## Privacy-first Modellgrenze (experimenteller Teilschritt)
+[Model Gateway](02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
