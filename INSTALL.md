@@ -7,7 +7,7 @@
 |---|---|
 | Backend / Frontend | Ein FastAPI-Prozess mit statischen Dateien; kein Node-Build |
 | Datenbank | SQLite aus Python-Standardbibliothek, lokaler beschreibbarer Pfad; Initialisierung beim Start |
-| Object Storage | NOT IMPLEMENTED; Evidenztext bis 20.000 Zeichen in SQLite |
+| Original-/Cacheablage | v0.2: lokale UTF-8-Blobs bis 65.536 Zeichen pro Objekt, optional Betreiber-SD-Verzeichnis; kein Remote Object Store |
 | Local Bridge / Workers | NOT IMPLEMENTED; keine zusätzlichen Dienste starten |
 | 3D / Unity / Android | NOT IMPLEMENTED; keine SDK-Version oder Buildfähigkeit behauptet |
 | GitHub / CI | Workflow im Repository; keine Zugangsdaten für lokale Tests erforderlich |
@@ -16,6 +16,8 @@
 `python -m build` erzeugt Wheel und sdist unter `dist/`. Deployment muss statische Dateien aus dem Wheel enthalten. `uvicorn app.main:create_app --factory` nutzt die gleiche Factory im Checkout und im installierten Paket. Datenpfad sollte für Dienste absolut sein.
 
 ## Datenmodell / Migration
-Schema v1 wird per `CREATE TABLE IF NOT EXISTS` erstellt. Keine Upgrade-Migrationen und kein Import bestehender Fremddaten. Bei künftigen Schemaänderungen zuerst versionierte Migrationen und Restore-Test einführen. Mehrere Replikate, Netzlaufwerke und nicht lokales SQLite sind nicht unterstützt.
+v0.2 ergänzt den v1-Kern additiv um einen Namespace-Index und SQLite-FTS5; bestehende Records bleiben erhalten. FTS5 und POSIX-Dateisystemoperationen sind erforderlich. Keine generelle versionierte Migrationsengine und kein Import bestehender Fremddaten. Bei künftigen Schemaänderungen zuerst versionierte Migrationen und Restore-Test einführen. Mehrere Replikate, Netzlaufwerke und nicht lokales SQLite sind nicht unterstützt.
+
+**Backupänderung v0.2:** SQLite allein enthält nicht mehr die Original-/Cacheblobs. [Storage-/Restore-Grenzen](docs/20-context-storage/architecture.md) beachten.
 
 Konfiguration: [Referenz](docs/19-operations/configuration.md). Produktion: [Gate](PRODUCTION.md).

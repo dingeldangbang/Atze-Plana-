@@ -2,3 +2,5 @@
 ATZE_OPERATOR_TOKEN: "" # required secret, >=32 characters
 ATZE_REVIEWER_TOKEN: "" # required different secret, >=32 characters
 ATZE_DB_PATH: data/atze.db
+ATZE_STORAGE_ROOT: "" # empty = DB parent / objects
+ATZE_SD_ROOT: "" # optional existing removable-tier directory

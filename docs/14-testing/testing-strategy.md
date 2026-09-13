@@ -15,3 +15,6 @@
 
 ## Offene Nachweise
 Browser-E2E (Login/Logout, UI-Fehler, Rendering, Accessibility), Device-/Agent-/Sandboxtests, Last-/Concurrency-Stresstest, unabhängiger Pentest, Wiederherstellung unter Produktionsbedingungen und plattformübergreifender Build sind NOT IMPLEMENTED bzw. BLOCKED. Temp-DB-Tests sind keine Sandbox-Isolation. Synthetische Daten sind nur Testinputs.
+
+## v0.2 Regressionen
+Zusätzliche echte temporäre Dateisystemtests für Originalbytes/Hash, stabile Pfadauflösung nach Relocation, Source Retention, Copy-/Auditfehler, Symlink-/Traversalschutz, Kapazitätsfallback, Stop, Cache-Expiry/Retry, Memory fact/inference, Live-Evidence, Projektfilter, Reindex und additive Migration. Simuliertes SD-Verzeichnis ist keine SD-Hardwarevalidierung. HTTP-Smoke wurde um Archive/Memory/FTS/Cache/Health erweitert. Multi-Tier-Gesamtbackup, mobile Hardware, MCP, Remote-Sync und Browser-E2E sind weiterhin offene Nachweise.

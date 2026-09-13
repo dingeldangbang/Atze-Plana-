@@ -6,6 +6,9 @@
 | Projekte/Evidence/Aufgaben/Stop lesen; Schema; Triage | nein | ja | ja |
 | Projekte/Evidence/Aufgaben anlegen | nein | ja | nein |
 | Evidence review, Task approval, Stop ändern, Audit lesen | nein | nein | ja |
+| Archive/Memory/Cache erfassen | nein | ja | nein |
+| Archive/Cache lesen, Memory/Storage Health, FTS suchen | nein | ja | ja |
+| Relocation, Cache-Cleanup, Reindex | nein | nein | ja |
 | Execution / Shell / Device / Cloud | nicht implementiert | nicht implementiert | nicht implementiert |
 
 Authentifizierung ist eine fest konfigurierte Rollenidentität, keine Benutzerverwaltung. Zwei verschiedene Tokens sind technisch vorgeschrieben, die tatsächliche personelle Trennung ist organisatorisch sicherzustellen. Kein Projekt-ACL: beide Rollen können alle Projekte lesen.

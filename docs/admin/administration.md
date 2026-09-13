@@ -10,4 +10,4 @@ Environment außerhalb Git setzen, `.env` und SQLite durch OS-Rechte schützen. 
 Reviewer kann Audit paginiert lesen. Domainwrites und Audit atomar; keine Nachweise über abgewiesene Logins, keine fälschungssichere Logkette. Health, Disk und Ressourcen extern überwachen. [Threat Model](../../THREAT_MODEL.md) vor Exposition lesen. Fehlender Ingress-/Security-Nachweis blockiert Produktion.
 
 ## Devices / Workers / Cloud
-Nicht implementiert. Keine USB-Rechte, privilegierten Container, SSH-Schlüssel, MQTT-Broker oder Cloud-Credentials hinzufügen, um nicht vorhandene Features „zu aktivieren“. Es existiert keine solche Konfiguration.
+Nicht implementiert. Keine USB-Rechte, privilegierten Container, SSH-Schlüssel, MQTT-Broker oder Cloud-Credentials hinzufügen, um nicht vorhandene Features „zu aktivieren“. Es existiert keine solche Konfiguration. Die optionale `ATZE_SD_ROOT` ist lediglich eine lokal provisionierte Speicherwurzel, kein Device-Adapter.

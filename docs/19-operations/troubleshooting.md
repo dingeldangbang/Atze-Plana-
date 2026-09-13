@@ -18,3 +18,16 @@
 ESP32 nicht erkannt, ADB device offline, Fastboot nicht erreichbar, EDL device nicht erkannt, Unity-/Android-Build failed, Bright Data request failed, Worker timeout, WebSocket disconnected und Sandbox failed können **nicht von diesem Kern diagnostiziert oder repariert werden**. Es gibt dafür keinen Adapter, Build oder Worker.
 
 Symptom in einem externen System: Hersteller-/SDK-Logs mit Zustimmung sichern, Hardware-/SDK-Version und autorisierten Kontext erfassen, zuständiges Team eskalieren. Keine Flash-/EDL-/Netzwerkscanbefehle als vermeintliche Reparatur durchführen. Ein passendes Runbook kann erst nach Integration und realem Test entstehen.
+
+## v0.2 Context / Storage
+| Problem | Symptom / mögliche Ursache | Diagnose / Evidence | Resolution / Eskalation |
+|---|---|---|---|
+| 507 No available tier | Local >=85%, SD >=90%, Reserve <16 MiB+Objekt oder Tier fehlt | Storage Health; konfigurierte Wurzeln/Mounts | Kapazität sicher bereitstellen; keine Archivlöschung erzwingen; Admin |
+| 503 Storage integrity | Blob fehlt, Hash/Größe falsch, Symlink oder nicht regulär | Objekt-ID, erwarteter Hash, Audit; Originalkopien read-only prüfen | Schreibverkehr stoppen, geprüfte Retention-/Backupkopie manuell wiederherstellen; Admin/Security |
+| SD nicht verfügbar | Root unkonfiguriert, fehlt, nicht zugreifbar | Health available=false; OS-Mountstatus | keine automatische Mount-/Formataktion; freigegebenen Tier herstellen |
+| Cache 410 | Server-Expiry erreicht | expires_at/Status | verlorener Cache ist disposable; Taskinput erneut erzeugen, wichtige Originale vorher archivieren |
+| Cache Cleanup teilweise fehlgeschlagen | Tombstone vorhanden, Blob noch da oder schon gelöscht | Cache/Audit und Fehlerzeit | Reviewer denselben begrenzten Cleanup wiederholen; Archive unberührt lassen |
+| Suche ohne Treffer | anderes Projekt, Token-AND passt nicht, FTS leer | Query/Projekt/Original prüfen | andere Wörter; Reviewer-Reindex aus intakten Originalen; keine Wahrheit aus leerem Index ableiten |
+| Suchtreffer, Original offline | lokaler FTS-Auszug noch da, aktiver Tier fehlt | location/Hash und content-503 | Original erst nach erfolgreicher Hashprüfung verwenden; nicht als live-validiert behandeln |
+| fact 409 | keine oder unverified/rejected Evidence | Referenz-Reviewzustände | echte Evidenz prüfen; Hypothese als inference speichern, niemals Status künstlich hochsetzen |
+| SQLite FTS5 fehlt | Start scheitert bei CREATE VIRTUAL TABLE | SQLite compile options / Pythonbuild | unterstützten SQLite-/Pythonbuild verwenden; kein stiller Such-Bypass |

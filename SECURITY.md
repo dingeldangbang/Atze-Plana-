@@ -23,3 +23,10 @@ READ wird nur mit geprüfter Evidenz, gemeldeter Confidence >=0.8 und bestätigt
 Stop wirkt auf jede neue Triage und Freigabe, nicht auf Netzwerk-, Host- oder Hardwareprozesse. Nach Deaktivierung können bestehende Freigaben wieder approved sein; es gibt keine Revocation/Expiry. Vor Einführung von Executoren muss das korrigiert und getestet werden.
 
 [Threat Model](THREAT_MODEL.md), [Security-Architektur](docs/01-architecture/security-architecture.md).
+
+## v0.2 Context-/Storage-Angriffsfläche
+Neue authentifizierte Text-Ingestion (max. 65.536 Zeichen/Objekt), FTS und Dateioperationen. Diese sind Metadaten-/Storagepflege, keine Taskausführung. Relocation/Cleanup/Reindex nur Reviewer; Archive/Cache-Mutationen und Reindex bei Stop blockiert. Fact-Memory benötigt verified Evidence, bleibt aber eine aufgezeichnete Behauptung. Retrieval liefert immer allowed_for_action=false; Prompt-Injection im Text verleiht keine Tools/Rechte.
+
+Neue Roots sind vertrauenswürdig administrierte lokale Dateisysteme, keine fremd beschreibbaren Agenten-Workspaces. UUID-Dateinamen, `O_NOFOLLOW`, Regulärdateiprüfung, Größen-/Hashprüfung, fsync, Source Retention und SQL-Transaktionen schützen API-vermittelte Pfade. Ein kompromittierter OS-Administrator/Root-Elternpfad/Mount kann nicht abgewehrt werden. Filesystem+SQLite haben keinen atomaren gemeinsamen Commit: Orphans möglich, keine automatische Original-GC.
+
+Cache-Cleanup darf ausschließlich abgelaufene Cacheobjekte löschen und committet zuvor Tombstones. Es ist keine Prozessisolation. Multi-Tier-Vollbackup, Remote/MCP-Transportauth, SD-Hotplug/Powerloss, Quoten, Memory-Revocation und echte mobile Hardwarevalidierung bleiben offen. Archive, FTS und Memory liegen unverschlüsselt auf Disk; keine Runtime-Synchronisation privater Daten nach GitHub.

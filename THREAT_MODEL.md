@@ -21,3 +21,15 @@ Falsche Rolle → 403 (SEC-002); fehlender Token → 401 (API-001); unzureichend
 
 ## Nicht-Nachweise
 Kein Penetrationstest, kein Secret-Scanner-Vollscan der gesamten Git-Historie, keine Hardware-Sicherheitsprüfung, keine Produktionsfreigabe. Dependency-Scan ist nur ein Advisory-Abgleich zum Ausführungszeitpunkt.
+
+## v0.2 Ergänzung
+| Fläche | Kontrolle | Restgrenze |
+|---|---|---|
+| Archive namespace / Traversal | Pfadvalidierung, UUID-physische Dateien, SQL-parametrisierte Auflösung | keine Host-Isolation gegen Admin/Mount-Manipulation |
+| Copy/Relocation | hashgeprüfte Quelle, fsync/Readback-Ziel, atomarer DB-/Auditwechsel, Quelle behalten | Orphans/Retained Copies wachsen, keine atomare Cross-FS-Transaktion |
+| Cache deletion | nur expired cache, committed tombstone, retry-sicher | Cleanup explizit; temporäre Daten können vorher verloren gehen |
+| FTS / Memory Prompt Injection | reine Retrieval-Daten, typed Kategorien, keine Tools, no action permission | Label/Reviewer kann irren, kein semantischer Wahrheitsbeweis |
+| Kontextfremde Quellen | same-project Referenzvalidierung, Query-Projektfilter | beide Rollen sehen alle Projekte, keine Tenant-Grenze |
+| Datenverlust | unveränderliche Archive, lesende Hashchecks | DB-only Backup nicht mehr vollständig; Gesamtrestore noch kein Produktionsnachweis |
+
+Regressionen: STO-001..010, CACHE-001/002, MEM-001/002, RAG-001/002, MIG-001. Tests verwenden temporäre Verzeichnisse als **simulierten** zweiten Tier, keine behauptete SD-Hardware.

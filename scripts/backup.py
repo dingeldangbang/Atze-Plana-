@@ -1,4 +1,4 @@
-"""Consistent SQLite backup, source read-only, exclusive destination, integrity checked."""
+"""Database-only SQLite backup. Archive/cache blob roots are NOT included."""
 import argparse
 from pathlib import Path
 import sqlite3
@@ -34,4 +34,4 @@ if __name__ == '__main__':
     parser.add_argument('source', type=Path)
     parser.add_argument('destination', type=Path)
     args = parser.parse_args()
-    print('Backup integrity:', backup(args.source, args.destination))
+    print('Database-only backup integrity (archive/cache roots NOT included):', backup(args.source, args.destination))

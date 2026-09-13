@@ -2,6 +2,9 @@
 
 Es wurde kein Produktionssystem bereitgestellt. Die aktuelle Implementierung ist ein Single-Workspace-Kern mit geteilten Rollen-Tokens. Sie ist nicht für unkontrollierten öffentlichen Zugriff, Multi-Tenancy oder kritische Geräteaktionen freigegeben.
 
+## v0.2 Storage-Gate
+DB UND Objektwurzeln sichern, Restore inklusive Hashprüfung/Retained Copies testen. DB-only-Backup ist unvollständig. Root-/Mountrechte und FTS5 prüfen; keine untrusted Agenten in diesen Verzeichnissen ausführen. Kein Hardware-/Powerloss-/2-GB-Benchmark vorhanden. [Storage-Architektur](docs/20-context-storage/architecture.md).
+
 ## Voraussetzungen vor Freigabe
 - Explizite menschliche Deployment-Freigabe, Zielhost und Verantwortliche festlegen.
 - TLS-Ingress, Zugriffsnetz/VPN, Request-Body-Limit (z. B. 128 KiB), Timeouts und getestete Ratenbegrenzung einrichten. Die App begrenzt Felder, aber nicht die Größe des eingelesenen Requests.

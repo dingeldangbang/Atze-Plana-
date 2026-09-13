@@ -48,3 +48,8 @@ pip-audit -r requirements.lock
 [Kompletter Ablauf als ausführbarer API-Smoke-Test](scripts/smoke.py). Dieser legt ausdrücklich synthetische Testdaten in der angegebenen Instanz an; nur gegen eine Testdatenbank ausführen.
 
 Stoppen: Ctrl+C. Daten bleiben unter `data/atze.db` erhalten. Fehlende Tokens verhindern den Start; keine unsichere Standardanmeldung.
+
+## Context / Speicher ab v0.2
+Ohne Zusatzkonfiguration nutzt der Server `data/objects` neben der Standarddatenbank. `ATZE_STORAGE_ROOT` kann einen anderen lokalen Pfad angeben. `ATZE_SD_ROOT` nur auf ein bereits provisioniertes, vertrauenswürdiges Verzeichnis setzen; der Server erkennt/mountet keine SD-Karte. Keine Remote-Credentials nötig. Die Oberfläche zeigt Storage Health und lokale Quellen-Suche.
+
+`scripts/smoke.py --base-url http://127.0.0.1:8000 --allow-fixtures` prüft gegen eine **separate Testinstanz** zusätzlich Archive, exakten Text-Readback, Memory-Inferenz, Quellen-Retrieval und Cache. Nicht gegen Produktion ausführen. Es importiert keine echten Motor-/Gerätedaten. [API-/Lifecycle-Verträge](docs/20-context-storage/contracts.md).

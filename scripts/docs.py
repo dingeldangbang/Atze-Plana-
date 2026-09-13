@@ -64,12 +64,14 @@ def products():
                     effect = 'Immutable task + audit; all evidence references must belong to project'
                 else:
                     effect = 'Project + audit; no evidence requirement'
+            role = operation.get('x-role', role)
+            effect = operation.get('x-side-effects', effect)
             name = request.get('$ref', '').split('/')[-1] or '—'
             response = json.dumps(responses, ensure_ascii=False).replace('|', '\\|')
             lines.append(f'| {method.upper()} | `{path}` | {role} | {name} | `{response}` | {effect} |')
     lines += ['', '## Static surface', '', '`GET /` and `GET /static/{path}` serve the dashboard without authentication.',
               'No embedded workspace data; browser uses same-origin bearer-authenticated API requests.',
-              'No Swagger CDN, webhooks, WebSockets, upload, shell, or execute endpoint.', '']
+              'Bounded JSON UTF-8 archive/cache ingestion is supported; no binary upload, MCP transport, shell, or execute endpoint.', '']
     result['docs/08-network/APIs.md'] = '\n'.join(lines)
     lines = ['# Test catalog (generated)', '',
              'Every test definition is catalogued from its AST; parametrizations produce separate JUnit cases.',

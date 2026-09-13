@@ -1,5 +1,9 @@
 # Release management
 
+## 0.2.0 — vorbereiteter Context-/Storage-Schnitt, nicht veröffentlicht
+
+[ADR-003](docs/adr/ADR-003-mobile-context-storage.md) und [Modulverträge](docs/20-context-storage/contracts.md) gelten. Neues Release-Gate: vollständiger konsistenter Multi-Tier-Backup-/Restore-Nachweis vor Produktion. Das SQLite-Backup allein genügt nicht. Mobile/SD-Hardware, MCP, Offline-Sync, Remoteadapter, Binärstreaming und Auto-Rebalancing fehlen. Added/Changed/Fixed/Security/Breaking/Migration im [Changelog](CHANGELOG.md). Aktuelle Gateergebnisse: [Validierungsbericht](FINAL_VALIDATION_REPORT.md).
+
 ## 0.1.0 — vorbereiteter Entwicklungsschnitt, nicht veröffentlicht
 Added/Changed/Fixed/Security/Breaking Changes/Migration/Validation: [Changelog](CHANGELOG.md).
 

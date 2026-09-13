@@ -28,6 +28,8 @@ class Store:
             db.execute('CREATE TABLE IF NOT EXISTS records (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL)')
             db.execute('CREATE INDEX IF NOT EXISTS records_kind ON records(kind, seq)')
             db.execute('CREATE TABLE IF NOT EXISTS control (id INTEGER PRIMARY KEY CHECK(id=1), active INTEGER NOT NULL, reason TEXT NOT NULL)')
+            db.execute("CREATE UNIQUE INDEX IF NOT EXISTS archive_namespace ON records(json_extract(body, '$.logical_path')) WHERE kind='archive'")
+            db.execute("CREATE VIRTUAL TABLE IF NOT EXISTS context_fts USING fts5(project_id UNINDEXED, source_id UNINDEXED, start_char UNINDEXED, end_char UNINDEXED, text)")
             db.execute("INSERT OR IGNORE INTO control VALUES(1, 0, 'Initial state')")
 
     @contextmanager

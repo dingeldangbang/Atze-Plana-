@@ -14,3 +14,9 @@ Die Dokumentation beschreibt den tatsächlich implementierten Kern. Nicht vorhan
 
 ## Kontinuierlicher Vertrag
 Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder eine begründete Aussage, warum keine erforderlich ist. `scripts/docs.py` erzeugt Quellinventar, OpenAPI, API-Referenz und Testkatalog. `--check` erkennt Drift, validiert Spezifikation, lokale Dateilinks und Environment-Abdeckung. Menschliche Prüfung ergänzt semantische Korrektheit; automatische Prüfungen beweisen keine Hardwarefähigkeit.
+
+## v0.2 — zentrale Context-/Speicherarchitektur
+- [ADR-003](adr/ADR-003-mobile-context-storage.md): Mobile Project Server + MCP/RAG Memory Layer als Zielentscheidung
+- [Tatsächliche Architektur und Migration](20-context-storage/architecture.md)
+- [Memory/Archive/Cache/Resource/Retrieval-Verträge](20-context-storage/contracts.md)
+- [Noch fehlende MCP-, Mobile-, Offline- und Remote-Stufen](20-context-storage/mobile-roadmap.md)

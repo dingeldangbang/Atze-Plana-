@@ -40,3 +40,6 @@ sequenceDiagram
 
 ## Ereignisse und Deployment
 Audit ist ein persistentes Ereignisregister, kein Eventbus. Keine WebSockets, MQTT, Queue oder Subscription. Ein Prozess, ein lokales Dateisystem, kein verteilter Lock. SQLite `BEGIN IMMEDIATE` serialisiert auch API-Lesetransaktionen; sinnvoll für den kleinen Kern, begrenzt Durchsatz. Schema- und Konfigurationsdetails: [Daten](data-architecture.md), [Konfiguration](../19-operations/configuration.md).
+
+## Erweiterung v0.2
+Das Diagramm oben beschreibt den fortbestehenden Evidence-/Approval-Kern. Die aktive Erweiterung liegt in `context_models.py`, `context.py`, `context_api.py` und `storage.py`: externe immutable Textarchive, taskgebundene Cacheblobs, append-only Memory und lokale FTS-Suche. [Aktuelles erweitertes Systemdiagramm](../20-context-storage/architecture.md), [Copy/Verify/Index-Sequenz](../20-context-storage/contracts.md). Es gibt weiterhin keinen Eventbus/MCP-Transport/Orchestrator oder ausführenden Agenten.

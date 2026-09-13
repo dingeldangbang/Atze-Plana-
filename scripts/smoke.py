@@ -36,6 +36,20 @@ def run(base_url):
             if action == 'write':
                 call('POST', f"/api/tasks/{t['id']}/approve", {'reason': 'Synthetic approval; no execution'}, role='reviewer', expected=201)
                 assert call('POST', f"/api/tasks/{t['id']}/triage")['state'] == 'approved'
+        archived = call('POST', '/api/archive', {'project_id': p['id'], 'relative_path': 'smoke/original.txt',
+                        'content': '  synthetic context original\n', 'evidence_ids': [e['id']]}, expected=201)
+        original = call('GET', f"/api/archive/{archived['id']}/content")
+        assert original['content'] == '  synthetic context original\n'
+        memory = call('POST', '/api/memory', {'project_id': p['id'], 'category': 'inference',
+                      'content': 'synthetic context hypothesis', 'evidence_ids': [e['id']], 'task_id': t['id']}, expected=201)
+        hits = call('POST', '/api/context/query', {'project_id': p['id'], 'query': 'synthetic context'})
+        assert {h['source_id'] for h in hits} == {archived['id'], memory['id']}
+        assert all(not h['allowed_for_action'] for h in hits)
+        cache = call('POST', '/api/cache', {'task_id': t['id'], 'content': 'temporary smoke cache'}, expected=201)
+        assert call('GET', f"/api/cache/{cache['id']}/content") == 'temporary smoke cache'
+        health = call('GET', '/api/storage/health')
+        assert next(tier for tier in health['tiers'] if tier['tier'] == 'local')['available']
+        call('POST', '/api/cache/cleanup', {'reason': 'Only expired fixture cache'}, role='reviewer')
         call('GET', '/api/audit', role='reviewer')
     return {'timestamp': datetime.now(timezone.utc).isoformat(), 'kind': 'synthetic HTTP smoke',
             'status': 'passed', 'checks': records}

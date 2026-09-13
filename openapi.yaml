@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Atze Plana Evidence Core
   description: Single-workspace evidence and approval registry. No action execution.
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /health:
     get:
@@ -43,6 +43,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -78,6 +82,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -125,6 +133,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -158,6 +170,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -205,6 +221,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -245,6 +265,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -278,6 +302,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -325,6 +353,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -359,6 +391,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -399,6 +435,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -424,6 +464,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -456,6 +500,10 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
@@ -506,10 +554,570 @@ paths:
           description: Entity not found
         '409':
           description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
         '422':
           description: Invalid input
         '503':
           description: Storage unavailable
+  /api/archive:
+    post:
+      tags:
+      - storage
+      summary: Archive Create
+      operationId: archive_create_api_archive_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Archive'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Immutable UTF-8 archive + FTS + audit; existing project and
+        same-project evidence references; stop blocks write
+    get:
+      tags:
+      - storage
+      summary: Archives
+      operationId: archives_api_archive_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+                title: Response Archives Api Archive Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; metadata only, immutable logical paths
+  /api/archive/{object_id}/content:
+    get:
+      tags:
+      - storage
+      summary: Archive Content
+      operationId: archive_content_api_archive__object_id__content_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: object_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Object Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveContent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; current tier read is size/hash verified, unavailable or
+        corrupt returns 503
+  /api/archive/resolve:
+    get:
+      tags:
+      - storage
+      summary: Resolve
+      operationId: resolve_api_archive_resolve_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: logical_path
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          title: Logical Path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveContent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Resolve stable logical path, then read/hash-check current tier;
+        never interprets path as host filename
+  /api/archive/{object_id}/relocate:
+    post:
+      tags:
+      - storage
+      summary: Relocate
+      operationId: relocate_api_archive__object_id__relocate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: object_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Object Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Archive'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Copy/fsync/verify before atomic location+audit switch; retains
+        original; explicit reason; stop blocks; 507 capacity failure
+  /api/storage/health:
+    get:
+      tags:
+      - storage
+      summary: Health
+      operationId: health_api_storage_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageHealth'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; real configured filesystem usage only, unsupported tiers
+        report null values
+  /api/cache:
+    post:
+      tags:
+      - cache
+      summary: Cache Create
+      operationId: cache_create_api_cache_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheInput'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheObject'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: operator
+      x-side-effects: Task-bound disposable UTF-8 blob + expiry + audit; no FTS or
+        execution; stop blocks write
+  /api/cache/{object_id}/content:
+    get:
+      tags:
+      - cache
+      summary: Cache Content
+      operationId: cache_content_api_cache__object_id__content_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: object_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Object Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Cache Content Api Cache  Object Id  Content Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; hash verified text, expired returns 410; save as archive
+        explicitly before expiry
+  /api/cache/cleanup:
+    post:
+      tags:
+      - cache
+      summary: Cleanup
+      operationId: cleanup_api_cache_cleanup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanupInput'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanupResult'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Commit expired-cache tombstones then delete only expired cache
+        blobs, audit; retry safe; archives never selected; stop blocks
+  /api/memory:
+    post:
+      tags:
+      - context
+      summary: Memory Create
+      operationId: memory_create_api_memory_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append-only memory + FTS + audit; fact category requires verified
+        linked evidence; commit SHA is attested not GitHub-validated
+    get:
+      tags:
+      - context
+      summary: Memories
+      operationId: memories_api_memory_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Memory'
+                title: Response Memories Api Memory Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; recorded assertions, not automatic truth validation
+  /api/context/query:
+    post:
+      tags:
+      - context
+      summary: Query
+      operationId: query_api_context_query_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalQuery'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RetrievalHit'
+                type: array
+                title: Response Query Api Context Query Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: Read-only lexical FTS retrieval within project; source/hash/offsets/live
+        evidence; no execution authorization
+  /api/context/reindex:
+    post:
+      tags:
+      - context
+      summary: Reindex
+      operationId: reindex_api_context_reindex_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReindexInput'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReindexResult'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Rebuild one page of derived FTS chunks from hash-verified archive
+        originals or memory; audit; stop blocks; failure rolls back page
 components:
   schemas:
     Action:
@@ -564,6 +1172,112 @@ components:
       required:
       - reason
       title: ApprovalInput
+    Archive:
+      properties:
+        id:
+          type: string
+          title: Id
+        project_id:
+          type: string
+          title: Project Id
+        logical_path:
+          type: string
+          title: Logical Path
+        sha256:
+          type: string
+          title: Sha256
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        created_at:
+          type: string
+          title: Created At
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          title: Evidence Ids
+        tier:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Tier
+        key:
+          type: string
+          title: Key
+        retained_copies:
+          items:
+            $ref: '#/components/schemas/Replica'
+          type: array
+          title: Retained Copies
+        version:
+          type: integer
+          const: 1
+          title: Version
+          default: 1
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - project_id
+      - logical_path
+      - sha256
+      - size_bytes
+      - created_at
+      - evidence_ids
+      - tier
+      - key
+      - retained_copies
+      title: Archive
+    ArchiveContent:
+      properties:
+        object:
+          $ref: '#/components/schemas/Archive'
+        content:
+          type: string
+          title: Content
+      additionalProperties: false
+      type: object
+      required:
+      - object
+      - content
+      title: ArchiveContent
+    ArchiveInput:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Evidence Ids
+        relative_path:
+          type: string
+          maxLength: 240
+          minLength: 1
+          title: Relative Path
+        content:
+          type: string
+          maxLength: 65536
+          minLength: 1
+          title: Content
+        placement:
+          type: string
+          enum:
+          - auto
+          - local
+          title: Placement
+          default: auto
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - relative_path
+      - content
+      title: ArchiveInput
     Audit:
       properties:
         id:
@@ -596,6 +1310,114 @@ components:
       - entity_id
       - details
       title: Audit
+    CacheInput:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        content:
+          type: string
+          maxLength: 65536
+          minLength: 1
+          title: Content
+        ttl_seconds:
+          type: integer
+          maximum: 86400.0
+          minimum: 60.0
+          title: Ttl Seconds
+          default: 3600
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - content
+      title: CacheInput
+    CacheObject:
+      properties:
+        id:
+          type: string
+          title: Id
+        task_id:
+          type: string
+          title: Task Id
+        project_id:
+          type: string
+          title: Project Id
+        tier:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Tier
+        key:
+          type: string
+          title: Key
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        sha256:
+          type: string
+          title: Sha256
+        created_at:
+          type: string
+          title: Created At
+        expires_at:
+          type: string
+          title: Expires At
+        state:
+          type: string
+          enum:
+          - active
+          - expired
+          title: State
+        deleted:
+          type: boolean
+          title: Deleted
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - task_id
+      - project_id
+      - tier
+      - key
+      - size_bytes
+      - sha256
+      - created_at
+      - expires_at
+      - state
+      - deleted
+      title: CacheObject
+    CleanupInput:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+        limit:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Limit
+          default: 20
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: CleanupInput
+    CleanupResult:
+      properties:
+        deleted_ids:
+          items:
+            type: string
+          type: array
+          title: Deleted Ids
+      additionalProperties: false
+      type: object
+      required:
+      - deleted_ids
+      title: CleanupResult
     Decision:
       properties:
         task_id:
@@ -795,6 +1617,158 @@ components:
       - content
       - confidence
       title: EvidenceInput
+    EvidenceState:
+      properties:
+        id:
+          type: string
+          title: Id
+        state:
+          type: string
+          enum:
+          - unverified
+          - verified
+          - rejected
+          title: State
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - state
+      title: EvidenceState
+    Memory:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Evidence Ids
+        category:
+          type: string
+          enum:
+          - fact
+          - inference
+          - decision
+          - task_history
+          - user_preference
+          - project_state
+          - device_history
+          - test_history
+          - repair_history
+          - trend_history
+          - agent_history
+          title: Category
+        content:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Content
+        task_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Task Id
+        commit_sha:
+          anyOf:
+          - type: string
+            pattern: ^[0-9a-f]{40}$
+          - type: 'null'
+          title: Commit Sha
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          title: Created At
+        sha256:
+          type: string
+          title: Sha256
+        state:
+          type: string
+          const: recorded
+          title: State
+          default: recorded
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - category
+      - content
+      - id
+      - created_at
+      - sha256
+      title: Memory
+    MemoryInput:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Evidence Ids
+        category:
+          type: string
+          enum:
+          - fact
+          - inference
+          - decision
+          - task_history
+          - user_preference
+          - project_state
+          - device_history
+          - test_history
+          - repair_history
+          - trend_history
+          - agent_history
+          title: Category
+        content:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Content
+        task_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Task Id
+        commit_sha:
+          anyOf:
+          - type: string
+            pattern: ^[0-9a-f]{40}$
+          - type: 'null'
+          title: Commit Sha
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - category
+      - content
+      title: MemoryInput
+    MoveInput:
+      properties:
+        target:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Target
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - target
+      - reason
+      title: MoveInput
     Project:
       properties:
         name:
@@ -838,6 +1812,162 @@ components:
       required:
       - name
       title: ProjectInput
+    ReindexInput:
+      properties:
+        offset:
+          type: integer
+          minimum: 0.0
+          title: Offset
+          default: 0
+        limit:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Limit
+          default: 20
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: ReindexInput
+    ReindexResult:
+      properties:
+        indexed_ids:
+          items:
+            type: string
+          type: array
+          title: Indexed Ids
+        next_offset:
+          type: integer
+          title: Next Offset
+      additionalProperties: false
+      type: object
+      required:
+      - indexed_ids
+      - next_offset
+      title: ReindexResult
+    Replica:
+      properties:
+        tier:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Tier
+        key:
+          type: string
+          title: Key
+      additionalProperties: false
+      type: object
+      required:
+      - tier
+      - key
+      title: Replica
+    RetrievalHit:
+      properties:
+        source_id:
+          type: string
+          title: Source Id
+        source_type:
+          type: string
+          enum:
+          - archive
+          - memory
+          title: Source Type
+        category:
+          type: string
+          title: Category
+        location:
+          type: string
+          title: Location
+        logical_path:
+          type: string
+          title: Logical Path
+        timestamp:
+          type: string
+          title: Timestamp
+        sha256:
+          type: string
+          title: Sha256
+        version:
+          type: integer
+          const: 1
+          title: Version
+          default: 1
+        start_char:
+          type: integer
+          title: Start Char
+        end_char:
+          type: integer
+          title: End Char
+        text:
+          type: string
+          title: Text
+        evidence:
+          items:
+            $ref: '#/components/schemas/EvidenceState'
+          type: array
+          title: Evidence
+        evidence_state:
+          type: string
+          enum:
+          - unverified
+          - verified
+          - rejected
+          title: Evidence State
+        commit_sha:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commit Sha
+        allowed_for_action:
+          type: boolean
+          const: false
+          title: Allowed For Action
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - source_id
+      - source_type
+      - category
+      - location
+      - logical_path
+      - timestamp
+      - sha256
+      - start_char
+      - end_char
+      - text
+      - evidence
+      - evidence_state
+      title: RetrievalHit
+    RetrievalQuery:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        query:
+          type: string
+          maxLength: 256
+          minLength: 1
+          title: Query
+        limit:
+          type: integer
+          maximum: 30.0
+          minimum: 1.0
+          title: Limit
+          default: 10
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - query
+      title: RetrievalQuery
     Review:
       properties:
         state:
@@ -889,6 +2019,35 @@ components:
       - active
       - reason
       title: StopInput
+    StorageHealth:
+      properties:
+        tiers:
+          items:
+            $ref: '#/components/schemas/TierHealth'
+          type: array
+          title: Tiers
+        cache_active_bytes:
+          type: integer
+          title: Cache Active Bytes
+        cache_expired_bytes:
+          type: integer
+          title: Cache Expired Bytes
+        archive_logical_bytes:
+          type: integer
+          title: Archive Logical Bytes
+        source_retention:
+          type: boolean
+          const: true
+          title: Source Retention
+          default: true
+      additionalProperties: false
+      type: object
+      required:
+      - tiers
+      - cache_active_bytes
+      - cache_expired_bytes
+      - archive_logical_bytes
+      title: StorageHealth
     Task:
       properties:
         project_id:
@@ -960,6 +2119,45 @@ components:
       - title
       - action
       title: TaskInput
+    TierHealth:
+      properties:
+        tier:
+          type: string
+          title: Tier
+        available:
+          type: boolean
+          title: Available
+        total_bytes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Total Bytes
+        used_bytes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Used Bytes
+        free_bytes:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Free Bytes
+        used_percent:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Used Percent
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - tier
+      - available
+      title: TierHealth
   securitySchemes:
     HTTPBearer:
       type: http

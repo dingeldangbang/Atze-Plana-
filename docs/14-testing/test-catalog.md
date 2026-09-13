@@ -14,6 +14,24 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 
 | Test ID / purpose / expected result | Executable case |
 |---|---|
+| STO-001: original UTF-8 whitespace/hash survives storage and restart; duplicate namespace cannot overwrite. | [test_context_storage.py: test_archive_original_namespace_and_restart](../../tests/test_context_storage.py) |
+| STO-002: absolute, traversal, empty, encoded or platform-specific path segments are rejected. | [test_context_storage.py: test_logical_path_rejection](../../tests/test_context_storage.py) |
+| STO-003: reviewer relocation preserves original, hash and namespace; retrieval resolves the new location. | [test_context_storage.py: test_copy_verify_switch_retains_source_and_citations](../../tests/test_context_storage.py) |
+| STO-004: failed destination verification cannot switch the index or destroy the original. | [test_context_storage.py: test_destination_failure_leaves_authoritative_source](../../tests/test_context_storage.py) |
+| STO-005: failed relocation audit rolls back location; unreferenced copies may remain, original remains readable. | [test_context_storage.py: test_archive_audit_failure_rolls_back_metadata](../../tests/test_context_storage.py) |
+| STO-006: corrupt source blocks reads/migration; object symlink cannot expose arbitrary host files. | [test_context_storage.py: test_corruption_and_symlink_are_not_followed](../../tests/test_context_storage.py) |
+| STO-007: capacity policy falls back to configured SD, rejects all-full tiers and reports unavailable remote tiers honestly. | [test_context_storage.py: test_capacity_policy_and_unavailable_tier](../../tests/test_context_storage.py) |
+| STO-008: stop blocks archive/cache creation, relocation and cleanup; existing originals remain readable. | [test_context_storage.py: test_stop_blocks_storage_writes](../../tests/test_context_storage.py) |
+| CACHE-001: only expired cache is deleted; archive, live cache and memory survive; repeat cleanup is safe. | [test_context_storage.py: test_cache_expiry_cleanup_and_archive_separation](../../tests/test_context_storage.py) |
+| CACHE-002: failure after physical deletion leaves a committed tombstone and cleanup can retry missing file. | [test_context_storage.py: test_cache_delete_crash_retry](../../tests/test_context_storage.py) |
+| MEM-001: fact creation needs verified evidence; inference remains inference even with verified sources; retrieval is never execution permission. | [test_context_storage.py: test_memory_fact_inference_and_live_evidence](../../tests/test_context_storage.py) |
+| RAG-001: lexical retrieval returns real character spans/hashes, isolates projects and treats FTS syntax as words. | [test_context_storage.py: test_retrieval_positions_project_filter_and_query_safety](../../tests/test_context_storage.py) |
+| MEM-002: foreign/duplicate evidence and task references are rejected; commit is format-checked attestation only. | [test_context_storage.py: test_cross_project_refs_and_commit_attestation](../../tests/test_context_storage.py) |
+| STO-009: missing SD never gets created, overlapping/symlink roots fail startup, absent tier cannot receive data. | [test_context_storage.py: test_missing_sd_and_root_boundaries](../../tests/test_context_storage.py) |
+| MIG-001: v0.1 records/control survive additive FTS/namespace schema initialization and repeated startup. | [test_context_storage.py: test_additive_upgrade_preserves_v1_data](../../tests/test_context_storage.py) |
+| RAG-002: paginated reviewer rebuild restores derived FTS; rejected evidence remains rejected without granting use. | [test_context_storage.py: test_reindex_from_originals_and_rejected_evidence](../../tests/test_context_storage.py) |
+| STO-010: missing index source, oversized blobs and nonregular objects fail closed rather than return false content. | [test_context_storage.py: test_index_and_nonregular_storage_fail_closed](../../tests/test_context_storage.py) |
+| TX-001: failure at transaction finalization returns 503, never a success sent before commit; mutation rolls back. | [test_context_storage.py: test_transaction_finalization_precedes_success](../../tests/test_context_storage.py) |
 | SEC-001: missing or identical credentials prevent startup; no insecure default. | [test_core.py: test_config_fails_closed](../../tests/test_core.py) |
 | API-001: health and static UI are public; data and specification require credentials. | [test_core.py: test_public_surface](../../tests/test_core.py) |
 | SEC-002: reviewers cannot create projects and operators cannot access audit or stop. | [test_core.py: test_role_separation](../../tests/test_core.py) |

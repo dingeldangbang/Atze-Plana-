@@ -9,6 +9,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from app.config import Settings
+from app.storage import Storage
+from app.context_api import register_context_api
 from app.models import (ProjectInput, Project, EvidenceInput, Evidence, Review,
                         TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit)
 from app.store import Store, get, put, listing, audit, stopped, identity, now
@@ -21,7 +23,8 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     if not schema_only:
         settings = settings or Settings.from_env()
     store = None if schema_only else Store(settings.db_path)
-    app = FastAPI(title='Atze Plana Evidence Core', version='0.1.0',
+    storage = None if schema_only else Storage(settings)
+    app = FastAPI(title='Atze Plana Evidence Core', version='0.2.0',
                   description='Single-workspace evidence and approval registry. No action execution.',
                   docs_url=None, redoc_url=None, openapi_url=None)
     bearer = HTTPBearer(auto_error=False)
@@ -48,7 +51,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         with store.connect() as db:
             yield db
 
-    DB = Depends(connection)
+    DB = Depends(connection, scope='function')
 
     @app.middleware('http')
     async def security_headers(request, call_next):
@@ -63,10 +66,14 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     async def database_error(request, error):
         return JSONResponse(status_code=503, content={'detail': 'Storage unavailable; retry or contact administrator'})
 
+    @app.exception_handler(OSError)
+    async def filesystem_error(request, error):
+        return JSONResponse(status_code=503, content={'detail': 'Storage unavailable; check configured tier and permissions'})
+
     @app.get('/health', tags=['system'])
     def health(db=DB) -> dict[str, str]:
         db.execute('SELECT 1')
-        return {'status': 'ok', 'version': '0.1.0'}
+        return {'status': 'ok', 'version': '0.2.0'}
 
     @app.get('/api/openapi.json', tags=['system'])
     def specification(who=Depends(actor)) -> dict:
@@ -157,6 +164,8 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     def audit_log(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(reviewer), db=DB):
         return listing(db, 'audit', limit, offset)
 
+    register_context_api(app, store, storage, actor, operator, reviewer, connection)
+
     @app.get('/', include_in_schema=False)
     def index():
         return FileResponse(STATIC / 'index.html')
@@ -167,5 +176,5 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         if getattr(route, 'path', '').startswith('/api/'):
             route.responses.update({code: {'description': description} for code, description in {
                 401: 'Missing or invalid token', 403: 'Role denied', 404: 'Entity not found',
-                409: 'State conflict', 422: 'Invalid input', 503: 'Storage unavailable'}.items()})
+                409: 'State conflict', 410: 'Disposable cache expired', 507: 'Insufficient eligible storage capacity', 422: 'Invalid input', 503: 'Storage unavailable'}.items()})
     return app
