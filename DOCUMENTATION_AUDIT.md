@@ -22,3 +22,6 @@ README-Titel ersetzt durch Scope, Status und Reproduktionspfad. Keine Alt-Dokume
 
 ## Validation
 `python scripts/docs.py --check`: formale OpenAPI-Prüfung, generierte Drift, lokale Markdown-Dateireferenzen, Environment-/YAML-/Dokumentationsabdeckung. Test-Docstrings zwingend. Installation/Tests/Build/HTTP-Smoke werden separat ausgeführt; Ergebnisse im [Validierungsbericht](FINAL_VALIDATION_REPORT.md). Menschliches finales Review bleibt zusätzlich notwendig.
+
+## GitHub-Nachweis
+PR [#1](https://github.com/dingeldangbang/Atze-Plana-/pull/1), grüne Dokumentations-/Test-/Build-/Security-/HTTP-Gates in [Lauf 34783739149](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34783739149). CI-Artefakte sind die tatsächlich erzeugten Laufreports, keine manuellen Erfolgstabellen. Action-SHAs entsprechen der Repository-Policy.

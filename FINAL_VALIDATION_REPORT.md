@@ -6,7 +6,9 @@ Stand: 2026-09-13. **Kein vollständiger Plattformabschluss und kein Produktions
 - Repository: `dingeldangbang/Atze-Plana-`.
 - Session-Branch: `arena/01a09c9d-atze-plana`.
 - Ausgangscommit: `2bd8656b67ca50676bf5ad7c6d4e1eef7c58a292`.
-- Implementierungscommit: der Commit, der diesen Bericht erstmals einführt; nach Push wird der konkrete GitHub-/CI-Nachweis ergänzt. Der Bericht enthält absichtlich keine erfundene zukünftige SHA.
+- Implementierungscommit: `3bd4ed213e1c2dcbf3f889aec68d0a640d009d34`.
+- CI-Policy-Fix und grün geprüfter Code-/Workflowstand: `4b13afb13703599c61cbe2d3cdf5316002ca5ee2`. Dieser spätere Bericht aktualisiert nur Dokumentationsnachweise.
+- Review-PR: [#1](https://github.com/dingeldangbang/Atze-Plana-/pull/1).
 - Lokale Laufumgebung: Linux, Python 3.11.2, Versionen aus `requirements.lock`.
 
 ## Tatsächlich ausgeführte lokale Validierung
@@ -25,13 +27,16 @@ Stand: 2026-09-13. **Kein vollständiger Plattformabschluss und kein Produktions
 | DOCUMENTATION | VALIDATED begrenzt | Vier generierte Produkte synchron; OpenAPI formal gültig; lokale Dateireferenzen und drei Environmentvariablen abgedeckt; kein vollständiger semantischer Textbeweis |
 | DEPENDENCIES | VALIDATED begrenzt | `pip check`: keine gebrochenen Requirements; Version-Lock ohne Artefakthashes |
 | JAVASCRIPT | VALIDATED begrenzt | `node --check app/static/app.js`: Syntax gültig |
-| CI | CONDITIONAL | Workflow implementiert; GitHub-Ausführung wird nach Push separat ergänzt |
-| GITHUB | CONDITIONAL | Zugang/Repositoryabfragen erfolgreich; Commit-/Push-/PR-Nachweis wird separat ergänzt |
+| CI | VALIDATED | [GitHub-PR-Lauf 34783739149](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34783739149) erfolgreich: Installation, Docs, Tests, Build, Dependency-Audit, echter HTTP-Smoke und Artefaktupload |
+| GITHUB | VALIDATED | Commits auf der vorgegebenen Session-Branch gepusht, PR #1 geöffnet; nicht gemergt |
 | RELEASE / PRODUCTION | BLOCKED | Keine Produktionsfreigabe, kein Deployment oder veröffentlichter Release |
 
 ## Evidence / ursprüngliche Fehler
 - Erster Testlauf: 20 bestanden, 1 fehlgeschlagen. Restart deckte SQLite-WAL-Umschaltung innerhalb einer Transaktion auf; Aktivierung außerhalb der Transaktion korrigiert. Nachfolgende Läufe vollständig grün.
 - Erster Dependency-Audit meldete 14 bekannte Schwachstellen in einer installierten Starlette-Version. Update auf die im Lockfile enthaltene Version; erneuter Audit ohne bekannte Treffer. Keine Ausnahmen oder Bypässe hinzugefügt.
+- Frische zweite virtuelle Umgebung aus `requirements.lock` installiert; gebautes Wheel ohne Checkout-Import geladen (`python -I`, `app.__file__` unter site-packages). Health, HTML und JS-Auslieferung bestanden.
+- Erster GitHub-Lauf scheiterte vor Testausführung an der verpflichtenden vollständigen SHA-Pinnung von Actions. Drei Action-SHAs via GitHub-API aufgelöst und Workflow korrigiert, Policy nicht umgangen. Danach vollständiger PR-Lauf grün.
+- GitHub meldet eine Node-20→24-Deprecation-Warnung für verwendete Action-Hauptversionen; Lauf erfolgreich, zukünftiges Action-Upgrade einplanen.
 - Zwei sichtbare Deprecation-Warnungen aus der Testclient-/AnyIO-Abhängigkeitskette verbleiben; nicht unterdrückt.
 - Laufartefakte: `reports/junit.xml`, `reports/coverage.xml`, `reports/dependency-audit.json`, `reports/smoke.json`, `reports/build.log`. Lokal ignoriert, CI lädt entsprechende Laufreports und Buildartefakte commitbezogen hoch. Dies sind keine echten Gerätebeobachtungen.
 
@@ -58,7 +63,7 @@ FastAPI/Pydantic, SQLite, statische Same-Origin-Oberfläche, zwei feste Rollen. 
 Geteilte Rollen statt individueller Identitäten, kein Multi-Tenant-ACL, keine Approval-Expiry/Revocation, keine automatische Fakten-/Aktualitätsprüfung, kein manipulationssicherer Audit, keine App-Rate-/Requestbody-Limits, keine Schema-Migrationen oder Retention. SQLite serialisiert Transaktionen; 2-GB-RAM-Budget ist Planung, kein Benchmark. Kein externes Action-Executing. Keine unautorisierten Geräte-/Cloud-/Finanz-/Produktionsaktionen vorgenommen. Lizenzentscheidung des Eigentümers offen.
 
 ## Next Steps
-1. GitHub-CI und PR-Review abschließen; keine Freigabe bei roten Gates.
+1. PR-Review durch Verantwortliche; CI für jeden Folgecommit erneut prüfen. Keine Freigabe bei roten Gates.
 2. Browser-E2E, Ingress-/Resource-Limits, individuelle Identitäten, widerrufbare/ablaufende zielgebundene Approvals, Migrationen und Last-/Recovery-Nachweise.
 3. Isolierte read-only Device Bridge und Worker erst mit realem Adapter-/Hardware-/Sicherheitsvertrag.
 4. Unity/Android/IoT/Provider/Agenten in getrennten überprüfbaren Implementierungsschnitten; keine Scheinfunktionen.

@@ -8,6 +8,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.1.0 i
 | Projekte, Evidenz, Aufgaben, Triage, Freigabe, Stop, Audit | IMPLEMENTED / TESTED | [Tests](docs/14-testing/test-catalog.md) |
 | Python-Paket, OpenAPI, Dokumentationskonsistenz | VALIDATED lokal | [Validierungsbericht](FINAL_VALIDATION_REPORT.md) |
 | Dashboard | IMPLEMENTED | Projektanlage, Listen, Triage; weitere Eingaben via API |
+| GitHub-CI / Review-PR | VALIDATED | [Grüner Lauf](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34783739149), [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); nicht gemergt |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
 | Agenten, Sandbox, Hardware, 3D, Android, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
