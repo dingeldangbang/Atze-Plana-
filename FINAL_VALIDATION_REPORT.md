@@ -3,7 +3,7 @@
 Stand 2026-09-14. **Verbindliche No-Fake-Policy und technische Test-/Betriebsgrenzen; kein neuer Hardware-/Provideradapter und kein Produktionsrelease.**
 
 ## Repository / Baseline
-`dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`. Ausgangspunkt dieses Schnitts: `f4fedc0f0a6bad86b0b925a2a9e81701a3893a7e` (v0.2 mit damals 53 Tests). Alle bisherigen Domainfunktionen und Tests bleiben erhalten. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) bleibt Review-PR. Neue v0.2.1-Commit-/GitHub-Nachweise werden nach tatsächlichem Push/Lauf ergänzt.
+`dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`. Ausgangspunkt dieses Schnitts: `f4fedc0f0a6bad86b0b925a2a9e81701a3893a7e` (v0.2 mit damals 53 Tests). Alle bisherigen Domainfunktionen und Tests bleiben erhalten. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) bleibt Review-PR. Implementierungscommit v0.2.1: `a2dd32ca6607b7129c7f94b385101959fb12d617`, tatsächlich auf die feste Branch gepusht. [PR-CI 34786490548](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34786490548) vollständig erfolgreich, inklusive Reality-Gate und selbst erzeugter HTTP-Testinstanz. Dieser spätere Dokumentationscommit ergänzt nur Nachweise.
 
 ## Implementiert / korrigiert
 - Verbindliche [REALITY_POLICY](REALITY_POLICY.md) und [AGENTS-Regeln](AGENTS.md).
@@ -29,11 +29,11 @@ Stand 2026-09-14. **Verbindliche No-Fake-Policy und technische Test-/Betriebsgre
 | DEPENDENCIES / JS SYNTAX | VALIDATED begrenzt | pip check ohne Konflikte; node --check erfolgreich |
 | UI BROWSER E2E | NOT RUN | kein automatisierter Browser für Login/Refreshfehler/Anzeige vorhanden; HTTP-/Syntaxprüfungen sind kein Browsernachweis |
 | TRIAGE | TESTED | bestehende Regeln/Role-/Stopgrenzen bestehen weiter; kein neuer Executionpfad |
-| CI / GITHUB v0.2.1 | CONDITIONAL | neue Remote-Commit-/Workflowprüfung nach Push erforderlich; alte grüne Runs sind kein Nachweis für diesen Schnitt |
+| CI / GITHUB v0.2.1 | VALIDATED | Commit a2dd32c gepusht, PR aktualisiert, Lauf 34786490548: Installation, Doku, Tests, Build, Dependency-Audit, Reality-Gate, echter isolierter HTTP-Smoke und Artefaktupload erfolgreich |
 | RELEASE / PRODUCTION | BLOCKED | kein Merge, Tag, Release, APK oder Produktionsdeploy; offene Identity-/Ingress-/Backup-/Last-/UI-Gates |
 
 ## Evidence
-Lokale tatsächlich erzeugte Dateien: `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/*.server.log`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log`. Reports und Testdaten sind nicht als Runtime-Daten versioniert; CI lädt seine commitbezogenen Artefakte hoch. Zwei bekannte sichtbare Testclient-/AnyIO-Deprecation-Warnungen bleiben; nicht ausgeblendet. Fehlertests erzeugen bewusst lokale Fehler, keine fingierten Gerätefehler.
+Lokale tatsächlich erzeugte Dateien: `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/*.server.log`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log`. Reports und Testdaten sind nicht als Runtime-Daten versioniert; CI lädt seine commitbezogenen Artefakte hoch. GitHub meldet weiterhin eine nicht blockierende Node-20→24-Actionwarnung; die gepinnten Actions liefen erfolgreich. Zwei bekannte sichtbare Testclient-/AnyIO-Deprecation-Warnungen bleiben; nicht ausgeblendet. Fehlertests erzeugen bewusst lokale Fehler, keine fingierten Gerätefehler.
 
 ## Integrationsachsen / nicht implementierte Zielmodule
 Die vollständige Tabelle mit **Implemented / Configured / Tested / Validated / Production Ready** steht im [Realitätsaudit](docs/17-security/reality-audit.md).
