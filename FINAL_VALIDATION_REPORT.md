@@ -1,3 +1,15 @@
+# Master-Inkrement — reale Worker-/Android-Abnahme, noch keine Gesamtfreigabe
+
+Stand 2026-09-14. Basis fbf4be9. Ist-Zustand und unterbrochene Änderungen geprüft; aktuelle Baseline erneut ausgeführt: 120 Tests, 97,78% Core-Coverage, Python-Build, Dokumentation/OpenAPI/No-fake/JS-Syntax PASS. Drei Harness-Tests sind kein realer Modelltest. [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [ADR-006](docs/adr/ADR-006-real-worker-and-android-validation.md).
+
+Neue Implementierung: gepinnter tatsächlicher lokaler HF/llama.cpp-Integrationsrunner mit separatem nicht-root Netzwerknamespace; nativer Android-HTTPS-Core-Statusclient plus tatsächliche SDK-/Signatur-/Emulatorpipeline. Lokaler HF-TLS-Abruf scheiterte, keine Zertifikatsabschwächung. Android-Build lokal tatsächlich BLOCKED (SDK/JDK fehlen). CI dieser neuen Integrationen steht zum Zeitpunkt dieser Berichtsfassung noch aus. **Kein Modell-/APK-/Emulator-PASS aus bloßer Workflowdefinition ableiten.**
+
+Unverändert: keine operative externe Inferenz, keine neuen Plattform-Testdaten; alle relevanten Entscheidungen weiterhin Challenge/Triage/Approval-pflichtig. Kein Native-Device-/Honeywell-/Repair-/ESP32-/Unity-/BrightData-/Cloud-/Payment-/MCP-/AgentBuilder-Erfolg behauptet. Universal-Egress-/Filesystem-/Syscall-Sandbox, umfassende Datenschutzabnahme und Gesamtplattformrelease BLOCKED. Keine leeren Modulverzeichnisse als fertige Implementierung angelegt.
+
+Nachfolgend historischer Stand der vorherigen bereits validierten Core-Änderungen. Dessen CI/Buildhashes sind kein Nachweis der neuen Worker-/Androidkandidaten.
+
+---
+
 # Final Validation Report — 0.4.0.dev0 Privacy-first foundation
 
 Stand 2026-09-14; Basis `9413bf5d4608e21cbdbf6894d4033c807b32a8ee`, Branch `arena/01a09c9d-atze-plana`. **Teilimplementierung, vollständige HF-/Agent-/MCP-Abnahme BLOCKED.** Kein Release/Produktionsdeploy. [ADR-005](docs/adr/ADR-005-private-model-gateway.md), [implementierter Vertrag](docs/02-core/model-gateway.md).

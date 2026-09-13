@@ -77,6 +77,9 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | SEC-004: storage failure returns redacted 503, not a SQL or filesystem traceback. | [test_core.py: test_storage_error_redacted](../../tests/test_core.py) |
 | DOC-001: authenticated schema reflects supported APIs and bearer authentication. | [test_core.py: test_schema](../../tests/test_core.py) |
 | SEC-005: both roles can inspect real stop state; write is reviewer-only. | [test_core.py: test_stop_read](../../tests/test_core.py) |
+| LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
+| LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
+| LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |
 | REAL-001: a new operational database/UI has no seeded projects, telemetry, tasks or results; mode is explicit. | [test_reality.py: test_operational_start_has_no_seeded_data](../../tests/test_reality.py) |
 | REAL-002: persistent test DB marker rejects switching to operational mode without changing/deleting data. | [test_reality.py: test_test_database_cannot_be_opened_operational](../../tests/test_reality.py) |
 | REAL-003: an operational database cannot be switched to test mode even if currently empty. | [test_reality.py: test_operational_database_cannot_be_used_as_test](../../tests/test_reality.py) |

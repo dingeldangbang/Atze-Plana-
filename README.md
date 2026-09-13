@@ -54,3 +54,6 @@ Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit
 
 ## Privacy-first Modellgrenze (experimenteller Teilschritt)
 [Model Gateway](docs/02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
+
+## Master-Anforderung: nächste reale Abnahme
+Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validation.md) mit gepinnten Gewichten/Runtime und ein [nativer Android-Core-Client](android/README.md) mit echter Build-/Emulator-Pipeline. Diese Pipelines sind keine Erfolgsmeldung: [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [Finale Validierung](FINAL_VALIDATION_REPORT.md) nennen nur ausgeführte Ergebnisse. Keine Dummy-Verzeichnisse für fehlende Geräte-/Unity-/MCP-/Cloudmodule. Gesamtplattform bleibt bis zur vollständigen Abnahme BLOCKED.

@@ -1,3 +1,9 @@
+# Documentation Audit — Master-Inkrement
+
+ADR-006 vor Worker-/Android-CI-Ausführung. Reale Grenzen in android/README.md, lokalem Modellvalidierungsvertrag, APK_RELEASE_REPORT.md und TEST_REPORT.md beschrieben. Baseline 120 Tests; Android lokal BLOCKED; Modellartefakte nicht aus Metadaten als heruntergeladen/verifiziert ausgegeben. Scope klar zwischen Core, eigenem Modell-CI-Prozess, Android-Emulator und physischer Hardware getrennt. Neue Pipelines zunächst NOT RUN, tatsächliche Ergebnisse erst nach CI ergänzen. Kein universeller Gateway-/Sandboxbeweis aus einem Netzwerknamespace. Acht Runtime-Envvariablen unverändert, OpenAPI konsistent; Android ist ein gesonderter nativer Client, keine neue Core-Agentfähigkeit.
+
+---
+
 # Documentation Audit — 0.4.0.dev0 privacy-first partial integration
 
 ADR-005 vor Implementierung; fehlende lokale Runtime/HF/MCP/Sandbox ausdrücklich erfasst. [Model Gateway](docs/02-core/model-gateway.md) beschreibt Purpose/Inputs/Outputs/Dependencies/Config/Permissions/Failures/Validation/Tests/Security/API-Workflow und Grenzen. Acht feste Umgebungsnamen plus dynamisch benannte ausschließlich providergebundene Secrets; OpenAPI/Inventar/Testkatalog synchron generiert. README, Betrieb, Ressourcen, UI, Policy, Threatmodel, Releasegates und Integrationsmatrix aktualisiert.

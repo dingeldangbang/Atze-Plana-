@@ -1,0 +1,54 @@
+name: Real Android debug build and emulator checks
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'scripts/build_android.sh'
+      - '.github/workflows/android.yml'
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Require official SDK and installed Java
+        run: |
+          java -version
+          test -n "$ANDROID_HOME"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools' 'emulator' 'system-images;android-35;google_apis;x86_64'
+      - name: Build and verify actual ephemeral debug-signed APKs
+        run: scripts/build_android.sh
+      - name: Launch actual emulator, install APKs and run instrumentation
+        run: |
+          set -euo pipefail
+          export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          sudo chmod 666 /dev/kvm
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force --name atze-test --package 'system-images;android-35;google_apis;x86_64' --device pixel_2
+          emulator -avd atze-test -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -memory 1536 > reports/android/emulator.log 2>&1 &
+          EMULATOR_PID=$!
+          trap 'adb emu kill || true; kill "$EMULATOR_PID" 2>/dev/null || true' EXIT
+          timeout 240 adb wait-for-device
+          BOOTED=false
+          for i in $(seq 1 180); do
+            if [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; then BOOTED=true; break; fi
+            sleep 2
+          done
+          "$BOOTED"
+          adb shell input keyevent 82
+          adb install -r reports/android/atze-app-debug.apk
+          adb install -r reports/android/atze-test-debug.apk
+          adb shell am start -W -n de.atze.plana/.MainActivity > reports/android/launch.txt
+          timeout 120 adb shell am instrument -w de.atze.plana.test/de.atze.plana.test.CoreClientTest | tee reports/android/instrumentation.txt
+          grep -q 'atze_result=PASS' reports/android/instrumentation.txt
+          adb shell dumpsys package de.atze.plana > reports/android/installed-package.txt
+          echo 'EMULATOR_INSTALL_START_TEST_PASS' > reports/android/validation-status.txt
+      - name: Upload actual APKs and evidence (never the temporary signing key)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-debug-${{ github.sha }}
+          path: reports/android/
+          retention-days: 14

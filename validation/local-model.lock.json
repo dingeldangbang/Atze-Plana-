@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "Explicit isolated development validation, never product seed configuration",
+  "model": {
+    "id": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+    "filename": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/9217f5db79a29953eb74d5343926648285ec7e67/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "size": 491400032,
+    "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+    "license": "Apache-2.0",
+    "license_source": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/blob/9217f5db79a29953eb74d5343926648285ec7e67/LICENSE",
+    "metadata_source": "https://huggingface.co/api/models/Qwen/Qwen2.5-0.5B-Instruct-GGUF?blobs=true",
+    "metadata_reviewed_on": "2026-09-14",
+    "quantization": "Q4_K_M",
+    "validation": "NOT_VALIDATED_BY_MANIFEST; require actual run report"
+  },
+  "runtime": {
+    "id": "ggml-org/llama.cpp",
+    "revision": "b10948",
+    "filename": "llama-b10948-bin-ubuntu-x64.tar.gz",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10948/llama-b10948-bin-ubuntu-x64.tar.gz",
+    "size": 16819315,
+    "sha256": "bcbf6a304f85dd5acceee4afde432d4d183120a32dccad9ca8dcb05687575d40",
+    "license": "MIT",
+    "metadata_source": "https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/b10948"
+  }
+}
