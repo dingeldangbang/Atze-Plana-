@@ -50,6 +50,19 @@ jobs:
           MODEL="$RUNNER_TEMP/atze-model-artifacts/qwen2.5-0.5b-instruct-q4_k_m.gguf"
           RUNTIME="$RUNNER_TEMP/atze-model-artifacts/llama-b10948-bin-ubuntu-x64.tar.gz"
           sudo unshare --net -- sh -c 'ip link set lo up; exec runuser -u "$1" -- "$2" scripts/validate_local_model.py --allow-fixtures --model "$3" --runtime-archive "$4"' sh "$USER" "$PYTHON" "$MODEL" "$RUNTIME"
+      - name: Publish bounded result metadata in check annotations
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          path=Path('reports/local-model.json')
+          if path.exists():
+              data=json.loads(path.read_text())
+              keys=['status','model','revision','model_sha256','runtime_sha256','network','uid','actual_output','checks','children_stopped']
+              summary=json.dumps({k:data.get(k) for k in keys},ensure_ascii=True)
+              print('::notice title=REAL_MODEL_EVIDENCE::'+summary.replace('%','%25').replace('\n','%0A').replace('\r','%0D'))
+          PYCODE
       - name: Publish actual reports only (no weights, secrets or raw logs)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

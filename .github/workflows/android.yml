@@ -30,7 +30,17 @@ jobs:
           emulator -avd atze-test -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -memory 1536 > reports/android/emulator.log 2>&1 &
           EMULATOR_PID=$!
           trap 'adb emu kill || true; kill "$EMULATOR_PID" 2>/dev/null || true' EXIT
-          timeout 240 adb wait-for-device
+          export EMULATOR_PID
+          python - <<'PYWAIT'
+          import os,subprocess,time
+          deadline=time.monotonic()+240
+          while time.monotonic()<deadline:
+              os.kill(int(os.environ['EMULATOR_PID']),0)
+              result=subprocess.run(['adb','get-state'],capture_output=True,text=True,timeout=5)
+              if result.returncode==0 and result.stdout.strip()=='device': break
+              time.sleep(2)
+          else: raise SystemExit('Emulator did not attach before deadline')
+          PYWAIT
           BOOTED=false
           for i in $(seq 1 180); do
             if [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; then BOOTED=true; break; fi
@@ -45,6 +55,23 @@ jobs:
           grep -q 'atze_result=PASS' reports/android/instrumentation.txt
           adb shell dumpsys package de.atze.plana > reports/android/installed-package.txt
           echo 'EMULATOR_INSTALL_START_TEST_PASS' > reports/android/validation-status.txt
+      - name: Publish actual APK hashes and test outcome in check annotations
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('reports/android'); root.mkdir(parents=True,exist_ok=True)
+          data={'scope':'real debug artifacts; emulator test not physical hardware','apks':[]}
+          for path in sorted(root.glob('atze-*-debug.apk')):
+              data['apks'].append({'file':path.name,'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+          for filename in ['build-status.txt','validation-status.txt','instrumentation.txt','emulator.log']:
+              path=root/filename
+              data[filename]=path.read_text(errors='replace')[-3000:] if path.exists() else 'NOT_RUN'
+          (root/'artifact-evidence.json').write_text(json.dumps(data,indent=2)+'\n')
+          summary=json.dumps(data,ensure_ascii=True)
+          print('::notice title=ANDROID_ARTIFACT_EVIDENCE::'+summary.replace('%','%25').replace('\n','%0A').replace('\r','%0D'))
+          PYCODE
       - name: Upload actual APKs and evidence (never the temporary signing key)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
