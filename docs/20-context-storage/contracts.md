@@ -3,7 +3,7 @@
 Exakte Inputs/Outputs/Constraints/Fehler: [OpenAPI](../../openapi.yaml), [API-Referenz](../08-network/APIs.md). Ausführbares synthetisches Beispiel: [HTTP-Smoke](../../scripts/smoke.py), gestartet wie im [Quickstart](../../QUICKSTART.md). Keine Beispieldaten sind Hardware-/Quellenbeobachtungen.
 
 ## Gemeinsame Dependencies / Configuration / Permissions
-Python 3.11+, FastAPI/Pydantic, lokales SQLite mit FTS5, POSIX-Dateisystem mit `O_NOFOLLOW`, `O_DIRECTORY`, `fsync`, `statvfs`. [Fünf Umgebungsvariablen](../19-operations/configuration.md); optionale Storage-Root/SD-Root, keine Providercredentials. Operator erfasst Archive/Memory/Cache; beide Rollen lesen/suchen; Reviewer darf Relocation, Cache-Cleanup und Reindex. Kein per-project ACL: Projektfilter trennt Suche fachlich, nicht Benutzerberechtigungen. Alle Endpunkte Bearer-authentifiziert.
+Python 3.11+, FastAPI/Pydantic, lokales SQLite mit FTS5, POSIX-Dateisystem mit `O_NOFOLLOW`, `O_DIRECTORY`, `fsync`, `statvfs`. [Sechs Umgebungsvariablen](../19-operations/configuration.md); optionale Storage-Root/SD-Root, keine Providercredentials. Operator erfasst Archive/Memory/Cache; beide Rollen lesen/suchen; Reviewer darf Relocation, Cache-Cleanup und Reindex. Kein per-project ACL: Projektfilter trennt Suche fachlich, nicht Benutzerberechtigungen. Alle Endpunkte Bearer-authentifiziert.
 
 ## Archive / Unified Namespace
 **Purpose:** Originaltext langfristig unveränderlich halten, physischen Ort transparent machen.

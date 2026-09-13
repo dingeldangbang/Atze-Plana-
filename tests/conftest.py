@@ -6,7 +6,7 @@ from app.main import create_app
 
 @pytest.fixture
 def settings(tmp_path):
-    return Settings(tmp_path / 'test.db', 'operator-test-only-' * 3, 'reviewer-test-only-' * 3)
+    return Settings(tmp_path / 'test.db', 'operator-test-only-' * 3, 'reviewer-test-only-' * 3, mode='test')
 
 
 @pytest.fixture

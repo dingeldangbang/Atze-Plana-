@@ -13,7 +13,11 @@ class Settings:
     storage_root: Path | None = None
     sd_root: Path | None = None
 
+    mode: str = "operational"
+
     def __post_init__(self):
+        if self.mode not in {"operational", "test"}:
+            raise ValueError("ATZE_MODE must be operational or test")
         if min(len(self.operator_token), len(self.reviewer_token)) < 32:
             raise ValueError('Both API tokens must contain at least 32 characters')
         if self.operator_token == self.reviewer_token:
@@ -24,4 +28,5 @@ class Settings:
         return cls(Path(os.getenv('ATZE_DB_PATH', 'data/atze.db')),
                    os.getenv('ATZE_OPERATOR_TOKEN', ''), os.getenv('ATZE_REVIEWER_TOKEN', ''),
                    Path(os.getenv('ATZE_STORAGE_ROOT')) if os.getenv('ATZE_STORAGE_ROOT') else None,
-                   Path(os.getenv('ATZE_SD_ROOT')) if os.getenv('ATZE_SD_ROOT') else None)
+                   Path(os.getenv('ATZE_SD_ROOT')) if os.getenv('ATZE_SD_ROOT') else None,
+                   os.getenv('ATZE_MODE', 'operational'))

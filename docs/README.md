@@ -20,3 +20,6 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 - [Tatsächliche Architektur und Migration](20-context-storage/architecture.md)
 - [Memory/Archive/Cache/Resource/Retrieval-Verträge](20-context-storage/contracts.md)
 - [Noch fehlende MCP-, Mobile-, Offline- und Remote-Stufen](20-context-storage/mobile-roadmap.md)
+
+## Verbindliche Realitätsprüfung v0.2.1
+[REALITY_POLICY](../REALITY_POLICY.md) gilt für jeden Beitrag. Keine Mock-/Demo-/Fake-Provider oder unbemerkten Fallbacks im Betriebsweg. Tests/Fehler-Injektionen bleiben getrennt; `python scripts/reality_check.py` und `python scripts/smoke.py --allow-fixtures` tatsächlich ausführen. Der Smoke startet ausschließlich seine eigene temporäre Testinstanz. Laufreports beweisen keine Geräte-/Providerintegration. [Getrennte Integrationsnachweise](../docs/17-security/reality-audit.md).

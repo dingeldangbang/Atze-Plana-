@@ -18,3 +18,8 @@ Browser-E2E (Login/Logout, UI-Fehler, Rendering, Accessibility), Device-/Agent-/
 
 ## v0.2 Regressionen
 Zusätzliche echte temporäre Dateisystemtests für Originalbytes/Hash, stabile Pfadauflösung nach Relocation, Source Retention, Copy-/Auditfehler, Symlink-/Traversalschutz, Kapazitätsfallback, Stop, Cache-Expiry/Retry, Memory fact/inference, Live-Evidence, Projektfilter, Reindex und additive Migration. Simuliertes SD-Verzeichnis ist keine SD-Hardwarevalidierung. HTTP-Smoke wurde um Archive/Memory/FTS/Cache/Health erweitert. Multi-Tier-Gesamtbackup, mobile Hardware, MCP, Remote-Sync und Browser-E2E sind weiterhin offene Nachweise.
+
+## v0.2.1 — explizite Realitätsschranke
+`python scripts/smoke.py --allow-fixtures` startet einen echten HTTP-Childprozess mit eigenen temporären Dateien, Modus test und frischen Tokens. Kein `--base-url` mehr, keine Übernahme von ATZE-Umgebungswerten, kein Mockprovider. Normale pytest-Fixtures wählen test ausdrücklich. Eingaben und reproduzierbare Fehler-Injektion liegen nur im Testwerkzeug, nie im App-Providerpfad. Reports enthalten wirkliche Statuscodes und enden nur nach vollständigem Lauf mit PASS; Opt-out/Fehler ersetzen alte Erfolge durch BLOCKED/FAIL.
+
+REAL-001..015 prüfen Empty Start, Mode-/Legacy-/Root-Grenzen, tatsächlichen Rootausfall, unbekannte Kapazität, explizites Opt-in, ausfallsichere Reportzustände und reale Childprozess-Isolation. `scripts/reality_check.py` prüft zusätzlich enge AST-Grenzen. Keine davon beweist reale SD-/Cloud-/MCP-Hardware, Browserbedienung oder semantische Wahrheit beliebiger Benutzertexte.

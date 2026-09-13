@@ -16,7 +16,7 @@ def test_backup_restore(client, settings, tmp_path):
     assert destination.stat().st_mode & 0o777 == 0o600
     with pytest.raises(FileExistsError):
         backup(settings.db_path, destination)
-    restored = Settings(destination, settings.operator_token, settings.reviewer_token)
+    restored = Settings(destination, settings.operator_token, settings.reviewer_token, mode=settings.mode)
     with TestClient(create_app(restored)) as restored_client:
         response = restored_client.get('/api/projects', headers={'Authorization': 'Bearer ' + settings.operator_token})
         assert response.json()[0]['id'] == created['id']

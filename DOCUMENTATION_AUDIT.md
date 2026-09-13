@@ -1,32 +1,25 @@
-# Documentation Audit — v0.2 Context / Storage
+# Documentation Audit — v0.2.1 No-Fake-Grenzen
 
-Stand 2026-09-13. Bestandsaufnahme der Architekturänderung: Commit `d52281f` hatte den geprüften Evidence-/Approval-Kern, aber kein Archive/Memory/FTS/Cache-Subsystem. Ursprüngliche Baseline bleibt unverändert als historischer Nachweis.
+Stand 2026-09-14. Ausgangspunkt `f4fedc0`; keine bestehende Domainfunktion gelöscht. [Verbindliche Policy](REALITY_POLICY.md) und [vollständiges Realitäts-/Integrationsaudit](docs/17-security/reality-audit.md).
 
 ## Coverage
-- Zentrale Strukturentscheidung vor Implementierung in [ADR-003](docs/adr/ADR-003-mobile-context-storage.md) festgehalten.
-- [Architektur/Statusmatrix](docs/20-context-storage/architecture.md) trennt tatsächlichen Local-/optionalen SD-Pfad-Schnitt von Mobile-Hardware, MCP, Remote Storage, Offline-Sync und Orchestrator-Ziel.
-- [Kernverträge](docs/20-context-storage/contracts.md) enthalten Purpose, Inputs/Outputs, Dependencies, Configuration, Permissions, Side Effects, Failure Modes, Validation/Tests, Examples, Security und Limitations für Archive, Namespace, Memory, Cache, Resource Manager und Retrieval.
-- Tatsächliche Daten-/Copy-Verify-Sequenzen, additive Migration und neue Backupgrenzen dokumentiert.
-- Neue APIs maschinenlesbar in OpenAPI, Rollen/Seiteneffekte für neue Endpunkte als `x-role`/`x-side-effects` an der Implementierung gepflegt und in Referenz generiert.
-- Fünf Environmentvariablen in Code, `.env.example`, YAML-Beispiel und Konfigurationsreferenz konsistent.
-- Alle Testdefinitionen katalogisiert; tatsächliche parametrische Ergebnisse in JUnit. HTTP-Smoke auf 19 echte Antworten erweitert, keine SD-/Motor-/Cloud-Fixtures als reale Geräte ausgegeben.
+- Policy gilt für Agenten/Beiträge/CI/Runtime/Reports/Release. Synthetische Testeingaben und Fehler-Injektion sind ausdrücklich kein Hardware-/Dienstnachweis.
+- Implemented, Configured, Tested, Validated und Production Ready getrennt für vorhandene Komponenten und fehlende Integrationen dokumentiert.
+- Konfiguration umfasst jetzt sechs Environmentvariablen, inklusive ATZE_MODE mit DB-/Rootbindung. API-/Statusfelder und Runtime-Endpunkt in tatsächlicher OpenAPI generiert.
+- Alle Testdefinitionen im AST-Testkatalog; konkrete parametrische Outcomes ausschließlich aus ausgeführtem JUnit. Keine statische Pass-Tabelle als Ersatz für Testlauf.
+- Build/Test/Reality/Smoke/Dependency-Prüfungen in CI. Smoke startet seine eigene temporäre echte Instanz und kann keine Betriebs-URL übernehmen.
 
-## Outdated / Corrected
-- README/Installation/Roadmap/Userhandbuch behaupten nicht länger, dass keinerlei Text-/Context-/Cacheablage existiert.
-- SQLite-only Backup ausdrücklich nicht mehr als vollständiges Backup dargestellt; Scriptausgabe ebenfalls präzisiert.
-- FTS als lokale Textkopie mit Ressourcenbedarf dokumentiert, nicht als kostenloser Remoteindex oder vollständiges RAG-System.
-- Inference bleibt Inference, Evidence state beschreibt verknüpfte Quellen und nicht automatisch die Wahrheit des gefundenen Auszugs.
-- Aktions-Triage vor Execution bleibt zwingend; nachgelagerte Ergebnis-Triage in Zielsequenz ist zusätzliche Kontrolle.
-- Dokumentation stellt SD-Pfad nicht als Geräteerkennung, Source Retention nicht als Platzfreigabe und Cache nicht als Sicherheits-Sandbox dar.
-- SQL-Abschluss erfolgt mit Function-Scope-Dependency vor HTTP-Erfolgsantwort; Commitzeit-Fehler durch Regression abgesichert.
+## Corrected / Outdated
+- README bezeichnet tatsächliche datenleere Arbeitsoberfläche nicht mehr als „ausführbare Demo“.
+- Quickstart und CI enthalten keinen veralteten --base-url-Smoke-Aufruf mehr; Betreiber müssen keine Fixture-Instanz mit Betriebstokens vorbereiten.
+- Storage-Dokumentation trennt unimplementierte, unkonfigurierte und nicht erreichbare Tiers; fehlende Werte nicht als künstliche Kapazität dargestellt.
+- UI-Doku zeigt expliziten Test-/Betriebsmodus und die Behandlung alter Werte bei Ladefehlern.
+- Ops-Doku erweitert um Sicherung/Restore versteckter Modusmarker und Legacy-Herkunftsprüfung. DB-only-Backup nicht als Vollbackup ausgegeben.
+- Teststrategie ergänzt um ausdrücklich isolierte echte HTTP-Läufe, Reportfehlerzustände und begrenzte Bedeutung des Reality-Gates.
+- Der Schema-only-Modus des Dokumentationsgenerators introspektiert Schnittstellen ohne Datenbankstart; er ist kein Fakeprovider und kein angebotener Runtime-Betriebsweg.
 
 ## Validation
-`python scripts/docs.py --check` prüft vier generierte Produkte, formale OpenAPI-Gültigkeit, lokale Dateilinks und Environmentabdeckung. Test-Docstrings verpflichtend. Konkrete Laufresultate und GitHub-Status im [Final Validation Report](FINAL_VALIDATION_REPORT.md). Gemeinsame v0.1-Tests bleiben erhalten; neue Source-/Copy-/Audit-/Cache-/Memory-/Retrieval-/Migration-/Commit-Fehlertests ergänzt.
+Vier generierte Produkte bytegenau synchron; formale OpenAPI-Gültigkeit, lokale Dateireferenzen, sechs Environmentvariablen und Test-Docstrings geprüft. `scripts/reality_check.py` prüft definierte Runtime-/Smoke-Grenzen. Tatsächliche Build-/Test-/HTTP-/GitHubresultate im [Validierungsbericht](FINAL_VALIDATION_REPORT.md); keine alten v0.2-Ergebnisse als aktuelle ausgegeben.
 
 ## Missing / Known Gaps
-Kein vollautomatischer semantischer Dokumentationsbeweis, externer Link-/Ankercheck oder beliebiger Commandparser. Keine Browser-E2E-/Hardware-/MCP-/Mobile-/Remote-/Sync-Handbücher mit fingierten Befehlen. Keine PDF/OCR/Bild/CAD- oder GitHub-Ingestion. Kein Multi-Tier-Gesamtsnapshot-/Restore-Automat, kein RAM-/2-GB-Benchmark, kein Auto-Rebalancing oder GC dauerhafter Quellkopien. Beispiele sind repräsentativer ausführbarer Smoke plus generierter Schema-/Endpunktvertrag, nicht curl für jede API.
-
-Nicht implementierte Zielteile werden in der [mobilen Roadmap](docs/20-context-storage/mobile-roadmap.md) beschrieben; keine leeren Produktseiten als Funktionsnachweise.
-
-## GitHub-Nachweis v0.2
-Codecommit `225b995914abac5d71fb3102e31fcfbc9bfdb3aa`; [PR-CI 34784573425](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34784573425) erfolgreich inklusive Dokumentationsprüfung und tatsächlichem Report-/Build-Artefaktupload. Keine v0.1-Testergebnisse als v0.2-Nachweis übernommen.
+Kein vollständiger semantischer Beweis jeder Dokumentations-/Codeaussage, kein externer Link-/Ankercheck oder allgemeiner Commandparser. Keine Browser-E2E-/Hardware-/Provider-/APK-/Unity-/Payment-/Cloud-/Release-Nachweise. Kein automatisierter Multi-Tier-Vollrestore. Modusmarker können Datenwahrheit nicht beweisen; autorisierte Benutzer/Hostadministratoren bleiben Vertrauensgrenzen. Buildpakete sind echte Python-Artefakte, keine behaupteten APKs/Firmwareoutputs.

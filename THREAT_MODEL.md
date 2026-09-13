@@ -33,3 +33,8 @@ Kein Penetrationstest, kein Secret-Scanner-Vollscan der gesamten Git-Historie, k
 | Datenverlust | unveränderliche Archive, lesende Hashchecks | DB-only Backup nicht mehr vollständig; Gesamtrestore noch kein Produktionsnachweis |
 
 Regressionen: STO-001..010, CACHE-001/002, MEM-001/002, RAG-001/002, MIG-001. Tests verwenden temporäre Verzeichnisse als **simulierten** zweiten Tier, keine behauptete SD-Hardware.
+
+## v0.2.1 — Testdatenkontamination / falsche Erfolgsanzeigen
+Risiko: beliebig adressierbarer Smoke-Runner könnte Testeingaben in Betriebs-DB schreiben; alte UI-Werte oder PASS-Dateien könnten einen ausgefallenen/neuen Lauf verdecken. Kontrolle: keine fremde Ziel-URL, selbst gestartete temporäre echte Testinstanz, eigenständige Credentials, explizites Opt-in und Modusprobe, dauerhafte DB-/Objektroot-Modusmarker, Reportstatus vor Beginn neu schreiben, Werte nach UI-Refreshfehler verwerfen. Kein Fake-Fallback bei fehlenden Adaptern/Roots oder Nullkapazität. Test-SD bleibt Dateiverzeichnis, kein Device-Profil/Live-Gerät.
+
+Restrisiken: Legacydaten ohne Marker brauchen Herkunftsprüfung; Administratoren können Marker oder Datensätze manipulieren. Ein autorisierter Mensch kann falsche Behauptungen erfassen. Die AST-Prüfung erkennt ausgewählte Testimports, nicht jede denkbare Scheinimplementierung. Kein ausgeführter Browser-E2E in diesem Schnitt.

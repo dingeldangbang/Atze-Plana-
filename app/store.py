@@ -16,7 +16,7 @@ def identity():
 
 
 class Store:
-    def __init__(self, path):
+    def __init__(self, path, mode="operational"):
         self.path = path
         path.parent.mkdir(parents=True, exist_ok=True)
         db = sqlite3.connect(self.path, timeout=5)
@@ -26,6 +26,14 @@ class Store:
             db.close()
         with self.connect() as db:
             db.execute('CREATE TABLE IF NOT EXISTS records (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT UNIQUE NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL)')
+            db.execute("CREATE TABLE IF NOT EXISTS instance_mode (singleton INTEGER PRIMARY KEY CHECK(singleton=1), mode TEXT NOT NULL)")
+            existing = db.execute('SELECT mode FROM instance_mode WHERE singleton=1').fetchone()
+            if existing and existing[0] != mode:
+                raise ValueError('Database mode mismatch; test data cannot enter operational mode')
+            if not existing:
+                if mode == 'test' and db.execute('SELECT 1 FROM records LIMIT 1').fetchone():
+                    raise ValueError('Test mode requires a new empty database, not unlabelled existing data')
+                db.execute('INSERT INTO instance_mode VALUES(1,?)', (mode,))
             db.execute('CREATE INDEX IF NOT EXISTS records_kind ON records(kind, seq)')
             db.execute('CREATE TABLE IF NOT EXISTS control (id INTEGER PRIMARY KEY CHECK(id=1), active INTEGER NOT NULL, reason TEXT NOT NULL)')
             db.execute("CREATE UNIQUE INDEX IF NOT EXISTS archive_namespace ON records(json_extract(body, '$.logical_path')) WHERE kind='archive'")

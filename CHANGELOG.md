@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.1 — unreleased / 2026-09-14
+
+### Added
+Verbindliche REALITY_POLICY und AGENTS-Regeln; getrenntes Integrations-/Nachweisaudit. ATZE_MODE mit persistenter DB-/Objektrootbindung, authentifizierter Runtime-Modusanzeige, enge CI-Reality-Grenzprüfung und Regressionen gegen Testdatenkontamination.
+
+### Changed
+Smoke startet ausschließlich eigene reale temporäre Testinstanz/Dateien/Tokens; keine übergebene Ziel-URL oder geerbten ATZE-Daten. Normale pytest-Fixtures explizit test. Storage-Status trennt Implemented/Configured/Verfügbarkeit. UI kennzeichnet Testmodus und leert alte Werte bei Ladefehlern. README bezeichnet die reale Arbeitsoberfläche nicht mehr als Demo.
+
+### Fixed
+Mögliche fehladressierte Fixturewrites im alten Smoke; stale PASS-Dateien bei Ausführungsfehlern; via python -O entfernbare Smoke-Assertions; irreführende Sammel-Verfügbarkeitsmeldung und erfundener 100%-Wert bei nicht messbarer Gesamtkapazität.
+
+### Security
+Kein Testprovider/Mock im Betriebsweg. Cross-Mode-DB-/Rootzugriff verweigert; Legacy-Daten nicht als echte Messungen zertifiziert. Modusmarker sind kein Schutz gegen Hostadministratoren. Reale Capacity-Alternative bleibt ein echter Datenträgerzugriff, kein Fakefallback.
+
+### Breaking Changes
+`--base-url` im Smoke entfernt. `ATZE_MODE` akzeptiert operational/test; Wechsel bestehender markierter Datenbestände abgelehnt. Neue API-Statusfelder und Healthversion 0.2.1.
+
+### Migration
+Additive SQLite instance_mode-Tabelle und `.atze-mode` in konfigurierten erreichbaren Wurzeln. Bestehende unmarkierte Bestände bleiben im operational-Modus möglich, müssen inhaltlich auf Herkunft geprüft werden. Testmodus nimmt keine unmarkierten nonempty Bestände an. Marker mit sichern; keine Daten werden automatisch gelöscht oder importiert.
+
+### Validation
+Aktuelle tatsächliche Ergebnisse im [Validierungsbericht](FINAL_VALIDATION_REPORT.md). Keine neuen Hardware-/Provider-/APK-/Releasefähigkeiten behauptet.
+
 ## 0.2.0 — unreleased / 2026-09-13
 
 ### Added

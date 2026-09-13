@@ -45,11 +45,13 @@ python -m build
 pip-audit -r requirements.lock
 ```
 
-[Kompletter Ablauf als ausführbarer API-Smoke-Test](scripts/smoke.py). Dieser legt ausdrücklich synthetische Testdaten in der angegebenen Instanz an; nur gegen eine Testdatenbank ausführen.
+[Kompletter Ablauf als ausführbarer API-Smoke-Test](scripts/smoke.py): `python scripts/smoke.py --allow-fixtures`. Der Runner startet selbst eine temporäre TESTINSTANZ mit eigenen Tokens/Dateien und echten lokalen Komponenten; keine bestehende Instanz wird befüllt.
 
 Stoppen: Ctrl+C. Daten bleiben unter `data/atze.db` erhalten. Fehlende Tokens verhindern den Start; keine unsichere Standardanmeldung.
 
 ## Context / Speicher ab v0.2
 Ohne Zusatzkonfiguration nutzt der Server `data/objects` neben der Standarddatenbank. `ATZE_STORAGE_ROOT` kann einen anderen lokalen Pfad angeben. `ATZE_SD_ROOT` nur auf ein bereits provisioniertes, vertrauenswürdiges Verzeichnis setzen; der Server erkennt/mountet keine SD-Karte. Keine Remote-Credentials nötig. Die Oberfläche zeigt Storage Health und lokale Quellen-Suche.
 
-`scripts/smoke.py --base-url http://127.0.0.1:8000 --allow-fixtures` prüft gegen eine **separate Testinstanz** zusätzlich Archive, exakten Text-Readback, Memory-Inferenz, Quellen-Retrieval und Cache. Nicht gegen Produktion ausführen. Es importiert keine echten Motor-/Gerätedaten. [API-/Lifecycle-Verträge](docs/20-context-storage/contracts.md).
+`python scripts/smoke.py --allow-fixtures` startet ausschließlich eine **eigene temporäre Testinstanz** und prüft zusätzlich Archive, exakten Text-Readback, Memory-Inferenz, Quellen-Retrieval und Cache. Fremde Ziel-URLs werden nicht akzeptiert, geerbte Betriebsdatenpfade und Tokens nicht verwendet. Es importiert keine echten Motor-/Gerätedaten. [API-/Lifecycle-Verträge](docs/20-context-storage/contracts.md).
+
+`ATZE_MODE` bleibt für die Arbeitsinstanz standardmäßig `operational`. Das ist keine Produktionsfreigabe. Der Smoke setzt seinen eigenen Modus ausdrücklich auf `test`. Datenbank/Dateiwurzeln erhalten dauerhafte Modusmarker; Testbestände dürfen nicht durch einen Moduswechsel produktiv gemacht werden. [Policy und Legacy-Grenzen](REALITY_POLICY.md).

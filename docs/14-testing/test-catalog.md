@@ -46,6 +46,21 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | SEC-004: storage failure returns redacted 503, not a SQL or filesystem traceback. | [test_core.py: test_storage_error_redacted](../../tests/test_core.py) |
 | DOC-001: authenticated schema reflects supported APIs and bearer authentication. | [test_core.py: test_schema](../../tests/test_core.py) |
 | SEC-005: both roles can inspect real stop state; write is reviewer-only. | [test_core.py: test_stop_read](../../tests/test_core.py) |
+| REAL-001: a new operational database/UI has no seeded projects, telemetry, tasks or results; mode is explicit. | [test_reality.py: test_operational_start_has_no_seeded_data](../../tests/test_reality.py) |
+| REAL-002: persistent test DB marker rejects switching to operational mode without changing/deleting data. | [test_reality.py: test_test_database_cannot_be_opened_operational](../../tests/test_reality.py) |
+| REAL-003: an operational database cannot be switched to test mode even if currently empty. | [test_reality.py: test_operational_database_cannot_be_used_as_test](../../tests/test_reality.py) |
+| REAL-004: legacy nonempty database is refused for test mode rather than silently seeded or relabelled. | [test_reality.py: test_unmarked_existing_database_not_adopted_as_test](../../tests/test_reality.py) |
+| REAL-005: blob-root mode marker rejects cross-mode sharing independently of database separation. | [test_reality.py: test_storage_root_cannot_cross_modes](../../tests/test_reality.py) |
+| REAL-006: test storage refuses pre-existing unlabelled originals instead of marking them as test data. | [test_reality.py: test_unmarked_existing_blobs_not_adopted_as_test](../../tests/test_reality.py) |
+| REAL-007: absent implementation, absent config and actual configured-path outage have distinct statuses and null measurements. | [test_reality.py: test_availability_dimensions_and_real_failure](../../tests/test_reality.py) |
+| REAL-008: unknown operating mode is rejected, never interpreted as permission to enable test behavior. | [test_reality.py: test_invalid_mode_fails_closed](../../tests/test_reality.py) |
+| REAL-009: absent explicit opt-in overwrites a stale PASS report with BLOCKED without starting tests. | [test_reality.py: test_smoke_requires_opt_in_and_invalidates_old_report](../../tests/test_reality.py) |
+| REAL-010: real HTTP smoke uses a fresh process/DB/roots/tokens, not inherited operational paths or credentials. | [test_reality.py: test_smoke_real_isolated_process_ignores_operational_paths](../../tests/test_reality.py) |
+| REAL-011: an injected test failure produces FAIL with error, not hardcoded/stale PASS, and stops the real child. | [test_reality.py: test_smoke_failure_does_not_leave_pass](../../tests/test_reality.py) |
+| REAL-012: CLI no longer accepts a user-supplied target URL for fixture writes. | [test_reality.py: test_smoke_rejects_arbitrary_target](../../tests/test_reality.py) |
+| REAL-013: runtime mock imports and assert-only test success are rejected by the narrow guardrail. | [test_reality.py: test_reality_boundary_guard](../../tests/test_reality.py) |
+| REAL-014: a filesystem capacity probe without total size yields UNAVAILABLE/null, not an invented 100 percent. | [test_reality.py: test_zero_capacity_has_no_invented_percentage](../../tests/test_reality.py) |
+| REAL-015: newly appearing unlabelled tier is not initialized by GET; reviewed restart binds its mode explicitly. | [test_reality.py: test_late_unmarked_tier_is_unavailable_until_reviewed_restart](../../tests/test_reality.py) |
 | OPS-001: backup integrity and restored project read work; existing destination is never overwritten. | [test_tools.py: test_backup_restore](../../tests/test_tools.py) |
 | DOC-002: OpenAPI, generated references, local links and environment coverage pass the worker gate. | [test_tools.py: test_docs_consistent](../../tests/test_tools.py) |
 | CFG-001: documented environment names configure startup and persistent path without defaults for secrets. | [test_tools.py: test_environment_config](../../tests/test_tools.py) |

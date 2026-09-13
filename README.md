@@ -1,6 +1,6 @@
 # Atze Plana
 
-Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.2.0 ist ein begrenzter, lauffähiger Kern, nicht die vollständige Plattform der Master-Anforderung.** Das Ausgangsrepository enthielt nur einen Titel; siehe [Bestandsaufnahme](PROJECT_BASELINE.md).
+Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.2.1 ist ein begrenzter, lauffähiger Kern, nicht die vollständige Plattform der Master-Anforderung.** Das Ausgangsrepository enthielt nur einen Titel; siehe [Bestandsaufnahme](PROJECT_BASELINE.md).
 
 ## Tatsächlicher Status
 | Bereich | Status | Nachweis / Grenze |
@@ -9,7 +9,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Version 0.2.0 i
 | Python-Paket, OpenAPI, Dokumentationskonsistenz | VALIDATED lokal | [Validierungsbericht](FINAL_VALIDATION_REPORT.md) |
 | Memory / Archive / Cache / lokale FTS-Suche | IMPLEMENTED / TESTED | [Neue Context-/Storage-Architektur](docs/20-context-storage/architecture.md); kein MCP-/Cloud-/Offline-Sync-Adapter |
 | Dashboard | IMPLEMENTED | Projektanlage, Listen, Triage, reale Storage Health und Quellen-Suche; weitere Eingaben via API |
-| GitHub-CI / Review-PR | VALIDATED für v0.2 | [Grüner Lauf](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34784573425), [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); nicht gemergt |
+| GitHub-CI / Review-PR | siehe aktuellen Validierungsbericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
 | Agenten, Sandbox, Hardware, 3D, Android, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
@@ -38,8 +38,11 @@ uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000
 - [Tests](docs/14-testing/testing-strategy.md), [Security](SECURITY.md), [Threat Model](THREAT_MODEL.md)
 - [Beiträge](CONTRIBUTING.md), [Changelog](CHANGELOG.md), [Releaseplan](RELEASES.md)
 
-## Demo / Screenshots
-Die mitgelieferte Oberfläche unter `/` ist die ausführbare Demo und startet ohne Seed-Daten. Noch kein versionierter Screenshot und kein öffentliches Deployment. Ihre Grenzen sind im Benutzerhandbuch beschrieben.
+## Arbeitsoberfläche / Screenshots
+Die Oberfläche unter `/` bedient die tatsächlich implementierten APIs und startet ohne Seed-Daten. Sie ist keine Demo-Implementierung. Noch kein versionierter Screenshot und kein öffentliches Deployment. Ihre Grenzen sind im Benutzerhandbuch beschrieben.
 
 ## Lizenz
 Im Ausgangsrepository wurde keine Lizenz festgelegt. Es wird keine Nutzungs- oder Weiterverbreitungslizenz erfunden. Eine Lizenzentscheidung des Repository-Eigentümers ist vor externer Distribution erforderlich.
+
+## Kein Fake im Betriebsweg
+Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit](docs/17-security/reality-audit.md). Implemented, Configured, Tested, Validated und Production Ready werden getrennt ausgewiesen. Testmodus aktiviert keine Mocks; Tests nutzen ausschließlich eigene temporäre Datenbestände und echte lokale Komponenten. Nicht erreichbare Ressourcen liefern Fehler/unknown statt Beispieldaten.

@@ -18,3 +18,6 @@
 
 ## Bekannte Einschränkungen
 Kein Typechecker/Linter-Gate, keine Browserautomatisierung, kein Lasttest. Transitive Bibliotheken können Deprecation-Warnungen ausgeben; diese werden nicht ausgeblendet. Änderungen an generierter API-Referenz gehören in Quelle oder Worker, nicht nur ins Ausgabe-Markdown.
+
+## Verbindliche Realitätsprüfung v0.2.1
+[REALITY_POLICY](REALITY_POLICY.md) gilt für jeden Beitrag. Keine Mock-/Demo-/Fake-Provider oder unbemerkten Fallbacks im Betriebsweg. Tests/Fehler-Injektionen bleiben getrennt; `python scripts/reality_check.py` und `python scripts/smoke.py --allow-fixtures` tatsächlich ausführen. Der Smoke startet ausschließlich seine eigene temporäre Testinstanz. Laufreports beweisen keine Geräte-/Providerintegration. [Getrennte Integrationsnachweise](docs/17-security/reality-audit.md).

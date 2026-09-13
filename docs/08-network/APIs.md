@@ -16,6 +16,7 @@ Source: `app/main.py` and Pydantic models. Regenerate: `python scripts/docs.py`.
 | Method | Endpoint | Role | Request schema | Success response | Side effects / evidence requirements |
 |---|---|---|---|---|---|
 | GET | `/health` | public | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"additionalProperties": {"type": "string"}, "type": "object", "title": "Response Health Health Get"}}}}}` | None; read-only |
+| GET | `/api/runtime` | both | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"additionalProperties": {"type": "string"}, "type": "object", "title": "Response Runtime Api Runtime Get"}}}}}` | None; read-only |
 | GET | `/api/openapi.json` | both | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"additionalProperties": true, "type": "object", "title": "Response Specification Api Openapi Json Get"}}}}}` | None; read-only |
 | POST | `/api/projects` | operator | ProjectInput | `{"201": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Project"}}}}}` | Project + audit; no evidence requirement |
 | GET | `/api/projects` | both | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Project"}, "title": "Response Projects Api Projects Get"}}}}}` | None; read-only |

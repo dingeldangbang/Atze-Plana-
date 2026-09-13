@@ -24,3 +24,8 @@ Nach Anmeldung zeigt „Speicher & Cache“ aktuelle Messwerte nur für erreichb
 Wähle unter „Projektkontext durchsuchen“ ein Projekt und Suchwörter. Treffer stammen aus erfassten Archivtexten/Memory, mit Pfad, Speicherort, Hash, Zeichenposition und Evidence-Zustand. Es wird keine KI-Antwort formuliert. Der Evidence-Zustand ist der Zustand verknüpfter Quellen, kein automatischer Wahrheitsnachweis des Auszugs. Keine Freigabe wird durch Suche erteilt.
 
 Archive und Memory werden zunächst über die dokumentierte API erfasst. Archive sind unveränderlich; gleicher Pfad lässt sich nicht überschreiben. Memory-Inferenzen bleiben Inferenzen. Cache kann nach TTL verloren gehen; wichtige Texte vorher explizit als Archiv sichern. Reviewer steuert Speicherwechsel/Cleanup; ein Wechsel behält die alte Archivkopie. Technische Verträge: [Context/Storage](../20-context-storage/contracts.md).
+
+## v0.2.1 — Betriebs-/Testzustand und fehlende Daten
+Nach erfolgreicher Anmeldung erscheint der tatsächliche Modus: TESTINSTANZ (Testeingaben, keine Live-Evidence) oder BETRIEBSINSTANZ (keine Seeds, trotzdem keine Produktionsfreigabe). Vor bestätigter Antwort bleibt der Modus unbekannt. Bei Refreshfehlern werden bisherige Werte verworfen, statt sie als aktuelle Messungen anzuzeigen; keine automatische Beispieldatenbefüllung.
+
+Storage unterscheidet BLOCKED (Adapter fehlt), NOT_CONFIGURED (Dateipfad nicht eingerichtet), UNAVAILABLE (eingerichteter Pfad nicht erreichbar/messbar) und AVAILABLE (reale Dateisystemmessung). „SD“ bleibt eine Pfadklasse, kein erkanntes Gerät. Nicht existierende Sensor-/Cloud-/Repair-/Buildmodule zeigen keine erfundenen Ressourcen oder Ergebnisse und besitzen keine Schein-Verbindungsbuttons.

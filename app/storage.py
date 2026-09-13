@@ -23,6 +23,7 @@ def guard(db):
 
 class Storage:
     def __init__(self, settings):
+        self.mode = settings.mode
         local = settings.storage_root or settings.db_path.parent / 'objects'
         if local.is_symlink():
             raise ValueError('Storage root must not be a symlink')
@@ -34,12 +35,41 @@ class Storage:
             if sd.is_symlink() or sd.resolve() == local.resolve() or sd.resolve() in local.resolve().parents or local.resolve() in sd.resolve().parents:
                 raise ValueError('Storage roots must be distinct, non-nested, non-symlink paths')
             self.roots['sd'] = sd
+        for tier, root in self.roots.items():
+            if root.is_dir():
+                os.close(self.directory(tier, bind=True))
 
-    def directory(self, tier):
+    def directory(self, tier, *, bind=False):
         root = self.roots.get(tier)
         if root is None:
             raise HTTPException(503, 'Requested storage tier is not configured')
-        return os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            marker = '.atze-mode'
+            try:
+                fd = os.open(marker, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=directory)
+            except FileNotFoundError:
+                if not bind:
+                    raise HTTPException(503, 'Storage root has no mode marker; restart after administrator review')
+                if self.mode == 'test' and any(name.endswith('.blob') for name in os.listdir(directory)):
+                    raise HTTPException(503, 'Test mode requires an empty or test-labelled object root')
+                try:
+                    fd = os.open(marker, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=directory)
+                    with os.fdopen(fd, 'wb') as output:
+                        output.write(self.mode.encode())
+                        output.flush()
+                        os.fsync(output.fileno())
+                    os.fsync(directory)
+                except FileExistsError:
+                    pass  # concurrent initialization: validate existing marker, never overwrite
+                fd = os.open(marker, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=directory)
+            with os.fdopen(fd, 'rb') as source:
+                if source.read(32) != self.mode.encode():
+                    raise HTTPException(503, 'Object root mode mismatch; refusing cross-mode access')
+            return directory
+        except BaseException:
+            os.close(directory)
+            raise
 
     @staticmethod
     def filename(key):
@@ -53,8 +83,10 @@ class Storage:
             info = os.fstatvfs(directory)
             total = info.f_blocks * info.f_frsize
             free = info.f_bavail * info.f_frsize
+            if total <= 0:
+                raise OSError('Filesystem returned no measurable capacity')
             return {'total_bytes': total, 'free_bytes': free, 'used_bytes': total - free,
-                    'used_percent': round((total - free) / total * 100, 2) if total else 100.0}
+                    'used_percent': round((total - free) / total * 100, 2)}
         finally:
             os.close(directory)
 
@@ -184,10 +216,19 @@ class Storage:
     def health(self, db):
         tiers = []
         for tier in ['ram', 'local', 'sd', 'server', 'cloud']:
-            try:
-                tiers.append(dict(tier=tier, available=True, **self.usage(tier)))
-            except (OSError, HTTPException):
-                tiers.append(dict(tier=tier, available=False, reason='Not configured or unavailable; no measurement'))
+            implemented = tier in {'local', 'sd'}
+            configured = tier in self.roots
+            base = dict(tier=tier, implemented=implemented, configured=configured,
+                        resource_kind='FILESYSTEM_PATH' if implemented else None)
+            if not implemented:
+                tiers.append(dict(**base, available=False, status='BLOCKED', reason='Adapter not implemented'))
+            elif not configured:
+                tiers.append(dict(**base, available=False, status='NOT_CONFIGURED', reason='No filesystem root configured'))
+            else:
+                try:
+                    tiers.append(dict(**base, available=True, status='AVAILABLE', **self.usage(tier)))
+                except (OSError, HTTPException):
+                    tiers.append(dict(**base, available=False, status='UNAVAILABLE', reason='Configured filesystem unavailable; no substitute data'))
         def size(kind, suffix='', params=()):
             return db.execute("SELECT COALESCE(SUM(json_extract(body,'$.size_bytes')),0) FROM records WHERE kind=? " + suffix, (kind, *params)).fetchone()[0]
         return dict(tiers=tiers, cache_active_bytes=size('cache', "AND json_extract(body,'$.deleted')=0 AND json_extract(body,'$.expires_at')>?", (now(),)),

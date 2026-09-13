@@ -22,9 +22,9 @@ STATIC = Path(__file__).parent / 'static'
 def create_app(settings: Settings | None = None, *, schema_only=False):
     if not schema_only:
         settings = settings or Settings.from_env()
-    store = None if schema_only else Store(settings.db_path)
+    store = None if schema_only else Store(settings.db_path, settings.mode)
     storage = None if schema_only else Storage(settings)
-    app = FastAPI(title='Atze Plana Evidence Core', version='0.2.0',
+    app = FastAPI(title='Atze Plana Evidence Core', version='0.2.1',
                   description='Single-workspace evidence and approval registry. No action execution.',
                   docs_url=None, redoc_url=None, openapi_url=None)
     bearer = HTTPBearer(auto_error=False)
@@ -73,7 +73,11 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     @app.get('/health', tags=['system'])
     def health(db=DB) -> dict[str, str]:
         db.execute('SELECT 1')
-        return {'status': 'ok', 'version': '0.2.0'}
+        return {'status': 'ok', 'version': '0.2.1', 'mode': settings.mode}
+
+    @app.get('/api/runtime', tags=['system'])
+    def runtime(who=Depends(actor)) -> dict[str, str]:
+        return {'mode': settings.mode, 'data_scope': 'TEST INPUTS — NOT LIVE EVIDENCE' if settings.mode == 'test' else 'OPERATIONAL — NO SEEDED DATA', 'production_readiness': 'NOT VALIDATED'}
 
     @app.get('/api/openapi.json', tags=['system'])
     def specification(who=Depends(actor)) -> dict:

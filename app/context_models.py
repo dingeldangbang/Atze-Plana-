@@ -136,6 +136,10 @@ class CleanupResult(Input):
 
 class TierHealth(Input):
     tier: str
+    implemented: bool
+    configured: bool
+    status: Literal["AVAILABLE", "BLOCKED", "NOT_CONFIGURED", "UNAVAILABLE"]
+    resource_kind: Literal["FILESYSTEM_PATH"] | None = None
     available: bool
     total_bytes: int | None = None
     used_bytes: int | None = None

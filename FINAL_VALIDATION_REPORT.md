@@ -1,74 +1,54 @@
-# Final Validation Report — v0.2 Context / Storage
+# Final Validation Report — v0.2.1 Reality Boundary
 
-Stand 2026-09-13. **Architekturänderung mit überprüfbarem lokalen Implementierungsschnitt; keine vollständige Mobile-/MCP-/Cloud-Plattform und kein Produktionsrelease.**
+Stand 2026-09-14. **Verbindliche No-Fake-Policy und technische Test-/Betriebsgrenzen; kein neuer Hardware-/Provideradapter und kein Produktionsrelease.**
 
-## Repository / Ausgangspunkt
-- Repository `dingeldangbang/Atze-Plana-`, Session-Branch `arena/01a09c9d-atze-plana`.
-- Ausgangspunkt dieser Erweiterung: `d52281f9f57c3e8fd3e7ac28089d6ad98e498407` (v0.1, 27 ursprüngliche Tests, grüner damaliger CI-Lauf).
-- Implementierungscommit v0.2: `225b995914abac5d71fb3102e31fcfbc9bfdb3aa`, auf die feste Session-Branch gepusht.
-- [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) aktualisiert; [v0.2-PR-CI 34784573425](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34784573425) vollständig grün. Dieser spätere Bericht ergänzt nur Nachweise, keinen Runtimecode.
-- Architekturentscheidung vor Codeänderung: [ADR-003](docs/adr/ADR-003-mobile-context-storage.md). Keine bisherigen Domainfunktionen entfernt.
+## Repository / Baseline
+`dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`. Ausgangspunkt dieses Schnitts: `f4fedc0f0a6bad86b0b925a2a9e81701a3893a7e` (v0.2 mit damals 53 Tests). Alle bisherigen Domainfunktionen und Tests bleiben erhalten. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) bleibt Review-PR. Neue v0.2.1-Commit-/GitHub-Nachweise werden nach tatsächlichem Push/Lauf ergänzt.
 
-## Project Status / Architecture / Features
-Core: FastAPI/Pydantic + SQLite (Records/Control/FTS5) + POSIX-Dateiwurzeln für Archive/Cache. Ein Workspace mit Operator-/Reviewer-Rollen. Neu:
-- Unveränderliche UTF-8-Archive mit stabilem logischem Namespace, Originalbytes/SHA-256/Bytelänge und transparenter Pfadauflösung.
-- Reviewergebundener Source-Hash → Copy/fsync → Readback/Verify → atomarer Metadaten-/Auditwechsel; Originalkopie bleibt erhalten.
-- Append-only Memory mit 11 Kategorien, fact/inference-Trennung, Evidence-/Task-/optional formal geprüfter Commitreferenz.
-- Lokale FTS5-Retrieval-Vorstufe für Archive/Memory; Quell-ID/Pfad/Ort/UTC/Hash/Zeichenposition/aktueller Evidencezustand; immer allowed_for_action=false.
-- Taskgebundener TTL-Textcache, expliziter Reviewer-Cleanup mit vorher committeten Tombstones und Retry; keine Indexierung oder Originallöschung.
-- Reale Dateisystemmessungen und konservative automatische Erstplatzierung Local→optional SD-Verzeichnis; kein Background-Rebalancing.
-- UI für Storage Health und Projektkontextsuche. Neue Datenerfassung/Relocation/Cleanup zunächst per API.
-- SQL-Dependency auf Function-Scope gesetzt: Transaktionsabschluss vor HTTP-Erfolg, auch für bisherigen Core.
+## Implementiert / korrigiert
+- Verbindliche [REALITY_POLICY](REALITY_POLICY.md) und [AGENTS-Regeln](AGENTS.md).
+- Tatsächlicher Instanzmodus operational/test, dauerhaft in SQLite und Datei-Roots gebunden; kein Modus aktiviert Mockprovider. Markierte Bestände lassen sich nicht einfach auf den anderen Modus umstellen.
+- Smoke akzeptiert keine fremde Ziel-URL/ATZE-Datenpfade/Tokens: selbst gestarteter echter HTTP-Prozess mit temporärer Test-DB/Dateiwurzeln und frischen Credentials, explizitem Opt-in und Modeprüfung vor Testwrites. Childprozess/Temporärdaten werden beendet/entfernt.
+- Smokeprüfungen bleiben unter python -O aktiv. Neuer Lauf invalidiert vorherigen PASS; fehlendes Opt-in BLOCKED, Ausführungsfehler FAIL, PASS erst nach realen Schritten.
+- Storage: Implemented/Configured sowie AVAILABLE/NOT_CONFIGURED/UNAVAILABLE/BLOCKED getrennt; Ausfall/nicht messbare Kapazität erzeugt null statt Ersatzwerte. SD bezeichnet Dateisystempfad, nicht erkanntes Gerät.
+- UI: explizite Instanzmoduskennzeichnung, keine Samples/Seeds, bei Refreshfehlern alte Werte verwerfen. Unbekannter Modus wird nicht als Betrieb bestätigt.
+- Enge AST-Reality-Prüfung zusätzlich in CI. Sie ist kein semantischer Beweis der gesamten Plattform.
 
-## Ausgeführte lokale Gates
-| Gate | Status | Tatsächliches Ergebnis |
+## Tatsächlich ausgeführte lokale Validierung
+| Gate | Status | Nachweis / tatsächliches Ergebnis |
 |---|---|---|
-| BUILD | VALIDATED | Wheel/sdist 0.2.0 erfolgreich erstellt, neue Module und statische Dateien paketiert |
-| UNIT / INTEGRATION | TESTED | 53 pytest-Fälle bestanden, einschließlich aller 27 bisherigen Fälle |
-| COVERAGE | VALIDATED begrenzt | 714/715 Statements unter `app/`, 99,86%; keine vollständige Branch-/Frontend-/Requirements-Abdeckung |
-| STORAGE / MEMORY / RAG | TESTED | Source Retention, logische Pfadauflösung nach Move, Byte-/Hashprüfung, Copy-/Auditfehler, Traversal/Symlink, nicht reguläre/überlange Blobs, fehlender Tier, Kapazität, Stop, Cache-Expiry/Delete-Retry, Inferenz, Live-Evidence, Projektfilter, FTS-Rebuild, additive v0.1-Migration und Fehler vor Transaktionsabschluss |
-| API-E2E | TESTED | Separater echter HTTP-Prozess: 19 Antworten geprüft; Evidence/Tasks/Triage/Approval und Archive/Memory/Retrieval/Cache/Health. Ausschließlich synthetische Testtexte |
-| INSTALLED PACKAGE | VALIDATED begrenzt | Wheel in zweiter locked Umgebung installiert und via `python -I` außerhalb Checkout-Import geprüft: Health/UI/JS/Storage Health/Archive-Readback erfolgreich |
-| DOCUMENTATION / OPENAPI | VALIDATED begrenzt | Vier generierte Produkte synchron, OpenAPI formal gültig, lokale Dateilinks gültig, fünf Environmentvariablen abgedeckt |
-| SECURITY | CONDITIONAL | Negativ-/Fehlertests bestanden; pip-audit ohne bekannte Treffer beim Lauf. Kein unabhängiger Pentest, kein Hardware-/Powerloss-/vollständiger Supply-chain-Audit |
-| DEPENDENCIES / JS | VALIDATED begrenzt | pip check ohne gebrochene Requirements; node --check erfolgreich |
-| TRIAGE | TESTED | Vorhandene konservative Regeln unverändert; Storage-Umschichtung/Cleanup/Reindex reviewergebunden und Stop-geschützt. Retrieval/Memory ist keine Execution-Freigabe |
-| BROWSER-E2E | NOT IMPLEMENTED | Keine automatisierte Browserbedienung/Accessibility-Prüfung; HTTP/Syntax ist kein Browser-E2E |
-| CI / GITHUB v0.2 | VALIDATED | Commit 225b995 gepusht, PR aktualisiert, GitHub-Lauf 34784573425: Installation/Docs/Tests/Build/Dependency-Audit/HTTP-Smoke/Artefaktupload erfolgreich |
-| RELEASE / PRODUCTION | BLOCKED | Kein Tag, Merge oder Deployment; Multi-Tier-Gesamtbackup, Identity-/Ingress-/Last-/Recovery-Gates fehlen |
+| BUILD | VALIDATED begrenzt | python -m build: Wheel und sdist 0.2.1 tatsächlich erzeugt |
+| UNIT / INTEGRATION | TESTED | 68 pytest-Fälle bestanden; alle 53 bisherigen Fälle plus 15 Reality-Grenzfälle |
+| COVERAGE | VALIDATED begrenzt | 768/772 Statements unter app, 99,48%; keine vollständige Branch-/Frontend-/Requirements-Abdeckung |
+| REAL HTTP | TESTED | eigener echter Testprozess: 20 Status-/Response-Prüfungen für Core/Archive/Memory/Cache/FTS/Health/Runtime; synthetische Inputs, keine Provider-/Gerätebeobachtungen |
+| SMOKE OPTIMIZATION | TESTED | Lauf mit python -O ebenfalls tatsächlich ausgeführt; 20 Antworten geprüft, Kontrollprüfungen nicht als assert implementiert |
+| INSTALLED PACKAGE | VALIDATED begrenzt | gebautes Wheel in zweiter locked Umgebung installiert; python -I lädt site-packages statt Checkout: echte leere DB, Mode, API, HTML/JS geprüft |
+| REALITY GATE | VALIDATED begrenzt | keine verbotenen Test-/Mockimporte im Runtimebaum, kein Fremd-URL-Smoke und keine entfernbaren Smoke-Assertions; manueller Audit zusätzlich erforderlich |
+| DOCUMENTATION / OPENAPI | VALIDATED begrenzt | vier generierte Produkte konsistent; formale OpenAPI, lokale Dateilinks und sechs Environmentvariablen geprüft |
+| SECURITY | CONDITIONAL | Rollen-/Stop-/Hash-/Pfad-/Mode-/Legacy-Negativtests und Dependency-Audit ausgeführt; keine bekannten Dependency-Treffer beim Lauf. Kein unabhängiger Pentest |
+| DEPENDENCIES / JS SYNTAX | VALIDATED begrenzt | pip check ohne Konflikte; node --check erfolgreich |
+| UI BROWSER E2E | NOT RUN | kein automatisierter Browser für Login/Refreshfehler/Anzeige vorhanden; HTTP-/Syntaxprüfungen sind kein Browsernachweis |
+| TRIAGE | TESTED | bestehende Regeln/Role-/Stopgrenzen bestehen weiter; kein neuer Executionpfad |
+| CI / GITHUB v0.2.1 | CONDITIONAL | neue Remote-Commit-/Workflowprüfung nach Push erforderlich; alte grüne Runs sind kein Nachweis für diesen Schnitt |
+| RELEASE / PRODUCTION | BLOCKED | kein Merge, Tag, Release, APK oder Produktionsdeploy; offene Identity-/Ingress-/Backup-/Last-/UI-Gates |
 
-## Nachweise und Grenzen der Tests
-`reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log` sind lokale ignorierte Laufartefakte; CI lädt seine tatsächlichen Reports/Builds commitbezogen hoch. Keine Secrets/Runtimeblobs als Git-Artefakte. GitHub meldet zusätzlich eine nicht blockierende Node-20→24-Warnung der gepinnten Action-Hauptversionen; Upgrade einplanen. Zwei vorhandene Dependency-Deprecation-Warnungen bleiben sichtbar, nicht unterdrückt. Test-SD ist ein temporäres Verzeichnis, kein realer SD-/Mobile-Test. Fehler durch Korruption/Audit-/Commit-/Delete-Injektion sind beabsichtigte Negativtests, keine erfundenen Hardwareausfälle.
+## Evidence
+Lokale tatsächlich erzeugte Dateien: `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/*.server.log`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log`. Reports und Testdaten sind nicht als Runtime-Daten versioniert; CI lädt seine commitbezogenen Artefakte hoch. Zwei bekannte sichtbare Testclient-/AnyIO-Deprecation-Warnungen bleiben; nicht ausgeblendet. Fehlertests erzeugen bewusst lokale Fehler, keine fingierten Gerätefehler.
 
-## Zielmodule / explizite offene Teile
-| Modul | Zustand |
-|---|---|
-| Mobile Project Server | Linux-lokal nutzbarer Core; Android/Termux/Raspberry Pi/Edge-Hardware nicht validiert |
-| MCP | NOT IMPLEMENTED: Domain-HTTP-API ist kein MCP-Server/Host/Transport |
-| RAG | PARTIAL: FTS-Retrieval; kein LLM/Embedding/Remoteindex/PDF/OCR/Bild/CAD/GitHub-Import |
-| Memory / Archive / Cache | IMPLEMENTED begrenzt: Textobjekte max. 65.536 Zeichen, Memory 2.000 Zeichen; kein allgemeiner großer Object Store |
-| Tier 0 RAM / Tier 1 Local / Tier 2 SD / Tier 3 Server / Tier 4 Cloud | Local und administrativ konfigurierter SD-Pfad implementiert; übrige Adapter NOT IMPLEMENTED |
-| Offline Queue / Sync / Conflict Merge | NOT IMPLEMENTED; lokaler Betrieb ohne Cloud ist keine Queue-/Syncfunktion |
-| Auto-Rebalancing / Quoten / Cold-Data-Analyse | NOT IMPLEMENTED; Erstplatzierung und explizite sichere Kopiewechsel vorhanden |
-| Agents / isolierte Sandbox / Worker | NOT IMPLEMENTED; Textcache ist keine Sicherheitsisolation und keine Execution |
-| 3D / Unity / Android / ADB / Fastboot / EDL / Honeywell | NOT IMPLEMENTED |
-| ESP32 / Telemetry / Sensors / Device Bridge | NOT IMPLEMENTED |
-| Bright Data / Network Discovery / MQTT / SSH / Cloudadapter | NOT IMPLEMENTED |
-| Trend Engine / kausale Commitanalyse / automatische Project-State-Sync | NOT IMPLEMENTED; History-/Inference-Kategorien allein implementieren keine solche Engine |
+## Integrationsachsen / nicht implementierte Zielmodule
+Die vollständige Tabelle mit **Implemented / Configured / Tested / Validated / Production Ready** steht im [Realitätsaudit](docs/17-security/reality-audit.md).
+
+Reale Runtime: Python/SQLite/FTS, begrenzte Original-/Cache-Dateiablage, manuelles Evidence-/Memory-/Taskregister, konservative Triage und Arbeitsoberfläche. Weiterhin NOT IMPLEMENTED/BLOCKED: MCP-Host/-Transport, Agent Builder/Runtime, isolierte Execution-Sandbox, Cloud-/Remoteadapter, Runtime-GitHub-Connector, Bright Data, USB/WiFi/BLE/Serial-Geräteadapter, Android/Honeywell/ADB/Fastboot/EDL/Repair, Unity/3D-Build, ESP32/Telemetrie, Payment, Trend Engine und Offline-Sync. APK NOT VERIFIED. Kein Sensorwert, Cloudserver oder Repairresultat wird dafür erzeugt. Lokale Git/gh-Entwicklungsoperationen sind keine Plattformintegration.
 
 ## Known Limitations / Blocked Items
-- Source Retention spart beim Relocation keinen Speicher; temporäre/unreferenzierte Crashkopien können bleiben. Keine automatische Original-GC oder Löschung nach bloßem Indexwechsel.
-- FTS speichert lokale Textkopien; ausgelagerte Blobs machen Indexwachstum nicht kostenlos. Kein 2-GB-/Unity-7,2-GB-Workspace-Benchmark.
-- Filesystem und SQLite haben keinen atomaren gemeinsamen Commit; API wartet aber auf DB-Commit, bevor sie Erfolg sendet. Datenträger-/Mountadministration bleibt vertrauenswürdig.
-- DB-only Backup ab v0.2 unvollständig; Gesamtsnapshot/Restore erfordert gestoppte Writer, DB plus alle Objektwurzeln und Hashabnahme. Produktionsreifer automatisierter Multi-Tier-Restore nicht implementiert.
-- Geteilte Rollen, kein Tenant-ACL/MFA, keine Approval-Expiry/Revocation, keine App-Rate-/Body-Limits, keine verschlüsselte/manipulationssichere Original-/Auditablage, keine Memory-Wahrheitsgarantie.
-- Keine externe Aktion, kein Gerätezugriff, keine Cloud-/Finanz-/Produktionsoperation vorgenommen. Lizenzentscheidung offen.
+- Marker sind keine kryptografische Herkunftssignatur und kein Schutz gegen Hostadministratoren. Legacy-/manuell eingereichte Daten werden nicht automatisch als wahr verifiziert; bereits vorhandene Testbestände niemals produktiv importieren oder umetikettieren.
+- Kein allgemeiner Fake-Detektor: AST-Gate findet ausgewählte Imports/Smoke-Risiken, nicht jede denkbare Scheinfunktion. Unabhängiges Code-/Doku-Review bleibt nötig.
+- Geteilte Rollen statt individueller Identitäten/MFA/Tenant-ACL, keine Approval-Expiry/Revocation, kein manipulationssicherer Audit, keine App-Body-/Rate-Limits, keine Produktionsabnahme.
+- Archive/Cache sind bounded UTF-8-Texte, keine beliebigen großen Artefakte. Source Retention spart keinen Platz beim Move; FTS hat eigene lokale Textkopien. Kein 2-GB-Lastnachweis.
+- DB-only-Backup bleibt unvollständig; Objektwurzeln inklusive Modusmarker und Originalkopien gemeinsam sichern/prüfen. Kein automatisierter konsistenter Multi-Tier-Gesamtrestore.
+- Keine Browser-E2E, reale SD-/Mobile-/Hardware-/Provider-/Payment-/APK-/Unity-/Cloudvalidierung. Keine dazugehörigen Ergebnisse erfunden.
 
 ## Next Steps
-1. PR-Review mit diesen Grenzen abschließen; Folgecommits erneut in CI prüfen. Kein Produktionsrelease bei offenen Gates.
-2. Vollständiges konsistentes Backup/Restore und Quoten/Streaming/Indexbudgets vor größeren Datenmengen.
-3. Standardkonformer read-only MCP-Adapter auf bestehende Domain-/Permissionverträge, mit Protokoll-/Auth-/Conformance-Tests.
-4. Mobile-Hardwaretests sowie eventidentitätsbasierte Offline Queue, Idempotenz, Konfliktzustände und freigegebener Merge; danach Remoteadapter.
-5. Identitäten, ablaufende/widerrufbare zielgebundene Freigaben, echte isolierte Worker vor irgendeiner Execution.
+PR-/CI-Review abschließen, Browser-E2E und komplette Backup-/Restore-/Betriebsnachweise ergänzen. Erst danach weitere reale Adapter mit klaren Config-/Live-Test-Gates implementieren. Keine Universaltools, Simulationen oder Templates als fertige Kundenfunktionen ausgeben.
 
-[Dokumentationsaudit](DOCUMENTATION_AUDIT.md) · [Architektur](docs/20-context-storage/architecture.md) · [Verträge](docs/20-context-storage/contracts.md) · [Mobile/MCP-Roadmap](docs/20-context-storage/mobile-roadmap.md)
+[Dokumentationsaudit](DOCUMENTATION_AUDIT.md) · [Realitätsaudit](docs/17-security/reality-audit.md) · [Policy](REALITY_POLICY.md) · [bestehende Architektur](docs/20-context-storage/architecture.md)

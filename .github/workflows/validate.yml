@@ -25,28 +25,10 @@ jobs:
         run: python -m build
       - name: Dependency security audit
         run: pip-audit -r requirements.lock --format json -o reports/dependency-audit.json
-      - name: Real HTTP workflow against disposable instance
-        shell: bash
-        run: |
-          set -euo pipefail
-          export ATZE_OPERATOR_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
-          export ATZE_REVIEWER_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
-          export ATZE_DB_PATH="$RUNNER_TEMP/atze-smoke.db"
-          uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000 > reports/server.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
-          python - <<'PY'
-          import time, urllib.request
-          for attempt in range(50):
-              try:
-                  urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=1)
-                  break
-              except Exception:
-                  time.sleep(0.2)
-          else:
-              raise SystemExit('Server did not become healthy')
-          PY
-          python scripts/smoke.py --base-url http://127.0.0.1:8000 --allow-fixtures
+      - name: Reality boundary checks
+        run: python scripts/reality_check.py
+      - name: Real HTTP workflow against self-created disposable test instance
+        run: python scripts/smoke.py --allow-fixtures
       - name: Upload real validation artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

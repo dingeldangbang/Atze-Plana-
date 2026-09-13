@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Atze Plana Evidence Core
   description: Single-workspace evidence and approval registry. No action execution.
-  version: 0.2.0
+  version: 0.2.1
 paths:
   /health:
     get:
@@ -20,6 +20,40 @@ paths:
                   type: string
                 type: object
                 title: Response Health Health Get
+  /api/runtime:
+    get:
+      tags:
+      - system
+      summary: Runtime
+      operationId: runtime_api_runtime_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Runtime Api Runtime Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
   /api/openapi.json:
     get:
       tags:
@@ -2124,6 +2158,26 @@ components:
         tier:
           type: string
           title: Tier
+        implemented:
+          type: boolean
+          title: Implemented
+        configured:
+          type: boolean
+          title: Configured
+        status:
+          type: string
+          enum:
+          - AVAILABLE
+          - BLOCKED
+          - NOT_CONFIGURED
+          - UNAVAILABLE
+          title: Status
+        resource_kind:
+          anyOf:
+          - type: string
+            const: FILESYSTEM_PATH
+          - type: 'null'
+          title: Resource Kind
         available:
           type: boolean
           title: Available
@@ -2156,6 +2210,9 @@ components:
       type: object
       required:
       - tier
+      - implemented
+      - configured
+      - status
       - available
       title: TierHealth
   securitySchemes:
