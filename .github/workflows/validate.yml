@@ -1,0 +1,60 @@
+name: Validate core and documentation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install locked dependencies
+        run: pip install -r requirements.lock
+      - name: Documentation and OpenAPI consistency
+        run: python scripts/docs.py --check
+      - name: Unit, integration and security regression
+        run: python -m pytest --cov=app --cov-fail-under=90 --cov-report=xml:reports/coverage.xml --junitxml=reports/junit.xml
+      - name: Build package
+        run: python -m build
+      - name: Dependency security audit
+        run: pip-audit -r requirements.lock --format json -o reports/dependency-audit.json
+      - name: Real HTTP workflow against disposable instance
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ATZE_OPERATOR_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+          export ATZE_REVIEWER_TOKEN="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+          export ATZE_DB_PATH="$RUNNER_TEMP/atze-smoke.db"
+          uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000 > reports/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          python - <<'PY'
+          import time, urllib.request
+          for attempt in range(50):
+              try:
+                  urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=1)
+                  break
+              except Exception:
+                  time.sleep(0.2)
+          else:
+              raise SystemExit('Server did not become healthy')
+          PY
+          python scripts/smoke.py --base-url http://127.0.0.1:8000 --allow-fixtures
+      - name: Upload real validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ github.sha }}
+          path: |
+            reports/*.xml
+            reports/*.json
+            reports/*.log
+            dist/*
+          retention-days: 14

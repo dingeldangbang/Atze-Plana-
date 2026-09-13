@@ -1,0 +1,966 @@
+openapi: 3.1.0
+info:
+  title: Atze Plana Evidence Core
+  description: Single-workspace evidence and approval registry. No action execution.
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      tags:
+      - system
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
+  /api/openapi.json:
+    get:
+      tags:
+      - system
+      summary: Specification
+      operationId: specification_api_openapi_json_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Specification Api Openapi Json Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+  /api/projects:
+    post:
+      tags:
+      - projects
+      summary: Create Project
+      operationId: create_project_api_projects_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+    get:
+      tags:
+      - projects
+      summary: Projects
+      operationId: projects_api_projects_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+                title: Response Projects Api Projects Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/evidence:
+    post:
+      tags:
+      - evidence
+      summary: Create Evidence
+      operationId: create_evidence_api_evidence_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+    get:
+      tags:
+      - evidence
+      summary: Evidence
+      operationId: evidence_api_evidence_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evidence'
+                title: Response Evidence Api Evidence Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/evidence/{evidence_id}/review:
+    post:
+      tags:
+      - evidence
+      summary: Review
+      operationId: review_api_evidence__evidence_id__review_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: evidence_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Evidence Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/tasks:
+    post:
+      tags:
+      - tasks
+      summary: Create Task
+      operationId: create_task_api_tasks_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+    get:
+      tags:
+      - tasks
+      summary: Tasks
+      operationId: tasks_api_tasks_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+                title: Response Tasks Api Tasks Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/tasks/{task_id}/triage:
+    post:
+      tags:
+      - tasks
+      summary: Triage
+      operationId: triage_api_tasks__task_id__triage_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/tasks/{task_id}/approve:
+    post:
+      tags:
+      - tasks
+      summary: Approve
+      operationId: approve_api_tasks__task_id__approve_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Task Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/control/stop:
+    get:
+      tags:
+      - control
+      summary: Stop State
+      operationId: stop_state_api_control_stop_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+    post:
+      tags:
+      - control
+      summary: Set Stop
+      operationId: set_stop_api_control_stop_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StopInput'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+  /api/audit:
+    get:
+      tags:
+      - audit
+      summary: Audit Log
+      operationId: audit_log_api_audit_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Audit'
+                title: Response Audit Log Api Audit Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+components:
+  schemas:
+    Action:
+      type: string
+      enum:
+      - read
+      - write
+      - flash
+      - firmware
+      - edl_write
+      - production_deploy
+      - payment
+      title: Action
+    Approval:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+        id:
+          type: string
+          title: Id
+        task_id:
+          type: string
+          title: Task Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        actor:
+          type: string
+          title: Actor
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      - id
+      - task_id
+      - created_at
+      - actor
+      title: Approval
+    ApprovalInput:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: ApprovalInput
+    Audit:
+      properties:
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        actor:
+          type: string
+          title: Actor
+        event:
+          type: string
+          title: Event
+        entity_id:
+          type: string
+          title: Entity Id
+        details:
+          additionalProperties: true
+          type: object
+          title: Details
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - created_at
+      - actor
+      - event
+      - entity_id
+      - details
+      title: Audit
+    Decision:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        state:
+          type: string
+          enum:
+          - blocked
+          - eligible
+          - approval_required
+          - approved
+          title: State
+        risk:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          title: Risk
+        reasons:
+          items:
+            type: string
+          type: array
+          title: Reasons
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          title: Evidence Ids
+        confidence:
+          type: number
+          title: Confidence
+        approval_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Approval Id
+        executed:
+          type: boolean
+          const: false
+          title: Executed
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - state
+      - risk
+      - reasons
+      - evidence_ids
+      - confidence
+      title: Decision
+    Evidence:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        claim:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Claim
+        source_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Source Url
+        observed_at:
+          type: string
+          format: date-time
+          title: Observed At
+        source_type:
+          type: string
+          enum:
+          - manual
+          - document
+          - measurement
+          title: Source Type
+        provider:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Provider
+        extraction_method:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Extraction Method
+        content:
+          type: string
+          maxLength: 20000
+          minLength: 1
+          title: Content
+        confidence:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        sha256:
+          type: string
+          title: Sha256
+        state:
+          type: string
+          enum:
+          - unverified
+          - verified
+          - rejected
+          title: State
+          default: unverified
+        review_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Reason
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - claim
+      - source_url
+      - observed_at
+      - source_type
+      - provider
+      - extraction_method
+      - content
+      - confidence
+      - id
+      - created_at
+      - sha256
+      title: Evidence
+    EvidenceInput:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        claim:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Claim
+        source_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Source Url
+        observed_at:
+          type: string
+          format: date-time
+          title: Observed At
+        source_type:
+          type: string
+          enum:
+          - manual
+          - document
+          - measurement
+          title: Source Type
+        provider:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Provider
+        extraction_method:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Extraction Method
+        content:
+          type: string
+          maxLength: 20000
+          minLength: 1
+          title: Content
+        confidence:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - claim
+      - source_url
+      - observed_at
+      - source_type
+      - provider
+      - extraction_method
+      - content
+      - confidence
+      title: EvidenceInput
+    Project:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - id
+      - created_at
+      title: Project
+    ProjectInput:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      title: ProjectInput
+    Review:
+      properties:
+        state:
+          type: string
+          enum:
+          - verified
+          - rejected
+          title: State
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - state
+      - reason
+      title: Review
+    Stop:
+      properties:
+        active:
+          type: boolean
+          title: Active
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - active
+      - reason
+      title: Stop
+    StopInput:
+      properties:
+        active:
+          type: boolean
+          title: Active
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - active
+      - reason
+      title: StopInput
+    Task:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        action:
+          $ref: '#/components/schemas/Action'
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Evidence Ids
+        preconditions_met:
+          type: boolean
+          title: Preconditions Met
+          default: false
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        created_by:
+          type: string
+          title: Created By
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - title
+      - action
+      - id
+      - created_at
+      - created_by
+      title: Task
+    TaskInput:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        action:
+          $ref: '#/components/schemas/Action'
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          title: Evidence Ids
+        preconditions_met:
+          type: boolean
+          title: Preconditions Met
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      - title
+      - action
+      title: TaskInput
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer

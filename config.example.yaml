@@ -1,0 +1,4 @@
+# Documentation-only mirror. Runtime reads environment variables, NOT this file.
+ATZE_OPERATOR_TOKEN: "" # required secret, >=32 characters
+ATZE_REVIEWER_TOKEN: "" # required different secret, >=32 characters
+ATZE_DB_PATH: data/atze.db

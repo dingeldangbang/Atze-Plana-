@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.coverage
+.env
+data/
+reports/*
+!reports/README.md
+*.db
+*.db-*
+build/
+dist/
+*.egg-info/
