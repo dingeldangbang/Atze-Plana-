@@ -5,7 +5,8 @@ Stand 2026-09-13. **Architekturänderung mit überprüfbarem lokalen Implementie
 ## Repository / Ausgangspunkt
 - Repository `dingeldangbang/Atze-Plana-`, Session-Branch `arena/01a09c9d-atze-plana`.
 - Ausgangspunkt dieser Erweiterung: `d52281f9f57c3e8fd3e7ac28089d6ad98e498407` (v0.1, 27 ursprüngliche Tests, grüner damaliger CI-Lauf).
-- Bestehender [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); neue v0.2-Commit-/CI-Nachweise werden nach Push ergänzt, nicht aus v0.1 übernommen.
+- Implementierungscommit v0.2: `225b995914abac5d71fb3102e31fcfbc9bfdb3aa`, auf die feste Session-Branch gepusht.
+- [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) aktualisiert; [v0.2-PR-CI 34784573425](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34784573425) vollständig grün. Dieser spätere Bericht ergänzt nur Nachweise, keinen Runtimecode.
 - Architekturentscheidung vor Codeänderung: [ADR-003](docs/adr/ADR-003-mobile-context-storage.md). Keine bisherigen Domainfunktionen entfernt.
 
 ## Project Status / Architecture / Features
@@ -33,11 +34,11 @@ Core: FastAPI/Pydantic + SQLite (Records/Control/FTS5) + POSIX-Dateiwurzeln für
 | DEPENDENCIES / JS | VALIDATED begrenzt | pip check ohne gebrochene Requirements; node --check erfolgreich |
 | TRIAGE | TESTED | Vorhandene konservative Regeln unverändert; Storage-Umschichtung/Cleanup/Reindex reviewergebunden und Stop-geschützt. Retrieval/Memory ist keine Execution-Freigabe |
 | BROWSER-E2E | NOT IMPLEMENTED | Keine automatisierte Browserbedienung/Accessibility-Prüfung; HTTP/Syntax ist kein Browser-E2E |
-| CI / GITHUB v0.2 | CONDITIONAL | Code lokal validiert; konkreter Push-/Run-Nachweis folgt separat |
+| CI / GITHUB v0.2 | VALIDATED | Commit 225b995 gepusht, PR aktualisiert, GitHub-Lauf 34784573425: Installation/Docs/Tests/Build/Dependency-Audit/HTTP-Smoke/Artefaktupload erfolgreich |
 | RELEASE / PRODUCTION | BLOCKED | Kein Tag, Merge oder Deployment; Multi-Tier-Gesamtbackup, Identity-/Ingress-/Last-/Recovery-Gates fehlen |
 
 ## Nachweise und Grenzen der Tests
-`reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log` sind lokale ignorierte Laufartefakte; CI lädt seine tatsächlichen Reports/Builds commitbezogen hoch. Keine Secrets/Runtimeblobs als Git-Artefakte. Zwei vorhandene Dependency-Deprecation-Warnungen bleiben sichtbar, nicht unterdrückt. Test-SD ist ein temporäres Verzeichnis, kein realer SD-/Mobile-Test. Fehler durch Korruption/Audit-/Commit-/Delete-Injektion sind beabsichtigte Negativtests, keine erfundenen Hardwareausfälle.
+`reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log` sind lokale ignorierte Laufartefakte; CI lädt seine tatsächlichen Reports/Builds commitbezogen hoch. Keine Secrets/Runtimeblobs als Git-Artefakte. GitHub meldet zusätzlich eine nicht blockierende Node-20→24-Warnung der gepinnten Action-Hauptversionen; Upgrade einplanen. Zwei vorhandene Dependency-Deprecation-Warnungen bleiben sichtbar, nicht unterdrückt. Test-SD ist ein temporäres Verzeichnis, kein realer SD-/Mobile-Test. Fehler durch Korruption/Audit-/Commit-/Delete-Injektion sind beabsichtigte Negativtests, keine erfundenen Hardwareausfälle.
 
 ## Zielmodule / explizite offene Teile
 | Modul | Zustand |
@@ -64,7 +65,7 @@ Core: FastAPI/Pydantic + SQLite (Records/Control/FTS5) + POSIX-Dateiwurzeln für
 - Keine externe Aktion, kein Gerätezugriff, keine Cloud-/Finanz-/Produktionsoperation vorgenommen. Lizenzentscheidung offen.
 
 ## Next Steps
-1. v0.2 GitHub-CI und PR-Review mit diesen Grenzen abschließen; kein Produktionsrelease bei offenen Gates.
+1. PR-Review mit diesen Grenzen abschließen; Folgecommits erneut in CI prüfen. Kein Produktionsrelease bei offenen Gates.
 2. Vollständiges konsistentes Backup/Restore und Quoten/Streaming/Indexbudgets vor größeren Datenmengen.
 3. Standardkonformer read-only MCP-Adapter auf bestehende Domain-/Permissionverträge, mit Protokoll-/Auth-/Conformance-Tests.
 4. Mobile-Hardwaretests sowie eventidentitätsbasierte Offline Queue, Idempotenz, Konfliktzustände und freigegebener Merge; danach Remoteadapter.

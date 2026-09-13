@@ -27,3 +27,6 @@ Stand 2026-09-13. Bestandsaufnahme der Architekturänderung: Commit `d52281f` ha
 Kein vollautomatischer semantischer Dokumentationsbeweis, externer Link-/Ankercheck oder beliebiger Commandparser. Keine Browser-E2E-/Hardware-/MCP-/Mobile-/Remote-/Sync-Handbücher mit fingierten Befehlen. Keine PDF/OCR/Bild/CAD- oder GitHub-Ingestion. Kein Multi-Tier-Gesamtsnapshot-/Restore-Automat, kein RAM-/2-GB-Benchmark, kein Auto-Rebalancing oder GC dauerhafter Quellkopien. Beispiele sind repräsentativer ausführbarer Smoke plus generierter Schema-/Endpunktvertrag, nicht curl für jede API.
 
 Nicht implementierte Zielteile werden in der [mobilen Roadmap](docs/20-context-storage/mobile-roadmap.md) beschrieben; keine leeren Produktseiten als Funktionsnachweise.
+
+## GitHub-Nachweis v0.2
+Codecommit `225b995914abac5d71fb3102e31fcfbc9bfdb3aa`; [PR-CI 34784573425](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34784573425) erfolgreich inklusive Dokumentationsprüfung und tatsächlichem Report-/Build-Artefaktupload. Keine v0.1-Testergebnisse als v0.2-Nachweis übernommen.
