@@ -1,27 +1,25 @@
-# Triage / Decision Engine
+# Triage / Decision Engine — v0.3
 
-## Purpose, Inputs, Outputs
-`app/triage.py:evaluate` erhält Task, zugehörige Evidence, aktuellen Stop und optional Approval-ID. Ergebnis: task_id, state, risk, reasons, evidence_ids, niedrigste gemeldete confidence, approval_id, executed=false. Keine Tools, keine Netzwerkanfragen und keine LLM-Entscheidung.
+**Kein relevantes Primärergebnis wird ohne Challenge übernommen.** [Vollständiger Challenge-Vertrag](challenge-worker.md).
 
-## Entscheidungsregeln (in Reihenfolge)
-1. Globaler Stop → Blocking reason.
-2. preconditions_met=false → Blocking reason.
-3. Keine Evidenz → Blocking reason.
-4. Mindestens eine Evidenz nicht verified → Blocking reason.
-5. Minimum der gemeldeten Confidence <0.8 → Blocking reason.
-6. Bei irgendeinem Blocking reason: blocked, auch wenn ein Approval existiert.
-7. Sonst READ → eligible; alle anderen Aktionen ohne Approval → approval_required, mit Approval → approved.
+## Inputs / Outputs / Dependencies
+Task, verknüpfte echte Evidence-Records, aktueller Stop, neuestes Result Package, neuester abgeschlossener Challenge-Report, aktueller Fingerprint und daran gebundene Approval. Pythonregeln, FastAPI/SQLite und separater HTTP-Worker. Response: bisherige Task-state/risk/reasons/evidence_ids/confidence/approval_id plus validation_status, result_id, challenge_id, fingerprint, challenge_reasons. executed bleibt false.
 
-Risk: READ low, WRITE medium, alle anderen high. Das ist eine feste grobe Kategorie, keine kontextbezogene Schadensprognose. Policythreshold 0.8 ist im Code festgelegt, nicht konfigurierbar. Abgelehnte/unverified Evidence darf nicht automatisch verwendet werden.
+## Pflichtregeln
+1. Stop aktiv, Preconditions nicht bestätigt, keine Evidence, nicht vollständig verified oder minimale gemeldete Confidence <0.8 blockieren weiterhin.
+2. Kein Result / kein abgeschlossener aktueller Challenge-Report / stale Daten oder Policy → BLOCK.
+3. Challenge CONDITIONAL → keine Freigabe; Task-state blocked. Challenge BLOCK → BLOCK.
+4. Nur Challenge PASS mit bestandenem Basistriage-Gate → ACCEPT für submitted_structured_claims_only.
+5. Danach READ eligible, WRITE approval_required bzw. approved mit aktuellem Reviewer-Approval. Hochrisikoaktionen bleiben durch den Challenge Worker eingeschränkt; kind=action hat keinen Executor und ist BLOCKED.
+6. Adoption nur ausdrücklich durch Reviewer mit erneut geprüfter aktueller Triage; Primärfreitext nicht automatisch übernommen.
 
-## Nachvollziehbarkeit
-Was: Task-ID und unveränderliche Aufgabe. Warum: reasons. Evidenz: IDs → Originaltext/Hash/Review. Voraussetzungen: operator-attestiertes Flag. Risiken: action-basierte Kategorie. Aktion: Enum der Aufgabe. Freigabe: approval_id mit Reviewer-Grund. Ergebnis: state und executed=false. Jede POST-Triage speichert einen Snapshot im Audit. Es gibt keine automatische Benachrichtigung/Eskalationsqueue; der API-Client muss blocked oder approval_required an Menschen weitergeben.
+Neue Evidence, neues Result, erneute Challenge und Stopereignisse entwerten alte Approval-Bindungen. Ein Stopreset stellt keine alte Freigabe wieder her. Frühere v0.2-Approvals ohne Challengebindung sind historische Datensätze, keine gültigen Freigaben.
 
-## Dependencies / Configuration / Permissions
-Reine Pythonfunktion; API lädt Daten transaktionell aus SQLite. Beide Rollen dürfen Triage starten; nur Reviewer kann approve. Keine direkten Endpunkte zur freien Manipulation eines Decision-Objekts.
+## Nachvollziehbarkeit / Permissions
+Was: unveränderliche Task + Result. Warum: Triagegründe und fünf Challenge-Prüfarten. Quellen: Evidence-IDs, Originaltext/SHA, strukturierte Beobachtungen. Voraussetzungen: Operator-Attestierung plus Gegenprüfung. Risiken: read low, write medium, übrige high; keine kontextsensitive Schadensprognose. Freigabe: Result/Report/Fingerprint-gebundenes Reviewer-Approval. Ergebnis: ACCEPT/CONDITIONAL/BLOCK und executed=false. Snapshot in Audit bei POST triage.
 
-## Failure Modes / Validation / Tests / Security
-Fehlende Task-ID → 404, unzulässige Eingabe → 422, Storage → 503. TRI-001 testet jede Action, TRI-002 die zentralen Blocks, TRI-003 leere/abgelehnte Evidenz und Grenzwert, SEC-003 den persistenten Stop. Approval endpoint berechnet erneut, um getrennte Precheck/Write-Rennen zu verhindern.
+## Failure Modes / Tests / Security
+401/403 Rollen, 404 fehlende Entität, 409 unzulässiger Zustand/Adoption, 422 ungültige Inputs/gefälschter Workerreport, 503 Storage-/Worker-Konfiguration. CH-001..017 und TRI-/SEC-Regressionen prüfen tatsächliche Fail-closed-Gates. Kein API-Schalter zum Überspringen von Challenge, kein Mock bei Worker-Ausfall. Kein Source-/LLM-/Device-Executor.
 
-## Examples / Known Limitations
-[API-Smoke](../../scripts/smoke.py) zeigt einen synthetischen READ- und WRITE-Ablauf. Keine automatische Faktenprüfung, Evidenzalterung, Widerspruchsanalyse, Device Preconditions, Approval-Expiry/Revocation oder Ausführung. Ein eligible READ ist nicht ausgeführt. Das Flag `preconditions_met` ist kein technischer Gerätecheck.
+## Configuration / Examples / Limits
+[Sieben Konfigurationsvariablen](../19-operations/configuration.md), [isolierter echter HTTP-Smoke](../../scripts/smoke.py). Preconditions/Confidence bleiben deklarierte Angaben; Challenge ist begrenzte strukturierte Datenprüfung, kein globaler Wahrheits-/Semantik-/Kausalitätsnachweis. Details zu Unabhängigkeit, Scope-Limits und Lease-Recovery im Challenge-Vertrag.

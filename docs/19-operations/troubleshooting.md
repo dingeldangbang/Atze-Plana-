@@ -31,3 +31,17 @@ Symptom in einem externen System: Hersteller-/SDK-Logs mit Zustimmung sichern, H
 | Suchtreffer, Original offline | lokaler FTS-Auszug noch da, aktiver Tier fehlt | location/Hash und content-503 | Original erst nach erfolgreicher Hashprüfung verwenden; nicht als live-validiert behandeln |
 | fact 409 | keine oder unverified/rejected Evidence | Referenz-Reviewzustände | echte Evidenz prüfen; Hypothese als inference speichern, niemals Status künstlich hochsetzen |
 | SQLite FTS5 fehlt | Start scheitert bei CREATE VIRTUAL TABLE | SQLite compile options / Pythonbuild | unterstützten SQLite-/Pythonbuild verwenden; kein stiller Such-Bypass |
+
+## Challenge / Triage v0.3
+| Symptom | Ursache / Diagnose | Behebung / Grenze |
+|---|---|---|
+| Task ohne Ergebnis BLOCK | Mandatory challenge not run | echtes Result Package erfassen; fehlende Primary-Runtime nicht durch Demo ersetzen |
+| Worker NOT CONFIGURED | dritter Token fehlt | getrennten Token in API/Worker setzen, API neu starten; keine Operator-Credentials als Ersatz |
+| Job bleibt pending | Prozess fehlt/unerreichbar | Workerlog/Netz/TLS prüfen, realen Prozess starten; kein UI-PASS erzeugen |
+| Claim/complete 403 | falsche Rolle | separaten Worker-Token verwenden, keine Permission-Eskalation |
+| Complete 409 | Lease expired, stale Result/Evidence/Stop oder Replay | gegebenenfalls Lease abwarten/neuer Claim bzw. explizite neue Challenge; alte Freigabe bleibt ungültig |
+| Complete 422 | Report weicht von versionierten Regeln ab | API-/Worker-Codeversion angleichen, Inputs/Schema prüfen; Verdict nicht überschreiben |
+| CONDITIONAL trotz verified Evidence | Maße/Identität/Bedingungen/Messung/Alternative/Kausalität fehlen | konkreten Findings mit Originalbelegen/Test nachgehen; Reviewer-Approval kann keine Lücke wegklicken |
+| BLOCK bei Konflikt | identische deklarierte Identität/Bedingungen, abweichende Werte | Variante/Revision/Originalquelle klären, nicht bevorzugten Wert auswählen |
+| Scope-/Finding-Limit BLOCK | vollständige Prüfung überschreitet Bounds | Projekt/Ergebnis fachlich sinnvoll aufteilen und vollständig neu prüfen; kein Teil-PASS |
+| fact/decision Memory 409 | direkter Übernahmeweg gesperrt | aktuelles Result→Challenge→Triage→ggf. Approval→Reviewer Adopt; nur Inferenz manuell untrusted erfassen |

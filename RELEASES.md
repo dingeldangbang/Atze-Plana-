@@ -1,5 +1,9 @@
 # Release management
 
+## 0.3.0 — Mandatory Challenge, nicht veröffentlicht
+
+[ADR-004](docs/adr/ADR-004-challenge-before-decision.md) gilt: Result → separater Worker → aktueller Report → Triage → Human Approval/Adoption. Pflichtgate ohne Bypass, einschließlich Legacy-/Stale-/Stopfälle. [Challenge-Scope](docs/02-core/challenge-worker.md) begrenzt alle ACCEPT-Aussagen auf eingereichte strukturierte Claims. Kein semantischer Primärtext-/Online-/Kausalitäts-/Executionnachweis. Zusätzliche Produktionsgates: Worker-/Secret-/OS-Isolation, Liveness-/Leasebetrieb, Last-/Retention-/Restoreabnahme und Browser-E2E. Kein Release allein wegen grüner Software-CI.
+
 ## 0.2.1 — Realitätsgrenzen, nicht veröffentlicht
 
 [REALITY_POLICY](REALITY_POLICY.md) ist verbindliches Gate: keine Runtime-Mocks/Seeds/Fake-Fallbacks; getrennte Implemented/Configured/Tested/Validated/Production-Ready-Nachweise. Smoke nur in selbst erzeugter Testinstanz. Teststatus und Buildoutputs benötigen reale Lauf-/Artefaktnachweise. PR/CI ist kein GitHub-Release. APK NOT VERIFIED; keine Android-/Unity-/Firmwareoutputs vorhanden. Bestehende offenen Produktions-/Identitäts-/Restore-/Browser-Gates bleiben bestehen.

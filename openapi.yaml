@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Atze Plana Evidence Core
   description: Single-workspace evidence and approval registry. No action execution.
-  version: 0.2.1
+  version: 0.3.0
 paths:
   /health:
     get:
@@ -247,6 +247,44 @@ paths:
                 items:
                   $ref: '#/components/schemas/Evidence'
                 title: Response Evidence Api Evidence Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+  /api/evidence/{evidence_id}:
+    get:
+      tags:
+      - evidence
+      summary: Evidence Source
+      operationId: evidence_source_api_evidence__evidence_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: evidence_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Evidence Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
         '401':
           description: Missing or invalid token
         '403':
@@ -596,6 +634,319 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+  /api/results:
+    post:
+      tags:
+      - challenge
+      summary: Submit
+      operationId: submit_api_results_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Immutable primary result + mandatory pending challenge job +
+        audit; NOT acceptance; same-project references; stop blocks
+    get:
+      tags:
+      - challenge
+      summary: Results
+      operationId: results_api_results_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+                title: Response Results Api Results Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read-only unadopted primary packages, not accepted recommendations
+  /api/results/{result_id}/challenge:
+    post:
+      tags:
+      - challenge
+      summary: Challenge
+      operationId: challenge_api_results__result_id__challenge_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: result_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Result Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Request new mandatory challenge; invalidates previous report/approval
+        for this result; no worker fallback; 503 without worker config
+  /api/results/{result_id}/why:
+    get:
+      tags:
+      - challenge
+      summary: Why
+      operationId: why_api_results__result_id__why_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: result_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Result Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Why'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read-only current triage, report findings, evidence IDs, alternative
+        candidates and limitations; stale reports explicitly not current
+  /api/results/{result_id}/adopt:
+    post:
+      tags:
+      - challenge
+      summary: Adopt
+      operationId: adopt_api_results__result_id__adopt_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: result_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Result Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Explicit adoption into decision-memory only after current Challenge
+        ACCEPT + triage + required task approval; revalidated atomically; no execution
+  /api/challenge/jobs/claim:
+    post:
+      tags:
+      - challenge-worker
+      summary: Claim
+      operationId: claim_api_challenge_jobs_claim_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/WorkItem'
+                - type: 'null'
+                title: Response Claim Api Challenge Jobs Claim Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: challenge-worker
+      x-side-effects: Lease oldest eligible pending/expired job for 60s; supersede
+        stale jobs; return server snapshot; token is NOT an operator/reviewer token
+  /api/challenge/jobs/{job_id}/complete:
+    post:
+      tags:
+      - challenge-worker
+      summary: Complete
+      operationId: complete_api_challenge_jobs__job_id__complete_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Completion'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeReport'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: challenge-worker
+      x-side-effects: Verify lease/current snapshot/policy/exact deterministic report,
+        append immutable report and audit; no direct client-set verdict; stale/replay
+        409; forged output 422
   /api/archive:
     post:
       tags:
@@ -1014,8 +1365,9 @@ paths:
         '503':
           description: Storage unavailable
       x-role: operator
-      x-side-effects: Append-only memory + FTS + audit; fact category requires verified
-        linked evidence; commit SHA is attested not GitHub-validated
+      x-side-effects: Untrusted non-authoritative memory + FTS + audit; direct fact/decision
+        writes blocked, use challenged result adoption; commit SHA is attested not
+        GitHub-validated
     get:
       tags:
       - context
@@ -1165,6 +1517,68 @@ components:
       - production_deploy
       - payment
       title: Action
+    Alternative:
+      properties:
+        subject:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Subject
+        rationale:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Rationale
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Evidence Ids
+      additionalProperties: false
+      type: object
+      required:
+      - subject
+      - rationale
+      - evidence_ids
+      title: Alternative
+    Analysis:
+      properties:
+        verdict:
+          type: string
+          enum:
+          - PASS
+          - CONDITIONAL
+          - BLOCK
+          title: Verdict
+        scope:
+          type: string
+          const: submitted_structured_claims_only
+          title: Scope
+          default: submitted_structured_claims_only
+        findings:
+          items:
+            $ref: '#/components/schemas/Finding'
+          type: array
+          title: Findings
+        alternatives:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Alternatives
+        policy_version:
+          type: string
+          title: Policy Version
+      additionalProperties: false
+      type: object
+      required:
+      - verdict
+      - findings
+      - alternatives
+      - policy_version
+      title: Analysis
     Approval:
       properties:
         reason:
@@ -1172,6 +1586,15 @@ components:
           maxLength: 2000
           minLength: 1
           title: Reason
+        result_id:
+          type: string
+          title: Result Id
+        challenge_id:
+          type: string
+          title: Challenge Id
+        fingerprint:
+          type: string
+          title: Fingerprint
         id:
           type: string
           title: Id
@@ -1189,6 +1612,9 @@ components:
       type: object
       required:
       - reason
+      - result_id
+      - challenge_id
+      - fingerprint
       - id
       - task_id
       - created_at
@@ -1422,6 +1848,116 @@ components:
       - state
       - deleted
       title: CacheObject
+    ChallengeReport:
+      properties:
+        id:
+          type: string
+          title: Id
+        job_id:
+          type: string
+          title: Job Id
+        result_id:
+          type: string
+          title: Result Id
+        fingerprint:
+          type: string
+          title: Fingerprint
+        created_at:
+          type: string
+          title: Created At
+        worker_identity:
+          type: string
+          const: challenge-worker
+          title: Worker Identity
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - job_id
+      - result_id
+      - fingerprint
+      - created_at
+      - worker_identity
+      - analysis
+      title: ChallengeReport
+    ChallengeRequest:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: ChallengeRequest
+    Claim:
+      properties:
+        subject:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Subject
+        variant:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Variant
+        revision:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Revision
+        attribute:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Attribute
+        value:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Value
+        unit:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Unit
+        conditions:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Conditions
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Evidence Ids
+        requires_measurement:
+          type: boolean
+          title: Requires Measurement
+          default: true
+        causal:
+          type: boolean
+          title: Causal
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - subject
+      - variant
+      - revision
+      - attribute
+      - value
+      - unit
+      - conditions
+      - evidence_ids
+      title: Claim
     CleanupInput:
       properties:
         reason:
@@ -1452,6 +1988,23 @@ components:
       required:
       - deleted_ids
       title: CleanupResult
+    Completion:
+      properties:
+        lease:
+          type: string
+          title: Lease
+        fingerprint:
+          type: string
+          title: Fingerprint
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+      additionalProperties: false
+      type: object
+      required:
+      - lease
+      - fingerprint
+      - analysis
+      title: Completion
     Decision:
       properties:
         task_id:
@@ -1495,6 +2048,34 @@ components:
           const: false
           title: Executed
           default: false
+        validation_status:
+          type: string
+          enum:
+          - ACCEPT
+          - CONDITIONAL
+          - BLOCK
+          title: Validation Status
+          default: BLOCK
+        result_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Result Id
+        challenge_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Challenge Id
+        fingerprint:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Fingerprint
+        challenge_reasons:
+          items:
+            type: string
+          type: array
+          title: Challenge Reasons
       additionalProperties: false
       type: object
       required:
@@ -1507,6 +2088,12 @@ components:
       title: Decision
     Evidence:
       properties:
+        observations:
+          items:
+            $ref: '#/components/schemas/Observation'
+          type: array
+          maxItems: 50
+          title: Observations
         project_id:
           type: string
           title: Project Id
@@ -1593,6 +2180,12 @@ components:
       title: Evidence
     EvidenceInput:
       properties:
+        observations:
+          items:
+            $ref: '#/components/schemas/Observation'
+          type: array
+          maxItems: 50
+          title: Observations
         project_id:
           type: string
           title: Project Id
@@ -1669,6 +2262,87 @@ components:
       - id
       - state
       title: EvidenceState
+    Finding:
+      properties:
+        check:
+          type: string
+          enum:
+          - evidence
+          - consistency
+          - alternative
+          - causality
+          - action
+          title: Check
+        severity:
+          type: string
+          enum:
+          - info
+          - condition
+          - block
+          title: Severity
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        evidence_ids:
+          items:
+            type: string
+          type: array
+          title: Evidence Ids
+        next_validation:
+          type: string
+          title: Next Validation
+      additionalProperties: false
+      type: object
+      required:
+      - check
+      - severity
+      - code
+      - message
+      - next_validation
+      title: Finding
+    JobStatus:
+      properties:
+        id:
+          type: string
+          title: Id
+        result_id:
+          type: string
+          title: Result Id
+        state:
+          type: string
+          enum:
+          - pending
+          - running
+          - completed
+          - superseded
+          title: State
+        fingerprint:
+          type: string
+          title: Fingerprint
+        created_at:
+          type: string
+          title: Created At
+        reason:
+          type: string
+          title: Reason
+        lease_expires_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lease Expires At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - result_id
+      - state
+      - fingerprint
+      - created_at
+      - reason
+      title: JobStatus
     Memory:
       properties:
         project_id:
@@ -1711,6 +2385,21 @@ components:
             pattern: ^[0-9a-f]{40}$
           - type: 'null'
           title: Commit Sha
+        decision_result_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision Result Id
+        decision_challenge_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision Challenge Id
+        decision_fingerprint:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision Fingerprint
         id:
           type: string
           title: Id
@@ -1803,6 +2492,62 @@ components:
       - target
       - reason
       title: MoveInput
+    Observation:
+      properties:
+        subject:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Subject
+        variant:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Variant
+        revision:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Revision
+        attribute:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Attribute
+        value:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Value
+        unit:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Unit
+        conditions:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Conditions
+        basis:
+          type: string
+          enum:
+          - manufacturer
+          - measurement
+          - manual
+          title: Basis
+      additionalProperties: false
+      type: object
+      required:
+      - subject
+      - variant
+      - revision
+      - attribute
+      - value
+      - unit
+      - conditions
+      - basis
+      title: Observation
     Project:
       properties:
         name:
@@ -1902,8 +2647,160 @@ components:
       - tier
       - key
       title: Replica
+    Result:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        kind:
+          type: string
+          enum:
+          - research
+          - calculation
+          - plan
+          - action
+          - presentation
+          title: Kind
+        summary:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Summary
+        primary_worker:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Primary Worker
+        claims:
+          items:
+            $ref: '#/components/schemas/Claim'
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Claims
+        alternatives:
+          items:
+            $ref: '#/components/schemas/Alternative'
+          type: array
+          maxItems: 10
+          title: Alternatives
+        unknowns:
+          items:
+            type: string
+            maxLength: 2000
+            minLength: 1
+          type: array
+          maxItems: 20
+          title: Unknowns
+        falsification_test:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Falsification Test
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          title: Created At
+        created_by:
+          type: string
+          const: operator
+          title: Created By
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - kind
+      - summary
+      - primary_worker
+      - claims
+      - falsification_test
+      - id
+      - created_at
+      - created_by
+      title: Result
+    ResultInput:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        kind:
+          type: string
+          enum:
+          - research
+          - calculation
+          - plan
+          - action
+          - presentation
+          title: Kind
+        summary:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Summary
+        primary_worker:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Primary Worker
+        claims:
+          items:
+            $ref: '#/components/schemas/Claim'
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Claims
+        alternatives:
+          items:
+            $ref: '#/components/schemas/Alternative'
+          type: array
+          maxItems: 10
+          title: Alternatives
+        unknowns:
+          items:
+            type: string
+            maxLength: 2000
+            minLength: 1
+          type: array
+          maxItems: 20
+          title: Unknowns
+        falsification_test:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Falsification Test
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - kind
+      - summary
+      - primary_worker
+      - claims
+      - falsification_test
+      title: ResultInput
     RetrievalHit:
       properties:
+        decision_result_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision Result Id
+        decision_challenge_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Decision Challenge Id
+        decision_status:
+          anyOf:
+          - type: string
+            enum:
+            - ACCEPT
+            - CONDITIONAL
+            - BLOCK
+          - type: 'null'
+          title: Decision Status
         source_id:
           type: string
           title: Source Id
@@ -2215,6 +3112,57 @@ components:
       - status
       - available
       title: TierHealth
+    Why:
+      properties:
+        result:
+          $ref: '#/components/schemas/Result'
+        decision:
+          additionalProperties: true
+          type: object
+          title: Decision
+        latest_job:
+          anyOf:
+          - $ref: '#/components/schemas/JobStatus'
+          - type: 'null'
+        report:
+          anyOf:
+          - $ref: '#/components/schemas/ChallengeReport'
+          - type: 'null'
+        current:
+          type: boolean
+          title: Current
+      additionalProperties: false
+      type: object
+      required:
+      - result
+      - decision
+      - latest_job
+      - report
+      - current
+      title: Why
+    WorkItem:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+        lease:
+          type: string
+          title: Lease
+        fingerprint:
+          type: string
+          title: Fingerprint
+        snapshot:
+          additionalProperties: true
+          type: object
+          title: Snapshot
+      additionalProperties: false
+      type: object
+      required:
+      - job_id
+      - lease
+      - fingerprint
+      - snapshot
+      title: WorkItem
   securitySchemes:
     HTTPBearer:
       type: http

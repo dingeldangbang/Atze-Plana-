@@ -20,7 +20,19 @@ class Project(ProjectInput):
     created_at: datetime
 
 
+class Observation(Input):
+    subject: Text
+    variant: Text
+    revision: Text
+    attribute: Text
+    value: Text
+    unit: Text
+    conditions: Text
+    basis: Literal['manufacturer', 'measurement', 'manual']
+
+
 class EvidenceInput(Input):
+    observations: list[Observation] = Field(default_factory=list, max_length=50)
     project_id: str
     claim: Text
     source_url: HttpUrl
@@ -86,6 +98,11 @@ class Decision(Input):
     confidence: float
     approval_id: str | None = None
     executed: Literal[False] = False
+    validation_status: Literal['ACCEPT', 'CONDITIONAL', 'BLOCK'] = 'BLOCK'
+    result_id: str | None = None
+    challenge_id: str | None = None
+    fingerprint: str | None = None
+    challenge_reasons: list[str] = Field(default_factory=list)
 
 
 class ApprovalInput(Input):
@@ -93,6 +110,9 @@ class ApprovalInput(Input):
 
 
 class Approval(ApprovalInput):
+    result_id: str
+    challenge_id: str
+    fingerprint: str
     id: str
     task_id: str
     created_at: datetime

@@ -1,54 +1,46 @@
-# Final Validation Report — v0.2.1 Reality Boundary
+# Final Validation Report — v0.3 Mandatory Challenge
 
-Stand 2026-09-14. **Verbindliche No-Fake-Policy und technische Test-/Betriebsgrenzen; kein neuer Hardware-/Provideradapter und kein Produktionsrelease.**
+Stand 2026-09-14. Repository `dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`, Basis `1094a8b40349dd258e1e716bd6cdfb3ad94974fc`. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1). Kein Merge/Tag/GitHub-Release oder Produktionsdeploy. Nachweisstand dieser Datei: lokale Implementierung validiert; Remote-CI des neuen Commits noch ausstehend, frühere v0.2.1-CI ist kein v0.3-Nachweis.
 
-## Repository / Baseline
-`dingeldangbang/Atze-Plana-`, feste Branch `arena/01a09c9d-atze-plana`. Ausgangspunkt dieses Schnitts: `f4fedc0f0a6bad86b0b925a2a9e81701a3893a7e` (v0.2 mit damals 53 Tests). Alle bisherigen Domainfunktionen und Tests bleiben erhalten. [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1) bleibt Review-PR. Implementierungscommit v0.2.1: `a2dd32ca6607b7129c7f94b385101959fb12d617`, tatsächlich auf die feste Branch gepusht. [PR-CI 34786490548](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34786490548) vollständig erfolgreich, inklusive Reality-Gate und selbst erzeugter HTTP-Testinstanz. Dieser spätere Dokumentationscommit ergänzt nur Nachweise.
+## Tatsächlicher Implementierungsumfang
+[ADR-004](docs/adr/ADR-004-challenge-before-decision.md): Primary **API-Eingabe** → unveränderliches Result Package → separater HTTP-Challenge-Worker mit eigenem Token → serververifizierter Report → Triage → erforderliche Human Approval → explizite Reviewer-Adoption. Kein Primär-Agentgenerator/LLM/Executor hinzugefügt.
 
-## Implementiert / korrigiert
-- Verbindliche [REALITY_POLICY](REALITY_POLICY.md) und [AGENTS-Regeln](AGENTS.md).
-- Tatsächlicher Instanzmodus operational/test, dauerhaft in SQLite und Datei-Roots gebunden; kein Modus aktiviert Mockprovider. Markierte Bestände lassen sich nicht einfach auf den anderen Modus umstellen.
-- Smoke akzeptiert keine fremde Ziel-URL/ATZE-Datenpfade/Tokens: selbst gestarteter echter HTTP-Prozess mit temporärer Test-DB/Dateiwurzeln und frischen Credentials, explizitem Opt-in und Modeprüfung vor Testwrites. Childprozess/Temporärdaten werden beendet/entfernt.
-- Smokeprüfungen bleiben unter python -O aktiv. Neuer Lauf invalidiert vorherigen PASS; fehlendes Opt-in BLOCKED, Ausführungsfehler FAIL, PASS erst nach realen Schritten.
-- Storage: Implemented/Configured sowie AVAILABLE/NOT_CONFIGURED/UNAVAILABLE/BLOCKED getrennt; Ausfall/nicht messbare Kapazität erzeugt null statt Ersatzwerte. SD bezeichnet Dateisystempfad, nicht erkanntes Gerät.
-- UI: explizite Instanzmoduskennzeichnung, keine Samples/Seeds, bei Refreshfehlern alte Werte verwerfen. Unbekannter Modus wird nicht als Betrieb bestätigt.
-- Enge AST-Reality-Prüfung zusätzlich in CI. Sie ist kein semantischer Beweis der gesamten Plattform.
+Fünf reale deterministische Dimensionen: Evidence, Consistency, Alternative, Causality, Action. Projektweite eingereichte Evidence wird nach strukturiertem Identitäts-/Messkontext geprüft, Gegenwerte stoppen. Fehlende Alternative bleibt UNKNOWN; vorhandene begründete Kandidaten stammen aus tatsächlichen eingereichten Datensätzen. Keine erfundene Gegenquelle. Calculation/Kausalität/High-impact eingeschränkt; Action-Ausführung BLOCK. Aktuelle Reports und Approvals an Result/Job/Policy/Evidence/Stop gebunden. Direktes fact/decision-Memory 409; Adoption speichert ausschließlich geprüfte Scope-Provenance, nicht Primärfreitext. Retrieval prüft aktuellen Status neu, nie Aktionsberechtigung.
 
-## Tatsächlich ausgeführte lokale Validierung
-| Gate | Status | Nachweis / tatsächliches Ergebnis |
+## Ausgeführte Gates
+| Gate | Status | Tatsächlicher Nachweis |
 |---|---|---|
-| BUILD | VALIDATED begrenzt | python -m build: Wheel und sdist 0.2.1 tatsächlich erzeugt |
-| UNIT / INTEGRATION | TESTED | 68 pytest-Fälle bestanden; alle 53 bisherigen Fälle plus 15 Reality-Grenzfälle |
-| COVERAGE | VALIDATED begrenzt | 768/772 Statements unter app, 99,48%; keine vollständige Branch-/Frontend-/Requirements-Abdeckung |
-| REAL HTTP | TESTED | eigener echter Testprozess: 20 Status-/Response-Prüfungen für Core/Archive/Memory/Cache/FTS/Health/Runtime; synthetische Inputs, keine Provider-/Gerätebeobachtungen |
-| SMOKE OPTIMIZATION | TESTED | Lauf mit python -O ebenfalls tatsächlich ausgeführt; 20 Antworten geprüft, Kontrollprüfungen nicht als assert implementiert |
-| INSTALLED PACKAGE | VALIDATED begrenzt | gebautes Wheel in zweiter locked Umgebung installiert; python -I lädt site-packages statt Checkout: echte leere DB, Mode, API, HTML/JS geprüft |
-| REALITY GATE | VALIDATED begrenzt | keine verbotenen Test-/Mockimporte im Runtimebaum, kein Fremd-URL-Smoke und keine entfernbaren Smoke-Assertions; manueller Audit zusätzlich erforderlich |
-| DOCUMENTATION / OPENAPI | VALIDATED begrenzt | vier generierte Produkte konsistent; formale OpenAPI, lokale Dateilinks und sechs Environmentvariablen geprüft |
-| SECURITY | CONDITIONAL | Rollen-/Stop-/Hash-/Pfad-/Mode-/Legacy-Negativtests und Dependency-Audit ausgeführt; keine bekannten Dependency-Treffer beim Lauf. Kein unabhängiger Pentest |
-| DEPENDENCIES / JS SYNTAX | VALIDATED begrenzt | pip check ohne Konflikte; node --check erfolgreich |
-| UI BROWSER E2E | NOT RUN | kein automatisierter Browser für Login/Refreshfehler/Anzeige vorhanden; HTTP-/Syntaxprüfungen sind kein Browsernachweis |
-| TRIAGE | TESTED | bestehende Regeln/Role-/Stopgrenzen bestehen weiter; kein neuer Executionpfad |
-| CI / GITHUB v0.2.1 | VALIDATED | Commit a2dd32c gepusht, PR aktualisiert, Lauf 34786490548: Installation, Doku, Tests, Build, Dependency-Audit, Reality-Gate, echter isolierter HTTP-Smoke und Artefaktupload erfolgreich |
-| RELEASE / PRODUCTION | BLOCKED | kein Merge, Tag, Release, APK oder Produktionsdeploy; offene Identity-/Ingress-/Backup-/Last-/UI-Gates |
+| Unit/Integration/Safety | TESTED | 90 pytest-Fälle bestanden, zwei sichtbare Deprecation-Warnungen; keine Testausblendung |
+| Coverage | VALIDATED begrenzt | 97,34%, 1203 Statements/32 nicht parent-gemessen; Challenge-Rules/API/Service 100%; separate Worker-Kindprozesse nicht in parent-Coverage |
+| Real HTTP | TESTED | 29 geprüfte Responses, zwei echte separate Workerprozesse; explizit temporäre synthetische Testeingaben, keine Produktfixtures |
+| Optimized Smoke | TESTED | python -O: ebenfalls 29 Responses und separate Worker; keine entfernbaren assert-Gates im Smoke |
+| Triage/Agentgrenze | TESTED begrenzt | Kein ACCEPT/Approval/Adopt ohne aktuellen Report; Manipulation/Replay/Stale/Stop/Lease/Rollen/Snapshotgrenzen getestet. Spezialisierter Worker, kein allgemeiner Agent Builder |
+| Build | VALIDATED begrenzt | Wheel und sdist 0.3.0 tatsächlich gebaut |
+| Reproduzierbarkeit | CONDITIONAL | Zwei Builds mit SOURCE_DATE_EPOCH=1789344000: Wheel bytegleich; sdist-Dateinamen/Inhalte/hashgleich, tar.gz-Bytes verschieden (Archivmetadaten). Kein vollständig bitreproduzierbares Release behauptet |
+| Installiertes Wheel | VALIDATED begrenzt | Zweite venv aus requirements.lock, Wheel installiert, python -I importiert site-packages, leere isolierte Test-DB, Health/HTML/JS/Resultliste/Worker-Claim geprüft |
+| Security | CONDITIONAL | Rollen-/Lease-/Hash-/Stop-/Pfad-/Mode-/Auditrollback-Negativtests; pip-audit: keine bekannten Dependencytreffer. Kein unabhängiger Pentest |
+| Dependencies/JS | TESTED | pip check ohne Konflikte; node --check app/static/app.js erfolgreich |
+| Documentation/OpenAPI | VALIDATED begrenzt | Vier generierte Produkte, formale OpenAPI, lokale Dateilinks, sieben Envvariablen, Test-Docstrings geprüft |
+| No-fake Boundary | TESTED begrenzt | scripts/reality_check.py PASS; enges AST-/Smoke-Gate, kein umfassender semantischer Fake-Detektor |
+| Browser-E2E | NOT RUN | HTTP/JS-Syntax ersetzt keine Browserinteraktion; keine erfundenen Screenshots/Bedienungstests |
+| CI/GitHub | PENDING | Wird nach echtem Push/Lauf gesondert nachgetragen |
+| Sandbox/Hardware/Cloud/Release | NOT IMPLEMENTED / BLOCKED | Keine neuen Adapter, reale Execution-Sandbox, Gerätetests oder Produktionsabnahme |
 
-## Evidence
-Lokale tatsächlich erzeugte Dateien: `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/*.server.log`, `reports/dependency-audit.json`, `reports/build.log`, `reports/wheel-install.log`. Reports und Testdaten sind nicht als Runtime-Daten versioniert; CI lädt seine commitbezogenen Artefakte hoch. GitHub meldet weiterhin eine nicht blockierende Node-20→24-Actionwarnung; die gepinnten Actions liefen erfolgreich. Zwei bekannte sichtbare Testclient-/AnyIO-Deprecation-Warnungen bleiben; nicht ausgeblendet. Fehlertests erzeugen bewusst lokale Fehler, keine fingierten Gerätefehler.
+Wheel-SHA256 des lokalen reproduzierten Builds: `eb42a0f39382db19e11f13bf232f4aa557b63f8ad03a4a008ec2f9551287de57`. Artefakte bleiben außerhalb Git. Dateien: `reports/tests.log`, `reports/junit.xml`, `reports/coverage.xml`, `reports/smoke.json`, `reports/smoke-optimized.json`, `reports/dependency-audit.json`, `reports/build.log`, `reports/reproducibility.json`, `reports/wheel-install.log`. CI erzeugt eigene commitgebundene Artefakte.
 
-## Integrationsachsen / nicht implementierte Zielmodule
-Die vollständige Tabelle mit **Implemented / Configured / Tested / Validated / Production Ready** steht im [Realitätsaudit](docs/17-security/reality-audit.md).
+### Beobachtete Fehler und Korrekturen
+Frühe Testmigration hatte alte Direkt-Approval-/Smoke-Annahmen; auf zwingenden echten Challengefluss umgestellt und vollständig neu ausgeführt. Erster installierter-Wheel-Check verwendete falsche Umgebungsnamen für Testpfade; vorhandener Objektwurzel-Modusguard verweigerte cross-mode-Zugriff korrekt. Mit tatsächlichen ATZE_DB_PATH/ATZE_STORAGE_ROOT erneut vollständig isoliert ausgeführt: PASS. Keine Betriebsdaten in Testdaten umetikettiert. sdist-Byteunterschied bleibt ausdrücklich offen.
 
-Reale Runtime: Python/SQLite/FTS, begrenzte Original-/Cache-Dateiablage, manuelles Evidence-/Memory-/Taskregister, konservative Triage und Arbeitsoberfläche. Weiterhin NOT IMPLEMENTED/BLOCKED: MCP-Host/-Transport, Agent Builder/Runtime, isolierte Execution-Sandbox, Cloud-/Remoteadapter, Runtime-GitHub-Connector, Bright Data, USB/WiFi/BLE/Serial-Geräteadapter, Android/Honeywell/ADB/Fastboot/EDL/Repair, Unity/3D-Build, ESP32/Telemetrie, Payment, Trend Engine und Offline-Sync. APK NOT VERIFIED. Kein Sensorwert, Cloudserver oder Repairresultat wird dafür erzeugt. Lokale Git/gh-Entwicklungsoperationen sind keine Plattformintegration.
+## Grenzen / offene Gates
+- ACCEPT ausschließlich `submitted_structured_claims_only`: exakte endliche Decimal-/normierte Stringvergleiche; keine Einheitenumrechnung, freie Mathematik, Primärtextsemantik oder Kausalitätsbeweise. Metadaten/Measurements/Review sind eingereichte Angaben, nicht tatsächliche Hardwareverifikation.
+- Worker separat mit eigener Credential, aber gemeinsamer Rulecode und gleicher Entwicklungs-OS-Nutzer. Keine unabhängige Online-Recherche/organisatorische Herkunft/Host-Sandbox bewiesen. Betriebstokenkonfiguration beweist keine Worker-Liveness.
+- Snapshots bis 500 Records/4 MiB, maximal 500 Findings plus BLOCK bei Überlauf. Grenzen sind kein Last-/2-GB-RAM-/globaler Body-/Rate-Limit-Nachweis. Immutable Job-/Reportretention noch ohne GC.
+- Geteilte Rollen statt individuelle Identitäten/MFA/Tenant-ACL; keine zeitbasierte Approvalexpiry, kein kryptografisch manipulationssicheres Audit. Stalenessbindung ersetzt diese Produktionsgates nicht.
+- Result-Erfassung API-only; kein versteckter Primary-Generator. Why/Challenge/Quellen real implementiert, Browser-E2E bleibt offen.
+- Cache/Memory/Archive getrennt; unveränderte Filesystem-/SQLite-Crashlücke, Retention alter Kopien, kein konsistenter automatisierter Gesamtrestore und keine reale SD-Hardwareabnahme.
+- MCP, mobile Geräte/Android/APK, Primary LLM, Agent Builder, allgemeine Executor/Sandbox, Remote/Cloud/Bright Data, Payment, Offline-Sync weiterhin NOT IMPLEMENTED/BLOCKED. Git/gh-Entwicklungszugriff ist keine Runtimeintegration.
 
-## Known Limitations / Blocked Items
-- Marker sind keine kryptografische Herkunftssignatur und kein Schutz gegen Hostadministratoren. Legacy-/manuell eingereichte Daten werden nicht automatisch als wahr verifiziert; bereits vorhandene Testbestände niemals produktiv importieren oder umetikettieren.
-- Kein allgemeiner Fake-Detektor: AST-Gate findet ausgewählte Imports/Smoke-Risiken, nicht jede denkbare Scheinfunktion. Unabhängiges Code-/Doku-Review bleibt nötig.
-- Geteilte Rollen statt individueller Identitäten/MFA/Tenant-ACL, keine Approval-Expiry/Revocation, kein manipulationssicherer Audit, keine App-Body-/Rate-Limits, keine Produktionsabnahme.
-- Archive/Cache sind bounded UTF-8-Texte, keine beliebigen großen Artefakte. Source Retention spart keinen Platz beim Move; FTS hat eigene lokale Textkopien. Kein 2-GB-Lastnachweis.
-- DB-only-Backup bleibt unvollständig; Objektwurzeln inklusive Modusmarker und Originalkopien gemeinsam sichern/prüfen. Kein automatisierter konsistenter Multi-Tier-Gesamtrestore.
-- Keine Browser-E2E, reale SD-/Mobile-/Hardware-/Provider-/Payment-/APK-/Unity-/Cloudvalidierung. Keine dazugehörigen Ergebnisse erfunden.
+## Nächste Schritte
+Remote-CI/PR prüfen; Browser-E2E, bitreproduzierbare sdist-Metadaten, konsistenten Restore und isolierten Workerbetrieb validieren. Anschließend tatsächliche unabhängige Recherche-/Experimentschnittstellen spezifizieren und mit realen Quellen prüfen — erst dann allgemeinere Agententscheidungen freigeben.
 
-## Next Steps
-PR-/CI-Review abschließen, Browser-E2E und komplette Backup-/Restore-/Betriebsnachweise ergänzen. Erst danach weitere reale Adapter mit klaren Config-/Live-Test-Gates implementieren. Keine Universaltools, Simulationen oder Templates als fertige Kundenfunktionen ausgeben.
-
-[Dokumentationsaudit](DOCUMENTATION_AUDIT.md) · [Realitätsaudit](docs/17-security/reality-audit.md) · [Policy](REALITY_POLICY.md) · [bestehende Architektur](docs/20-context-storage/architecture.md)
+[Dokumentationsaudit](DOCUMENTATION_AUDIT.md) · [Integrationsaudit](docs/17-security/reality-audit.md) · [Challenge-Vertrag](docs/02-core/challenge-worker.md) · [Policy](REALITY_POLICY.md)

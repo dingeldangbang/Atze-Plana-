@@ -68,6 +68,9 @@ class MemoryInput(LinkedInput):
 
 
 class Memory(MemoryInput):
+    decision_result_id: str | None = None
+    decision_challenge_id: str | None = None
+    decision_fingerprint: str | None = None
     id: str
     created_at: str
     sha256: str
@@ -86,6 +89,9 @@ class EvidenceState(Input):
 
 
 class RetrievalHit(Input):
+    decision_result_id: str | None = None
+    decision_challenge_id: str | None = None
+    decision_status: Literal['ACCEPT', 'CONDITIONAL', 'BLOCK'] | None = None
     source_id: str
     source_type: Literal['archive', 'memory']
     category: str

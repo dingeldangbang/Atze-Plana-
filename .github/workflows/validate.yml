@@ -29,6 +29,10 @@ jobs:
         run: python scripts/reality_check.py
       - name: Real HTTP workflow against self-created disposable test instance
         run: python scripts/smoke.py --allow-fixtures
+      - name: Optimized smoke and JavaScript syntax
+        run: |
+          python -O scripts/smoke.py --allow-fixtures --report reports/smoke-optimized.json
+          node --check app/static/app.js
       - name: Upload real validation artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

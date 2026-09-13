@@ -1,6 +1,6 @@
 [project]
 name = "atze-plana"
-version = "0.2.1"
+version = "0.3.0"
 description = "Evidence and approval core; no external action execution"
 requires-python = ">=3.11"
 dependencies = ["fastapi>=0.135", "uvicorn>=0.41"]

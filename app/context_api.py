@@ -70,7 +70,7 @@ def register_context_api(app, store, storage, actor, operator, reviewer, connect
         return storage.cleanup(store, body, who)
 
     @app.post('/api/memory', response_model=Memory, status_code=201, tags=['context'],
-              openapi_extra=contract('operator', 'Append-only memory + FTS + audit; fact category requires verified linked evidence; commit SHA is attested not GitHub-validated'))
+              openapi_extra=contract('operator', 'Untrusted non-authoritative memory + FTS + audit; direct fact/decision writes blocked, use challenged result adoption; commit SHA is attested not GitHub-validated'))
     def memory_create(body: MemoryInput, who=Depends(operator), db=db_dependency):
         return create_memory(db, body, who)
 

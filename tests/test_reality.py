@@ -118,7 +118,9 @@ def test_smoke_real_isolated_process_ignores_operational_paths(tmp_path, monkeyp
     monkeypatch.setenv('ATZE_MODE', 'operational')
     monkeypatch.setenv('ATZE_OPERATOR_TOKEN', 'invalid-inherited-token')
     result = smoke.run(tmp_path / 'real-smoke.json', allow_fixtures=True)
-    assert result['status'] == 'PASS' and len(result['checks']) == 20
+    assert result['status'] == 'PASS' and len(result['checks']) == 29
+    assert len(result['worker_processes']) == 2
+    assert all(p['exit_code'] == 0 for p in result['worker_processes'])
     assert result['checks'][0]['body']['mode'] == 'test'
     assert sentinel.read_bytes() == b'unchanged operational sentinel'
     assert not (tmp_path / 'must-not-create').exists()
@@ -126,7 +128,7 @@ def test_smoke_real_isolated_process_ignores_operational_paths(tmp_path, monkeyp
 
 def test_smoke_failure_does_not_leave_pass(tmp_path, monkeypatch):
     """REAL-011: an injected test failure produces FAIL with error, not hardcoded/stale PASS, and stops the real child."""
-    def fail(*args):
+    def fail(*args, **kwargs):
         raise RuntimeError('deliberate harness failure')
     monkeypatch.setattr(smoke, '_exercise', fail)
     report = tmp_path / 'failed.json'

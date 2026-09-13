@@ -53,9 +53,9 @@ def products():
                 if path.endswith('/review'):
                     effect = 'One immutable manual evidence review + audit; reason required'
                 elif path.endswith('/approve'):
-                    effect = 'Approval + audit only; current triage must require approval; never executes'
+                    effect = 'Approval bound to current Result/Challenge/fingerprint + audit; current triage must require approval; never executes'
                 elif path.endswith('/triage'):
-                    effect = 'Decision snapshot in audit; verified evidence, confidence >=0.8, preconditions, no stop'
+                    effect = 'Decision snapshot in audit; current mandatory Challenge + verified evidence, confidence >=0.8, preconditions, no stop'
                 elif path.endswith('/stop'):
                     effect = 'Persist global stop + reason in audit; does not interrupt external processes'
                 elif path.endswith('/evidence'):

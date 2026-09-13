@@ -23,7 +23,18 @@ def _require(condition, message):
         raise RuntimeError(message)
 
 
-def _exercise(client, operator, reviewer, records):
+def _exercise(client, operator, reviewer, records, *, worker_url, worker_token, worker_records):
+    def run_worker():
+        worker_env = {k: v for k, v in os.environ.items() if not k.startswith('ATZE_')}
+        worker_env['ATZE_CHALLENGE_TOKEN'] = worker_token
+        completed = subprocess.run([sys.executable, '-m', 'app.challenge_worker', '--url', worker_url, '--once'],
+                                   cwd=ROOT, env=worker_env, capture_output=True, text=True, timeout=30)
+        record = {'kind': 'separate real challenge process', 'exit_code': completed.returncode,
+                  'stdout': completed.stdout.strip()}
+        worker_records.append(record)
+        _require(completed.returncode == 0, 'Separate challenge worker failed; no fallback')
+        _require(json.loads(completed.stdout)['verdict'] == 'PASS', 'Worker did not produce real PASS')
+
 
     def call(method, path, body=None, role='operator', expected=200):
         token = operator if role == 'operator' else reviewer
@@ -34,10 +45,20 @@ def _exercise(client, operator, reviewer, records):
     _require(call('GET', '/health')['mode'] == 'test', 'Refusing fixture writes outside test mode')
     _require(call('GET', '/api/runtime')['mode'] == 'test', 'Authenticated test-mode check failed')
     p = call('POST', '/api/projects', {'name': 'Synthetic HTTP smoke fixture', 'description': 'Not a real project observation'}, expected=201)
-    e = call('POST', '/api/evidence', {'project_id': p['id'], 'claim': 'Synthetic smoke assertion, not externally validated', 'source_url': 'https://example.com/fixture', 'observed_at': '2026-01-01T00:00:00Z', 'source_type': 'manual', 'provider': 'smoke fixture', 'extraction_method': 'manual', 'content': 'Synthetic test content', 'confidence': 0.9}, expected=201)
+    observation = dict(subject='synthetic-object', variant='fixture-v1', revision='fixture-r1', attribute='format', value='text', unit='label', conditions='synthetic fixture only', basis='manual')
+    e = call('POST', '/api/evidence', {'project_id': p['id'], 'claim': 'Synthetic smoke assertion, not externally validated', 'source_url': 'https://example.com/fixture', 'observed_at': '2026-01-01T00:00:00Z', 'source_type': 'manual', 'provider': 'smoke fixture', 'extraction_method': 'manual', 'content': 'Synthetic test content', 'confidence': 0.9, 'observations': [observation, {**observation, 'subject': 'synthetic-alternative'}]}, expected=201)
     call('POST', f"/api/evidence/{e['id']}/review", {'state': 'verified', 'reason': 'Synthetic test review'}, role='reviewer')
     for action in ['read', 'write']:
         t = call('POST', '/api/tasks', {'project_id': p['id'], 'title': 'Synthetic ' + action, 'action': action, 'evidence_ids': [e['id']], 'preconditions_met': True}, expected=201)
+        _require(call('POST', f"/api/tasks/{t['id']}/triage")['state'] == 'blocked', 'Challenge must be mandatory')
+        claim = {k: v for k, v in observation.items() if k != 'basis'}
+        primary = call('POST', '/api/results', {'task_id': t['id'], 'kind': 'plan', 'summary': 'Compare submitted fixture properties only',
+                       'primary_worker': 'explicit smoke input, not an agent runtime',
+                       'claims': [{**claim, 'evidence_ids': [e['id']], 'requires_measurement': False}],
+                       'alternatives': [], 'unknowns': [], 'falsification_test': 'Inspect synthetic fixture original text'}, expected=201)
+        run_worker()
+        why = call('GET', f"/api/results/{primary['id']}/why")
+        _require(why['current'] and why['report']['analysis']['scope'] == 'submitted_structured_claims_only', 'Current challenge report required')
         d = call('POST', f"/api/tasks/{t['id']}/triage")
         _require(d['state'] == ('eligible' if action == 'read' else 'approval_required'), "Failed: d['state'] == ('eligible' if action == 'read' else 'approval_required')")
         _require(d['executed'] is False, "Failed: d['executed'] is False")
@@ -56,6 +77,10 @@ def _exercise(client, operator, reviewer, records):
     health = call('GET', '/api/storage/health')
     _require(next((tier for tier in health['tiers'] if tier['tier'] == 'local'))['available'], "Failed: next((tier for tier in health['tiers'] if tier['tier'] == 'local'))['available']")
     call('POST', '/api/cache/cleanup', {'reason': 'Only expired fixture cache'}, role='reviewer')
+    adopted = call('POST', f"/api/results/{primary['id']}/adopt", {'reason': 'Explicit bounded fixture decision'}, role='reviewer', expected=201)
+    _require(adopted['decision_result_id'] == primary['id'], 'Adoption must retain challenge provenance')
+    call('POST', f"/api/results/{primary['id']}/challenge", {'reason': 'Invalidate prior pass for explicit recheck'}, expected=201)
+    _require(call('POST', f"/api/tasks/{t['id']}/triage")['state'] == 'blocked', 'Rechallenge must invalidate old approval')
     call('GET', '/api/audit', role='reviewer')
 
 
@@ -64,7 +89,7 @@ def run(report_path=Path('reports/smoke.json'), *, allow_fixtures=False):
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report = {'timestamp': datetime.now(timezone.utc).isoformat(), 'kind': 'REAL HTTP / SYNTHETIC TEST INPUTS',
               'scope': 'disposable test instance only; no live provider/device validation',
-              'status': 'NOT_RUN', 'checks': []}
+              'status': 'NOT_RUN', 'checks': [], 'worker_processes': []}
     def save():
         report_path.write_text(json.dumps(report, indent=2))
     save()  # invalidate any previous success BEFORE startup or opt-in checks
@@ -79,11 +104,11 @@ def run(report_path=Path('reports/smoke.json'), *, allow_fixtures=False):
             root = Path(tmp)
             listener.bind(('127.0.0.1', 0))
             listener.listen()
-            operator, reviewer = secrets.token_urlsafe(48), secrets.token_urlsafe(48)
+            operator, reviewer, challenge = secrets.token_urlsafe(48), secrets.token_urlsafe(48), secrets.token_urlsafe(48)
             env = {k: v for k, v in os.environ.items() if not k.startswith('ATZE_')}
             env.update(ATZE_MODE='test', ATZE_DB_PATH=str(root / 'core.db'),
                        ATZE_STORAGE_ROOT=str(root / 'objects'), ATZE_SD_ROOT='',
-                       ATZE_OPERATOR_TOKEN=operator, ATZE_REVIEWER_TOKEN=reviewer)
+                       ATZE_OPERATOR_TOKEN=operator, ATZE_REVIEWER_TOKEN=reviewer, ATZE_CHALLENGE_TOKEN=challenge)
             address = 'http://127.0.0.1:' + str(listener.getsockname()[1])
             log_path = report_path.with_suffix('.server.log')
             with log_path.open('w') as log:
@@ -104,7 +129,7 @@ def run(report_path=Path('reports/smoke.json'), *, allow_fixtures=False):
                             time.sleep(0.05)
                         else:
                             raise RuntimeError('Disposable server did not become ready')
-                        _exercise(client, operator, reviewer, report['checks'])
+                        _exercise(client, operator, reviewer, report['checks'], worker_url=address, worker_token=challenge, worker_records=report['worker_processes'])
                     report['status'] = 'PASS'
                 finally:
                     server.terminate()

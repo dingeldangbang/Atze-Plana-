@@ -32,8 +32,8 @@ def index_text(db, project_id, source_id, text):
 
 def create_memory(db, body, who):
     evidence = references(db, body.project_id, body.evidence_ids)
-    if body.category == 'fact' and (not evidence or any(e['state'] != 'verified' for e in evidence)):
-        raise HTTPException(409, 'A fact assertion requires reviewed evidence; review is not proof of truth')
+    if body.category in {'fact', 'decision'}:
+        raise HTTPException(409, 'Authoritative memory requires result/challenge/triage adoption; record an inference instead')
     if body.task_id and get(db, 'task', body.task_id)['project_id'] != body.project_id:
         raise HTTPException(422, 'Task belongs to another project')
     value = dict(**body.model_dump(), id=identity(), created_at=now(), state='recorded',
@@ -60,7 +60,13 @@ def retrieve(db, body):
         kind, value = row[0], json.loads(row[1])
         evidence = [{'id': e, 'state': get(db, 'evidence', e)['state']} for e in value['evidence_ids']]
         state = 'rejected' if any(e['state'] == 'rejected' for e in evidence) else 'verified' if evidence and all(e['state'] == 'verified' for e in evidence) else 'unverified'
-        hits.append(dict(source_id=key, source_type=kind, category=value.get('category', 'archive'),
+        decision_status = 'BLOCK' if value.get('category') in {'fact', 'decision'} else None
+        if value.get('decision_result_id'):
+            from app.challenge_service import decide_task
+            current = decide_task(db, value['task_id'])
+            if current.challenge_id == value['decision_challenge_id'] and current.fingerprint == value['decision_fingerprint']:
+                decision_status = current.validation_status
+        hits.append(dict(decision_result_id=value.get('decision_result_id'), decision_challenge_id=value.get('decision_challenge_id'), decision_status=decision_status, source_id=key, source_type=kind, category=value.get('category', 'archive'),
                          location=value.get('tier', 'core'), logical_path=value.get('logical_path', f"/project/{value['project_id']}/memory/{key}"),
                          timestamp=value['created_at'], sha256=value['sha256'], start_char=int(start), end_char=int(end),
                          text=text, evidence=evidence, evidence_state=state, commit_sha=value.get('commit_sha'),

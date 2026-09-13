@@ -7,3 +7,6 @@ Tests mit synthetischen Inputs/Fehler-Injektion nur außerhalb des Betriebswegs,
 Code, Tests, OpenAPI, Konfiguration und Dokumentation im selben Änderungsschnitt pflegen. `python scripts/docs.py --check`, `python scripts/reality_check.py`, pytest, echter Build und isolierter Smoke müssen tatsächlich laufen. Integrationen getrennt nach Implemented/Configured/Tested/Validated/Production Ready bewerten. Fehlende Adapter BLOCKED, fehlende Konfiguration NOT CONFIGURED; keine Statusseite als Integration ausgeben.
 
 Keine Secrets/Runtime-Daten committen. Kein Merge, Release oder Produktionsdeploy ohne erforderliche Freigabe. Weitere Regeln in CONTRIBUTING.md, DEVELOPMENT.md und SECURITY.md.
+
+## Verbindliche Challenge-Regel v0.3
+Every Decision Must Survive Challenge. Kein Primärergebnis direkt in Approval/autoritative Memory übernehmen. Aktuelles Result Package → separater Challenge-Prozess → verifizierter Report → Triage → erforderliche Human Approval → explizite Adoption. Keine Test-/UI-/Configoption zum Überspringen. CONDITIONAL/BLOCK stoppt. Bei Staleness neu prüfen, alte Freigaben nicht wiederverwenden. Primärfreitext nicht durch einen begrenzten strukturierten PASS als wahr ausgeben. [Vertrag](docs/02-core/challenge-worker.md).

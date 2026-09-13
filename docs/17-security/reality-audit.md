@@ -39,7 +39,7 @@ Stand 2026-09-14, Ausgangscommit `f4fedc0`. Verbindliche [Reality Policy](../../
 | Bright Data / externe Recherche | NO | NOT CONFIGURED | NOT RUN | BLOCKED; keine Providerantwort | NO |
 | Cloud-Provisioning / Netzwerkprovider | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 | Payment | NO | NOT CONFIGURED | NOT RUN | BLOCKED; kein offizieller Provider-Sandboxtest | NO |
-| MCP / Agent Builder / Runtime | NO | NOT CONFIGURED | NOT RUN | BLOCKED; REST ist nicht MCP | NO |
+| MCP / Primary Agent Builder / Runtime | NO | NOT CONFIGURED | NOT RUN | BLOCKED; REST ist nicht MCP | NO |
 | Isolierter Execution-Sandbox | NO | NOT CONFIGURED | NOT RUN | BLOCKED; Textcache ist keine Isolation | NO |
 | Trend Engine / Offline Sync | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 
@@ -54,3 +54,14 @@ Stand 2026-09-14, Ausgangscommit `f4fedc0`. Verbindliche [Reality Policy](../../
 Software kann nicht feststellen, ob beliebiger manuell eingereichter Text wahr ist. Modusmarker sind keine kryptografische Herkunftssignatur und kein Schutz gegen Hostadministratoren, die Marker löschen. Bestehende unmarkierte Daten werden nicht gelöscht oder als „REAL“ zertifiziert; bekannte alte Smoke-Bestände bleiben Testdaten und dürfen nicht in operational importiert werden. Keine automatischen Datenimporte.
 
 Ausgeführte Prüfungen: [Testkatalog](../14-testing/test-catalog.md), [aktueller Validierungsbericht](../../FINAL_VALIDATION_REPORT.md). Eine grüne CI belegt nur ihre tatsächlich ausgeführten Gates, nicht alle Zielintegrationen. Keine Hardware-/Cloud-/APK-/Releaseerfolge aus diesen Softwaretests ableiten. Kein Produktionsrelease ohne die offenen Betriebs-/Security-/Restore-/UI-Gates und explizite Freigabe.
+
+## Erweiterung v0.3 — separat zu bewerten
+Die oben genannten fehlenden Primary-Agent-/MCP-/Provider-/Hardwareintegrationen bleiben fehlend. Neu real implementiert ist ein spezialisierter **Challenge-Prüfprozess**, kein allgemeiner Agent Builder oder Execution-Worker.
+
+| Funktion | Implemented | Configured | Tested | Validated | Production Ready |
+|---|---|---|---|---|---|
+| Result/Challenge/Adopt-Gate | YES, strukturiert begrenzt | API + eigener Servicetoken | echte API-/Regel-/SQLite-Tests | Scope laut Report, siehe aktuellen Validationreport | NO |
+| Separater Challenge Worker | YES, eigenes Python-Programm | eigener Prozess erforderlich; Token allein beweist keine Liveness | tatsächlich zwei Prozesse im isolierten HTTP-Smoke | lokale eingereichte Evidenz, keine unabhängige Online-Recherche | NO — OS-/Secret-/Betriebsabnahme |
+| Semantische/Online-/Kausalitäts-Gegenprüfung | NO | kein Provider/Experimentvertrag | NOT RUN | BLOCKED/CONDITIONAL | NO |
+
+Kein statisches „Bist du sicher?“ ersetzt Gegenprüfung. Reportresultate stammen aus realen Regeln und Snapshotdaten. Ungeprüfter Primärfreitext wird nicht als Fakt adoptiert. Fehlende Quellen/Alternativen bleiben UNKNOWN, keine Motor-/Sensorbeispiele in der Produktinstanz.

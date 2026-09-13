@@ -218,7 +218,7 @@ def test_cache_delete_crash_retry(tiered):
 
 
 def test_memory_fact_inference_and_live_evidence(tiered):
-    """MEM-001: fact creation needs verified evidence; inference remains inference even with verified sources; retrieval is never execution permission."""
+    """MEM-001: direct fact creation is blocked pending Challenge adoption; inference remains inference even with verified sources; retrieval is never execution permission."""
     client, config, reviewer = tiered
     p, e = seed(client, reviewer, verified=False)
     base = {'project_id': p['id'], 'category': 'fact', 'content': 'motor tested', 'evidence_ids': [e['id']]}
@@ -230,8 +230,8 @@ def test_memory_fact_inference_and_live_evidence(tiered):
     client.post(f"/api/evidence/{e['id']}/review", headers=reviewer, json={'state': 'verified', 'reason': 'Test review'})
     hit = query(client, p)[0]
     assert hit['category'] == 'inference' and hit['evidence_state'] == 'verified' and not hit['allowed_for_action']
-    assert client.post('/api/memory', json=base).status_code == 201
-    assert len(client.get('/api/memory').json()) == 2
+    assert client.post('/api/memory', json=base).status_code == 409  # direct authoritative adoption forbidden
+    assert len(client.get('/api/memory').json()) == 1
     assert client.post('/api/memory', headers=reviewer, json=base).status_code == 403
 
 

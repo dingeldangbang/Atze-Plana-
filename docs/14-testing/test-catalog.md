@@ -14,6 +14,23 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 
 | Test ID / purpose / expected result | Executable case |
 |---|---|
+| CH-001: pending blocks; a real report enables bounded triage; reviewer adoption stores only checked-scope references, not unchecked primary text. | [test_challenge.py: test_mandatory_challenge_and_explicit_adoption](../../tests/test_challenge.py) |
+| CH-002: operator/reviewer cannot act as worker; worker cannot write primary evidence; forged PASS and replay are rejected. | [test_challenge.py: test_worker_credentials_separate_and_forgery_rejected](../../tests/test_challenge.py) |
+| CH-003: missing service credential leaves pending result blocked; no in-process auto-report or approval path. | [test_challenge.py: test_unconfigured_worker_has_no_fallback](../../tests/test_challenge.py) |
+| CH-004: independently scanned project evidence contradicting an identical variant/property blocks despite not being selected by primary. | [test_challenge.py: test_contradiction_not_selected_by_primary_stops_line](../../tests/test_challenge.py) |
+| CH-005: identity, unit/condition, measurement and causality gaps yield concrete CONDITIONAL findings, not rhetorical confirmation. | [test_challenge.py: test_specific_unknowns_cannot_pass](../../tests/test_challenge.py) |
+| CH-006: absent alternative remains a concrete gap; worker emits no fabricated device or counter-source. | [test_challenge.py: test_no_alternative_is_not_invented](../../tests/test_challenge.py) |
+| CH-007: new evidence invalidates a prior approval; a new challenge and human approval are both required before adoption. | [test_challenge.py: test_stale_evidence_invalidates_reports_approvals_and_adoption](../../tests/test_challenge.py) |
+| CH-008: newest result and newest challenge must pass; old package/adoption and old job cannot bypass pending work. | [test_challenge.py: test_new_result_and_rechallenge_invalidate_old_pass](../../tests/test_challenge.py) |
+| CH-009: expired leases are reclaimable, old leases rejected, evidence changes during worker run prevent commit. | [test_challenge.py: test_lease_expiry_reclaim_and_snapshot_race](../../tests/test_challenge.py) |
+| CH-010: stop blocks schedule/claims/complete; report/audit failure rolls back completion instead of permitting acceptance. | [test_challenge.py: test_challenge_stop_and_audit_atomicity](../../tests/test_challenge.py) |
+| CH-011: duplicate/foreign references and shared/short worker credentials cannot establish a challenge boundary. | [test_challenge.py: test_claim_references_and_service_config](../../tests/test_challenge.py) |
+| CH-012: truncated scope, missing/corrupt/rejected sources and declared unsupported actions/calculations never receive a fake PASS. | [test_challenge.py: test_rule_boundaries_and_scope](../../tests/test_challenge.py) |
+| CH-013: worker rejects credential-bearing/remote-plaintext origins, missing credentials and redirects instead of faking a result. | [test_challenge.py: test_worker_transport_constraints](../../tests/test_challenge.py) |
+| CH-014: unknown values are not promoted by matching strings; alternative rationale alone is not evidence and unreviewed sources remain conditional. | [test_challenge.py: test_unreviewed_sources_alternatives_and_unknown_sentinels](../../tests/test_challenge.py) |
+| CH-015: retrieved decision-memory carries challenge provenance and becomes BLOCK after evidence changes; no stale acceptance in RAG. | [test_challenge.py: test_adopted_memory_retrieval_revalidates_challenge](../../tests/test_challenge.py) |
+| CH-016: accepted challenge does not bypass atomic audit on adoption; audit failure creates no decision-memory or index entry. | [test_challenge.py: test_adoption_audit_failure_rolls_back_memory](../../tests/test_challenge.py) |
+| CH-017: bounded snapshot and finding limits stop the line instead of silently validating a truncated context. | [test_challenge.py: test_scope_limits_block_instead_of_partial_validation](../../tests/test_challenge.py) |
 | STO-001: original UTF-8 whitespace/hash survives storage and restart; duplicate namespace cannot overwrite. | [test_context_storage.py: test_archive_original_namespace_and_restart](../../tests/test_context_storage.py) |
 | STO-002: absolute, traversal, empty, encoded or platform-specific path segments are rejected. | [test_context_storage.py: test_logical_path_rejection](../../tests/test_context_storage.py) |
 | STO-003: reviewer relocation preserves original, hash and namespace; retrieval resolves the new location. | [test_context_storage.py: test_copy_verify_switch_retains_source_and_citations](../../tests/test_context_storage.py) |
@@ -24,7 +41,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | STO-008: stop blocks archive/cache creation, relocation and cleanup; existing originals remain readable. | [test_context_storage.py: test_stop_blocks_storage_writes](../../tests/test_context_storage.py) |
 | CACHE-001: only expired cache is deleted; archive, live cache and memory survive; repeat cleanup is safe. | [test_context_storage.py: test_cache_expiry_cleanup_and_archive_separation](../../tests/test_context_storage.py) |
 | CACHE-002: failure after physical deletion leaves a committed tombstone and cleanup can retry missing file. | [test_context_storage.py: test_cache_delete_crash_retry](../../tests/test_context_storage.py) |
-| MEM-001: fact creation needs verified evidence; inference remains inference even with verified sources; retrieval is never execution permission. | [test_context_storage.py: test_memory_fact_inference_and_live_evidence](../../tests/test_context_storage.py) |
+| MEM-001: direct fact creation is blocked pending Challenge adoption; inference remains inference even with verified sources; retrieval is never execution permission. | [test_context_storage.py: test_memory_fact_inference_and_live_evidence](../../tests/test_context_storage.py) |
 | RAG-001: lexical retrieval returns real character spans/hashes, isolates projects and treats FTS syntax as words. | [test_context_storage.py: test_retrieval_positions_project_filter_and_query_safety](../../tests/test_context_storage.py) |
 | MEM-002: foreign/duplicate evidence and task references are rejected; commit is format-checked attestation only. | [test_context_storage.py: test_cross_project_refs_and_commit_attestation](../../tests/test_context_storage.py) |
 | STO-009: missing SD never gets created, overlapping/symlink roots fail startup, absent tier cannot receive data. | [test_context_storage.py: test_missing_sd_and_root_boundaries](../../tests/test_context_storage.py) |
@@ -36,7 +53,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | API-001: health and static UI are public; data and specification require credentials. | [test_core.py: test_public_surface](../../tests/test_core.py) |
 | SEC-002: reviewers cannot create projects and operators cannot access audit or stop. | [test_core.py: test_role_separation](../../tests/test_core.py) |
 | EVD-001: content hash is real, evidence starts unverified, review is role-bound and immutable. | [test_core.py: test_evidence_provenance_and_review](../../tests/test_core.py) |
-| TRI-001: only READ is eligible without reviewer approval; no decision executes an action. | [test_core.py: test_approval_policy](../../tests/test_core.py) |
+| TRI-001: Challenge is mandatory; only READ can be eligible without approval, high-impact decisions remain conditional and never execute. | [test_core.py: test_approval_policy](../../tests/test_core.py) |
 | TRI-002: low confidence, unverified evidence or absent preconditions block approval. | [test_core.py: test_blocking_conditions](../../tests/test_core.py) |
 | SEC-003: persisted stop blocks even approved tasks after application restart. | [test_core.py: test_emergency_stop_persistent](../../tests/test_core.py) |
 | API-002: reject blank names, extra fields, foreign/duplicate/missing references and over-limit lists. | [test_core.py: test_input_integrity](../../tests/test_core.py) |

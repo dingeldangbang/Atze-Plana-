@@ -23,6 +23,9 @@ Dies ist ein **logisches** ERD, keine Behauptung separater SQL-Tabellen. `AUDIT.
 | Control | ein persistenter globaler Stop und Grund |
 
 ## Zustände / Speicherung
-Evidence: unverified → verified ODER rejected, terminal. Korrektur nur als neuer Datensatz; keine Supersession-/Revocation-Verknüpfung. Tasks sind unveränderlich. Entscheidungen werden neu berechnet und im Audit gespeichert; keine gespeicherte Task-State-Maschine. Approval bleibt bestehen, Stop kann seine Verwendung temporär blockieren.
+Evidence: unverified → verified ODER rejected, terminal. Korrektur nur als neuer Datensatz; keine Supersession-/Revocation-Verknüpfung. Tasks sind unveränderlich. Entscheidungen werden neu berechnet und im Audit gespeichert; keine gespeicherte Task-State-Maschine. Approval bleibt historisch bestehen. Ab v0.3 benötigt jede Verwendung die aktuelle Result-/Challenge-/Fingerprintbindung; Stopereignisse entwerten sie auch nach Reset.
 
 Keine Assets, Devices, Measurements, Agents, Permissions-Tabellen, Actions-Ausführung, Tests-Entities, Repairs oder Trends vorhanden. Ab v0.2 ergänzen Archive-/Cacheblobs und Memory/FTS den Kern; siehe [Context-/Storage-Datenmodell](../20-context-storage/architecture.md). Testreports sind lokale/CI-Dateien, kein Plattform-Datenmodell. Originaltexte unverschlüsselt auf Disk; Rechte, Verschlüsselung und Retention sind Betreiberverantwortung. Keine Delete-API oder DSGVO-Löschworkflow.
+
+## Additive Records v0.3
+`result`: unveränderliches Primärpaket mit Claims/Alternativen/Unknowns/Falsifikationsvorschlag. `challenge_job`: Snapshot, Fingerprint, pending/running/completed/superseded, 60s Leasehash/-ablauf. `challenge_report`: immutable policygebundene Findings und Gegenkandidaten, Report-ID. Approval enthält result_id/challenge_id/fingerprint. Adopted Memory enthält decision_result_id/decision_challenge_id/decision_fingerprint, nicht automatisch den ungeprüften Primärtext. Evidence optional observations; ursprünglicher Content-SHA bleibt. Keine vorhandenen Records werden gelöscht. [Schema-/Zustandsdetails](../02-core/challenge-worker.md).

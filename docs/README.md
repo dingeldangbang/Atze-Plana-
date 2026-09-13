@@ -23,3 +23,6 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 
 ## Verbindliche Realitätsprüfung v0.2.1
 [REALITY_POLICY](../REALITY_POLICY.md) gilt für jeden Beitrag. Keine Mock-/Demo-/Fake-Provider oder unbemerkten Fallbacks im Betriebsweg. Tests/Fehler-Injektionen bleiben getrennt; `python scripts/reality_check.py` und `python scripts/smoke.py --allow-fixtures` tatsächlich ausführen. Der Smoke startet ausschließlich seine eigene temporäre Testinstanz. Laufreports beweisen keine Geräte-/Providerintegration. [Getrennte Integrationsnachweise](../docs/17-security/reality-audit.md).
+
+## v0.3 — Every Decision Must Survive Challenge
+[ADR-004](adr/ADR-004-challenge-before-decision.md) · [Challenge Worker, fünf Prüfarten, API, Grenzen und Recovery](02-core/challenge-worker.md) · [aktuelle Triage](02-core/triage.md). Primary-Text bleibt unvalidiert; akzeptierte strukturierte Decision-Snapshots benötigen Gegenprüfung und explizite Übernahme. Kein allgemeiner Agent-/Webresearch-/Executor-Anspruch.

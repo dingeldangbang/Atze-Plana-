@@ -43,3 +43,6 @@ Audit ist ein persistentes Ereignisregister, kein Eventbus. Keine WebSockets, MQ
 
 ## Erweiterung v0.2
 Das Diagramm oben beschreibt den fortbestehenden Evidence-/Approval-Kern. Die aktive Erweiterung liegt in `context_models.py`, `context.py`, `context_api.py` und `storage.py`: externe immutable Textarchive, taskgebundene Cacheblobs, append-only Memory und lokale FTS-Suche. [Aktuelles erweitertes Systemdiagramm](../20-context-storage/architecture.md), [Copy/Verify/Index-Sequenz](../20-context-storage/contracts.md). Es gibt weiterhin keinen Eventbus/MCP-Transport/Orchestrator oder ausführenden Agenten.
+
+## Erweiterung v0.3
+Ein realer separater Challenge-Prozess ergänzt die API: Result → serverseitiger Snapshot/Job → workergebundener Lease → fünf deterministische Checks → verifizierter Report → aktuelle Triage → Human Approval/Adoption. [Tatsächliches Sequenzdiagramm und Grenzen](../02-core/challenge-worker.md). Dies ist keine zusätzliche Promptrolle desselben Primary; API-Rechte und Prozess sind getrennt. Gegenprüfung nutzt nur vorhandene eingereichte Evidence, keine unimplementierten Suchprovider. Worker und API teilen Regelcode; keine organisatorische Quellen-/OS-Isolation behauptet.

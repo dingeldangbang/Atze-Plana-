@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.0 — unreleased / 2026-09-14
+
+### Added
+ADR-004, immutable Result Packages und obligatorische Challenge-Jobs. Separater HTTP-Worker mit dritter Credential, fünf deterministischen Prüfarten, projektweiter Evidence-Gegenprüfung und belegten alternativen Kandidaten. Warum?/Herausfordern/Quellen in UI. Versions-/Fingerprint-/Leasegebundene Reports, explizite reviewergebundene Adoption und aktuelle RAG-Decision-Provenance.
+
+### Changed
+Jede freigabefähige Taskentscheidung benötigt aktuellen Challenge-Pass. Approval an Result/Challenge/Context gebunden. Stopreset, neue Evidence/Result/Challenge entwerten vorherige Freigaben. Smoke prüft echte getrennte Workerprozesse statt eines erfundenen PASS. Existing Tests an das verschärfte Gate angepasst, nicht umgangen.
+
+### Fixed
+Bisherige Direktfreigabe ohne Gegenprüfung und direkte neue fact/decision-Memory-Übernahme blockiert. Primärfreitext wird nicht automatisch aus strukturiertem PASS adoptiert. Stale Memory-Passes in Retrieval werden neu geprüft. Scope-/Findinggrenzen führen zu BLOCK statt unvollständigem PASS.
+
+### Security
+Operator/Reviewer können keine Workerreports setzen; Worker keine Primär-/Approvalrechte. Replay, Leaseablauf, Snapshot-/Policyänderung und manipulierte Reports abgewiesen. Kein Worker-Fallback/Executor. Keine unabhängige Web-/Quellen-/Kausalitätsprüfung vorgetäuscht; Same-Host-Prozess ist keine Sandbox.
+
+### Breaking Changes
+Tasks ohne aktuellen Result-/Challenge-Pass sind BLOCKED, alte Approvals ohne Bindung nicht gültig. Neue direkte fact/decision-Memory-POSTs 409. Dritter Token und separater Worker erforderlich. High-impact-/Action-/Calculation-Gates bewusst eingeschränkt.
+
+### Migration
+Additive result/challenge_job/challenge_report Records und optionale strukturierte Evidence-Beobachtungen. Alte Daten bleiben erhalten; keine automatisch erzeugten Ergebnisse/Reports. Neue echte Pakete und Gegenprüfungen erforderlich. API und Worker zusammen auf dieselbe Policyversion aktualisieren.
+
+### Validation
+Siehe [aktuellen Bericht](FINAL_VALIDATION_REPORT.md). Nur überprüfte strukturierte lokale Datenverträge, keine freigeschalteten Geräte-/Cloud-/Primary-Agentfähigkeiten.
+
 ## 0.2.1 — unreleased / 2026-09-14
 
 ### Added

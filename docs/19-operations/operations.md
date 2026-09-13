@@ -32,3 +32,8 @@ Dependencies regelmäßig auditieren; Lockfile nach Update neu validieren. Token
 
 ## v0.2.1 — Modusmarker bei Backup/Restore
 `instance_mode` gehört zur SQLite-Sicherung; `.atze-mode` als versteckte Datei zur jeweiligen Objektwurzel. Bei Dateisicherung/Restore versteckte Dateien mitnehmen. Keine Testdaten durch Löschen/Ändern dieser Marker in Betriebsdaten umetikettieren. Getrennte Wurzeln/DBs je Instanzmodus. Alte unmarkierte Bestände werden beim operational-Start markiert, damit wird ihre Herkunft nicht nachträglich bewiesen. Vor Nutzung Legacy-Herkunft prüfen. Smoke-Tests verwenden keine konfigurierten Betriebsbestände mehr, sondern entfernen ihre eigene temporäre Instanz nach dem Lauf.
+
+## Challenge-Worker v0.3
+Worker separat starten/überwachen; `/api/runtime` meldet nur Tokenkonfiguration, nicht Liveness. Prozess kann im Leerlauf NO_PENDING_JOB melden, das ist kein Test-/Challenge-PASS. Bei Abbruch läuft ein Joblease nach 60 Sekunden ab. Neuer Worker darf ihn claimen, veraltete Jobs werden superseded. Neue Evidence/Result/Stopereignisse erfordern explizite Rechallenge; alte Approvals nicht wiederverwenden. API und Worker bei Policyupdates gemeinsam aktualisieren. Kein Report-/Lease-/Tokenoverride zur Fehlerbehebung.
+
+Result/Job/Reports/Audit liegen in derselben SQLite-Sicherung. Quellblobs/Modusmarker weiterhin separat vollständig sichern. Context-Snapshots enthalten Originaltexte: gleicher Schutz/Retentionbedarf wie Evidence. Max. 500 Evidenzen/4 MiB je Snapshot, max. 500 Findings plus Limitbefund; bei Überschreitung BLOCK statt Teilfreigabe. Keine RAM-/Durchsatzgarantie.

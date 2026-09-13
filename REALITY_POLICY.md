@@ -30,3 +30,6 @@ Release als fertig bezeichneter Funktionen nur mit Implementation + realem Test 
 
 ## Technische und organisatorische Grenzen
 Die Policyprüfung ist eine überprüfbare Teilkontrolle, kein semantischer Beweis jedes Codes. Ein autorisierter Mensch kann weiterhin falschen Text einreichen; kein Schlagwortfilter kann Wahrheit beweisen. Review, Provenance, Hostzugriff und kontrollierter Datenimport bleiben nötig. Testdaten werden nicht aus bestehenden DBs gelöscht oder als real umetikettiert. Vorhandene Daten und Geräte werden nicht für diese Prüfung manipuliert.
+
+## Verbindliche Challenge-Regel v0.3
+Every Decision Must Survive Challenge. Kein Primärergebnis direkt in Approval/autoritative Memory übernehmen. Aktuelles Result Package → separater Challenge-Prozess → verifizierter Report → Triage → erforderliche Human Approval → explizite Adoption. Keine Test-/UI-/Configoption zum Überspringen. CONDITIONAL/BLOCK stoppt. Bei Staleness neu prüfen, alte Freigaben nicht wiederverwenden. Primärfreitext nicht durch einen begrenzten strukturierten PASS als wahr ausgeben. [Vertrag](docs/02-core/challenge-worker.md).

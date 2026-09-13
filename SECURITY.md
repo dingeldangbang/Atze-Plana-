@@ -9,7 +9,7 @@ Keine Secrets, Angriffspayloads gegen Live-Systeme oder private Daten in öffent
 ## Schutzmaßnahmen
 - Zwei unterschiedliche Bearer-Tokens, mindestens 32 Zeichen; Startup schlägt bei fehlenden Tokens fehl. Zufällige Token empfohlen, nicht Passwörter.
 - Keine Rolle aus Request-Feldern; Authentifizierung über konstantzeitlichen Tokenvergleich.
-- Reviewer darf nicht erfassen; Operator darf weder Evidenz prüfen noch Aufgaben freigeben, Audit lesen oder Stop ändern.
+- Reviewer darf keine Primary-Projekte/Evidence/Tasks erfassen; die explizite geprüfte Result-Adoption ist ein separater Reviewer-Pfad; Operator darf weder Evidenz prüfen noch Aufgaben freigeben, Audit lesen oder Stop ändern.
 - Kein CORS-Allow-All, kein Cookie-Login, keine Tokenpersistenz im Frontend; CSP und `textContent` statt HTML-Rendering fremder Daten.
 - Keine Server-Fetches fremder URLs; dadurch kein implementierter SSRF-Pfad über Quellen. Eine URL ist ein erfasster Verweis, nicht eine geprüfte Quelle.
 - SQL-Parameter und Feldlängen; Audit und fachliche Mutation in einer SQLite-Transaktion.
@@ -20,7 +20,7 @@ Geteilte Rollen sind keine individuelle Identität; ein Nutzer mit beiden Tokens
 ## Human in the loop
 READ wird nur mit geprüfter Evidenz, gemeldeter Confidence >=0.8 und bestätigten Voraussetzungen eligible. WRITE, FLASH, FIRMWARE, EDL WRITE, PRODUCTION DEPLOY und PAYMENT erfordern je Aufgabe einen Reviewer-Grund. Keine dieser Aktionen wird ausgeführt. Für spätere finanzielle oder invasive Ausführung ist ein stärkerer, ziel-/betragsgebundener expliziter Freigabevertrag zwingend. Der heutige Approval-Datensatz reicht dafür nicht.
 
-Stop wirkt auf jede neue Triage und Freigabe, nicht auf Netzwerk-, Host- oder Hardwareprozesse. Nach Deaktivierung können bestehende Freigaben wieder approved sein; es gibt keine Revocation/Expiry. Vor Einführung von Executoren muss das korrigiert und getestet werden.
+Stop wirkt auf jede neue Triage und Freigabe, nicht auf Netzwerk-, Host- oder Hardwareprozesse. Seit v0.3 bleiben alte Freigaben nach Stop-Deaktivierung ungültig und benötigen neue Challenge/Approval; allgemeine zeitliche Expiry fehlt. Vor Einführung von Executoren muss das korrigiert und getestet werden.
 
 [Threat Model](THREAT_MODEL.md), [Security-Architektur](docs/01-architecture/security-architecture.md).
 
@@ -33,3 +33,8 @@ Cache-Cleanup darf ausschließlich abgelaufene Cacheobjekte löschen und committ
 
 ## Verbindliche Realitätsprüfung v0.2.1
 [REALITY_POLICY](REALITY_POLICY.md) gilt für jeden Beitrag. Keine Mock-/Demo-/Fake-Provider oder unbemerkten Fallbacks im Betriebsweg. Tests/Fehler-Injektionen bleiben getrennt; `python scripts/reality_check.py` und `python scripts/smoke.py --allow-fixtures` tatsächlich ausführen. Der Smoke startet ausschließlich seine eigene temporäre Testinstanz. Laufreports beweisen keine Geräte-/Providerintegration. [Getrennte Integrationsnachweise](docs/17-security/reality-audit.md).
+
+## Mandatory Challenge v0.3
+[Every Decision Must Survive Challenge](docs/02-core/challenge-worker.md). Ohne aktuellen serverseitig verifizierten Workerreport kein Task-ACCEPT, kein Approval und keine autoritative Resultübernahme. Workercredential separat; claim/complete allein erlaubt. Primärpakete/Jobs/Reports unveränderlich bzw. servergebundene Leasezustände; Replay und stale Snapshots blockiert. Kritische Befunde nicht durch Human-Approval überstimmbar. Jeder neue Challenge-/Result-/Evidence-/Stopstand entwertet alte Approvals.
+
+Ein PASS ist ausschließlich der Abschluss begrenzter strukturierter Checks, kein Beweis für Primärfreitext, reale Geräteidentität, unabhängige Quellen oder Kausalität. Adopt speichert nur einen gebundenen Decision-Verweis; direktes fact/decision-Memory blockiert. RAG berechnet die aktuelle Decisiongültigkeit erneut. Gemeinsamer Rulecode und gleicher Entwicklungs-OS-Nutzer sind keine organisatorische/OS-Isolation. Vor Produktion getrennte Nutzer/Secrets/Workersicherheit abnehmen; kein Executor eingeführt.

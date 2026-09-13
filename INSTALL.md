@@ -8,7 +8,8 @@
 | Backend / Frontend | Ein FastAPI-Prozess mit statischen Dateien; kein Node-Build |
 | Datenbank | SQLite aus Python-Standardbibliothek, lokaler beschreibbarer Pfad; Initialisierung beim Start |
 | Original-/Cacheablage | v0.2: lokale UTF-8-Blobs bis 65.536 Zeichen pro Objekt, optional Betreiber-SD-Verzeichnis; kein Remote Object Store |
-| Local Bridge / Workers | NOT IMPLEMENTED; keine zusätzlichen Dienste starten |
+| Challenge Worker | separater realer Prüfprozess; python -m app.challenge_worker; eigener Token und HTTP-API |
+| Local Bridge / Execution Workers | NOT IMPLEMENTED; Challenge ist kein allgemeiner Executor |
 | 3D / Unity / Android | NOT IMPLEMENTED; keine SDK-Version oder Buildfähigkeit behauptet |
 | GitHub / CI | Workflow im Repository; keine Zugangsdaten für lokale Tests erforderlich |
 

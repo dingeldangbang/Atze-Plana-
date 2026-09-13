@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from app.config import Settings
 from app.main import create_app
 from app.triage import evaluate
-from conftest import seed, task
+from conftest import seed, task, challenged_result, process_job_api
 
 
 def test_config_fails_closed(tmp_path):
@@ -52,17 +52,20 @@ def test_evidence_provenance_and_review(client, reviewer):
 
 @pytest.mark.parametrize('action', ['read', 'write', 'flash', 'firmware', 'edl_write', 'production_deploy', 'payment'])
 def test_approval_policy(client, reviewer, action):
-    """TRI-001: only READ is eligible without reviewer approval; no decision executes an action."""
+    """TRI-001: Challenge is mandatory; only READ can be eligible without approval, high-impact decisions remain conditional and never execute."""
     project, evidence = seed(client, reviewer)
     key = task(client, project, evidence, action)
     url = f'/api/tasks/{key}'
+    assert client.post(url + '/triage').json()['state'] == 'blocked'
+    challenged_result(client, key, evidence['id'])
     decision = client.post(url + '/triage').json()
-    assert decision['state'] == ('eligible' if action == 'read' else 'approval_required')
+    assert decision['state'] == ('eligible' if action == 'read' else 'approval_required' if action == 'write' else 'blocked')
+    assert decision['validation_status'] == ('ACCEPT' if action in {'read', 'write'} else 'CONDITIONAL')
     assert decision['executed'] is False
     assert client.post(url + '/approve', json={'reason': 'Denied'}).status_code == 403
     response = client.post(url + '/approve', headers=reviewer, json={'reason': 'Explicit fixture approval'})
-    assert response.status_code == (409 if action == 'read' else 201)
-    if action != 'read':
+    assert response.status_code == (201 if action == 'write' else 409)
+    if action == 'write':
         assert client.post(url + '/triage').json()['state'] == 'approved'
         assert client.post(url + '/approve', headers=reviewer, json={'reason': 'Duplicate'}).status_code == 409
     assert client.post(url + '/execute').status_code == 404
@@ -83,6 +86,7 @@ def test_emergency_stop_persistent(client, reviewer, settings):
     """SEC-003: persisted stop blocks even approved tasks after application restart."""
     project, evidence = seed(client, reviewer)
     key = task(client, project, evidence, 'write')
+    result = challenged_result(client, key, evidence['id'])
     assert client.post(f'/api/tasks/{key}/approve', headers=reviewer, json={'reason': 'Fixture'}).status_code == 201
     assert client.post('/api/control/stop', headers=reviewer, json={'active': True, 'reason': 'Test stop'}).status_code == 200
     with TestClient(create_app(settings)) as restarted:
@@ -90,7 +94,10 @@ def test_emergency_stop_persistent(client, reviewer, settings):
         assert decision['state'] == 'blocked'
         assert 'Emergency stop is active' in decision['reasons']
     assert client.post('/api/control/stop', headers=reviewer, json={'active': False, 'reason': 'Resume review'}).status_code == 200
-    assert client.post(f'/api/tasks/{key}/triage').json()['state'] == 'approved'
+    assert client.post(f'/api/tasks/{key}/triage').json()['state'] == 'blocked'
+    assert client.post(f"/api/results/{result['id']}/challenge", json={'reason': 'Recheck after stop reset'}).status_code == 201
+    process_job_api(client)
+    assert client.post(f'/api/tasks/{key}/triage').json()['state'] == 'approval_required'
 
 
 def test_input_integrity(client, reviewer):
@@ -123,7 +130,7 @@ def test_rejected_and_empty_evidence():
     base = {'id': 'unit', 'action': 'read', 'preconditions_met': True, 'evidence_ids': []}
     assert evaluate(base, []).state == 'blocked'
     assert evaluate(base, [{'state': 'rejected', 'confidence': 1}]).state == 'blocked'
-    assert evaluate(base, [{'state': 'verified', 'confidence': 0.8}]).state == 'eligible'
+    assert evaluate(base, [{'state': 'verified', 'confidence': 0.8}]).state == 'blocked'  # challenge absent
 
 
 def test_audit_and_transaction(client, reviewer, settings):

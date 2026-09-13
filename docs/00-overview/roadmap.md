@@ -6,7 +6,7 @@ Stand 2026-09-13. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 |---|---|---|
 | 00 Overview | IMPLEMENTED | Dokumentierte Grenzen und Begriffe |
 | 01 Architecture | IMPLEMENTED Kern | Kein verteiltes System |
-| 02 Core | PARTIAL | Projekte/Aufgaben/Evidence/Triage/Approval; kein Orchestrator, Context-/Decision-LLM oder Action-Executor |
+| 02 Core | PARTIAL | Result Packages, separater Challenge Worker, Triage/Approval/Adoption plus bisheriger Kern; kein Orchestrator/Primary-LLM/Action-Executor |
 | 03 Plan | PARTIAL | Projektmetadaten, bounded Archive-/Memory-Erfassung und Textsuche; kein Plan-/Workflow-/Query-Builder |
 | 04 Agents | NOT IMPLEMENTED | Kein Agent Builder, Runtime, Tools, Lifecycle; vor Implementierung Tool→Permission→Task→Triage→Execution-Vertrag und isolierte Negativtests |
 | 05 Devices | NOT IMPLEMENTED | USB, WiFi, BLE, Serial, Discovery, Device Bridge fehlen; reale Testgeräte und Adaptermodell nötig |
@@ -17,7 +17,7 @@ Stand 2026-09-13. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 10 Web Research | NOT IMPLEMENTED | Bright Data SERP/Scraping/Browser/Crawl/Extraction/PDF/Cache/Rate-Handling fehlen; URLs nur manuelle Referenzen |
 | 11 3D | NOT IMPLEMENTED | Keine Unity-Version, Module, Pakete, Szenen, Assets, Avatare, Worlds oder Digital Twins; kein Editor-/Headless-Build |
 | 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein Android-/CLI-/Softwareprojekt-Builder |
-| 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | v0.2 taskgebundene Cacheblobs mit TTL/Cleanup; kein Executor, isolierter Workspace oder Worker |
+| 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | Cache TTL/Cleanup und separater Challenge-Prüfprozess; kein Executor oder isolierter Workspace |
 | 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; Browser-E2E, Geräte, Agenten, Lasttest fehlen |
 | 15 Trends | NOT IMPLEMENTED | Keine Anomalie-, Lifecycle- oder Proaktivitätsengine |
 | 16 Evidence | PARTIAL | Manuelle Provenance, Hash, Review; keine Quellenrangfolge, automatische Wahrheit/Aktualität oder Widerspruchserkennung |

@@ -14,8 +14,11 @@ class Settings:
     sd_root: Path | None = None
 
     mode: str = "operational"
+    challenge_token: str = field(default="", repr=False)
 
     def __post_init__(self):
+        if self.challenge_token and (len(self.challenge_token) < 32 or self.challenge_token in {self.operator_token, self.reviewer_token}):
+            raise ValueError('Challenge credential must be separate and at least 32 characters')
         if self.mode not in {"operational", "test"}:
             raise ValueError("ATZE_MODE must be operational or test")
         if min(len(self.operator_token), len(self.reviewer_token)) < 32:
@@ -29,4 +32,5 @@ class Settings:
                    os.getenv('ATZE_OPERATOR_TOKEN', ''), os.getenv('ATZE_REVIEWER_TOKEN', ''),
                    Path(os.getenv('ATZE_STORAGE_ROOT')) if os.getenv('ATZE_STORAGE_ROOT') else None,
                    Path(os.getenv('ATZE_SD_ROOT')) if os.getenv('ATZE_SD_ROOT') else None,
-                   os.getenv('ATZE_MODE', 'operational'))
+                   os.getenv('ATZE_MODE', 'operational'),
+                   os.getenv('ATZE_CHALLENGE_TOKEN', ''))

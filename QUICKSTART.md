@@ -8,10 +8,10 @@ python -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.lock
 cp .env.example .env
-python -c 'import secrets; print(secrets.token_urlsafe(48)); print(secrets.token_urlsafe(48))'
+python -c 'import secrets; print(secrets.token_urlsafe(48)); print(secrets.token_urlsafe(48)); print(secrets.token_urlsafe(48))'
 ```
 
-Die beiden erzeugten Werte lokal in `.env` bei `ATZE_OPERATOR_TOKEN` und `ATZE_REVIEWER_TOKEN` eintragen. Nicht in Chat, Git oder Tickets kopieren. `.env` ist ignoriert, aber nicht verschlüsselt.
+Die drei erzeugten Werte lokal in `.env` bei `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN` und `ATZE_CHALLENGE_TOKEN` eintragen. Nicht in Chat, Git oder Tickets kopieren. `.env` ist ignoriert, aber nicht verschlüsselt.
 
 ```sh
 chmod 600 .env
@@ -55,3 +55,12 @@ Ohne Zusatzkonfiguration nutzt der Server `data/objects` neben der Standarddaten
 `python scripts/smoke.py --allow-fixtures` startet ausschließlich eine **eigene temporäre Testinstanz** und prüft zusätzlich Archive, exakten Text-Readback, Memory-Inferenz, Quellen-Retrieval und Cache. Fremde Ziel-URLs werden nicht akzeptiert, geerbte Betriebsdatenpfade und Tokens nicht verwendet. Es importiert keine echten Motor-/Gerätedaten. [API-/Lifecycle-Verträge](docs/20-context-storage/contracts.md).
 
 `ATZE_MODE` bleibt für die Arbeitsinstanz standardmäßig `operational`. Das ist keine Produktionsfreigabe. Der Smoke setzt seinen eigenen Modus ausdrücklich auf `test`. Datenbank/Dateiwurzeln erhalten dauerhafte Modusmarker; Testbestände dürfen nicht durch einen Moduswechsel produktiv gemacht werden. [Policy und Legacy-Grenzen](REALITY_POLICY.md).
+
+## Pflicht-Worker ab v0.3
+API und Worker getrennt starten. Nach Setzen/Laden der drei Tokens eine zweite Shell verwenden; dem Worker nur seinen Servicetoken geben (keine Operator-/Reviewer-/DB-Konfiguration). Beispiel für Linux nach dem lokalen Laden von `.env`:
+
+```sh
+env -i PATH="$PATH" ATZE_CHALLENGE_TOKEN="$ATZE_CHALLENGE_TOKEN" .venv/bin/python -m app.challenge_worker --url http://127.0.0.1:8000
+```
+
+Ergebnis-Package per API einreichen → Job pending → separater Workerbericht → Triage → ggf. Reviewer-Approval → explizite Adoption. Ohne Worker kein akzeptiertes Ergebnis. Keine Aufgabe der Vorschau mit Testfixtures befüllen. `python scripts/smoke.py --allow-fixtures` prüft den vollständigen Ablauf in eigener temporärer Testinstanz inklusive **zwei echter separater Workerprozesse**. [Challenge-Vertrag / API / Breaking Changes](docs/02-core/challenge-worker.md).
