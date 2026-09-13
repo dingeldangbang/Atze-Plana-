@@ -69,3 +69,24 @@ def test_broken_link_detection(monkeypatch, tmp_path):
     assert docs.validate_links() == ['README.md: broken file reference missing.md']
     (tmp_path / 'missing.md').write_text('Now present')
     assert docs.validate_links() == []
+
+
+def test_connection_dependency_thread_handoff(tmp_path):
+    """DB-THREAD-001 | FastAPI lifecycle handoff | real SQLite/two threads | enter/use/exit separately | commit and rollback correct."""
+    from concurrent.futures import ThreadPoolExecutor
+    from app.store import Store, put, get
+    store = Store(tmp_path / 'thread-handoff.db', mode='test')
+    with ThreadPoolExecutor(max_workers=1) as enter_thread, ThreadPoolExecutor(max_workers=1) as exit_thread:
+        cm = store.connect()
+        db = enter_thread.submit(cm.__enter__).result()
+        exit_thread.submit(put, db, 'project', {'id': 'synthetic-handoff', 'name': 'Thread test only'}).result()
+        exit_thread.submit(cm.__exit__, None, None, None).result()
+        with store.connect() as check:
+            assert get(check, 'project', 'synthetic-handoff')['name'] == 'Thread test only'
+        cm = store.connect()
+        db = enter_thread.submit(cm.__enter__).result()
+        exit_thread.submit(put, db, 'project', {'id': 'synthetic-rollback', 'name': 'Must rollback'}).result()
+        error = RuntimeError('isolated rollback test')
+        exit_thread.submit(cm.__exit__, RuntimeError, error, None).result()
+        with store.connect() as check:
+            assert check.execute("SELECT count(*) FROM records WHERE id='synthetic-rollback'").fetchone()[0] == 0

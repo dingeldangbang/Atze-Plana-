@@ -42,7 +42,9 @@ class Store:
 
     @contextmanager
     def connect(self):
-        db = sqlite3.connect(self.path, timeout=5)
+        # One connection per unit of work, used sequentially. FastAPI may enter,
+        # execute and exit sync dependencies on different threadpool threads.
+        db = sqlite3.connect(self.path, timeout=5, check_same_thread=False)
         try:
             db.execute('BEGIN IMMEDIATE')
             yield db

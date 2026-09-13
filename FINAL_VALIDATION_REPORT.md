@@ -11,7 +11,7 @@ LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Loca
 ## Aktuell ausgeführte lokale Gates
 | Gate | Ergebnis | Grenze / Evidence |
 |---|---|---|
-| Gesamtsuite | **116 passed**, 2 sichtbare Deprecation-Warnungen | `reports/ai-tests.log`, JUnit; 90 bestehende + 26 neue parametrisierte Fälle |
+| Gesamtsuite | **117 passed**, 2 sichtbare Deprecation-Warnungen | `reports/ai-tests.log`, JUnit; 90 bestehende + 27 neue parametrisierte Fälle |
 | Statement-Coverage | **97,78%**, 1489 Statements /33 nicht parent-gemessen | Challenge-Kindprozesse nicht in Parent-Coverage; keine Requirements-/Browserabdeckung behauptet |
 | Privacy-/Rollen-/Leak-/Context-/Memory-/Replay-/Stop-/Policytests | TESTED | echte APIs/SQLite, abgewiesene Anfragen ohne Transport; AI-001..014 |
 | TLS | TESTED begrenzt | echter Loopback-TLS-Handshake: unbekanntes Zertifikat abgewiesen, explizit vertrautes temporäres Testzertifikat akzeptiert; TLSminimum1.2; keine echte PrivateLink-/Remoteproviderabnahme |
@@ -26,7 +26,7 @@ LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Loca
 | Browser E2E | NOT RUN | Syntax/HTTP sind kein Bedienungsnachweis |
 | Gesamte HF-Agent-Integration / Release | **BLOCKED** | lokale HF-Inferenz, AgentRuntime/MCP/OS-Sandbox/full privacy/cost/offload noch nicht umgesetzt/validiert |
 
-Lokaler wiederholter Wheel-SHA256: `bfbc8197871fce1bf92b9cf54739405ad3abf8ca7a380b8dd5c68fc68cb38ecd`. Weitere ignorierte Laufartefakte: `reports/ai-build.log`, `reports/ai-wheel-install.log`, `reports/ai-reproducibility.json`, `reports/dependency-audit.json`, `reports/smoke*.json`. CI erzeugt eigene commitgebundene Artefakte. Erster Gesamtlauf: 110 bestanden/1 Docsfehler wegen noch fehlendem ATZE_AI_CONFIG in YAML-Spiegel; Spiegel ergänzt, Generator und Gesamtsuite danach neu ausgeführt. Kein Test umgangen.
+Lokaler wiederholter Wheel-SHA256: `09e3184292f3421bc359f905ff838def6e07759081c0d955d03c290362f1b573`. Weitere ignorierte Laufartefakte: `reports/ai-build.log`, `reports/ai-wheel-install.log`, `reports/ai-reproducibility.json`, `reports/dependency-audit.json`, `reports/smoke*.json`. CI erzeugt eigene commitgebundene Artefakte. Erster Gesamtlauf: 110 bestanden/1 Docsfehler wegen noch fehlendem ATZE_AI_CONFIG in YAML-Spiegel; Spiegel ergänzt, Generator und Gesamtsuite danach neu ausgeführt. Kein Test umgangen.
 
 ## Nicht als erfüllt ausgegebene Akzeptanzkriterien
 - **Local Hugging Face model / autonome Agent Runtime / MCP / Multimodel Challenge:** NOT RUN/NOT IMPLEMENTED. Kein Modelloutput oder MCP-Erfolg erfunden. Bestehender deterministischer separater Challenge-Worker ist kein unabhängiges zweites KI-Modell.
@@ -38,8 +38,11 @@ Lokaler wiederholter Wheel-SHA256: `bfbc8197871fce1bf92b9cf54739405ad3abf8ca7a38
 
 Nächster realer Integrationsschritt: geprüften separaten lokalen Modellworker mit konkreter Runtime, Modelllizenz, gepinnter Revision und Hardwarebudget bereitstellen; reale Inferenz und danach eigenständige Agent-/MCP-/Sandboxpfade jeweils durch eigene Abnahmegates führen. Keine Remote-Inferenz im Produkt automatisch aktivieren.
 
+## Beobachteter Previewfehler und Regression
+Beim abschließenden Live-Read nach Neustart trat SQLite ProgrammingError auf: FastAPI kann sync Dependency-Enter/Handler/Exit auf verschiedene Poolthreads verteilen. Bisherige SQLite-Threadbindung war zu streng. Store.connect verwendet weiterhin eine eigene, sequenziell genutzte Verbindung pro Unit-of-Work, jetzt mit erlaubtem Thread-Handoff. DB-THREAD-001 prüft reale getrennte Threads inklusive Commit und Rollback. Kein geteilter globaler Connectionpool oder überlappende Benutzung eingeführt. Erneut ausgeführt: 117 Tests, beide echten Smokes, zwei Builds und installierter-Wheel-Check samt Thread-Handoff. Preview nach Korrektur: 40 echte Read-only-Anfragen mit 8 parallelen Clients erfolgreich, Default DENY/leere Modell-/Resultlisten, keine Testeinträge. reports/ai-preview-read.json. CI der Korrektur wird separat nachgetragen; frühere grüne Läufe allein reichen nicht.
+
 ## Remote-/Preview-Nachweis
-Implementierung `7de6893211a87c92bc2af42bae498b1d75efee61`, zusätzliche explizite Sperre bekannter unbeschrifteter Plattform-/Providercredentials in `a915c659ebf4937b462ce30af9c0c52feb939e99`. Letzter lokaler Gesamtlauf 116 Tests; Remote-Lauf 34788948064 für diesen Code vollständig grün (1m16s). Nicht blockierende bekannte Node-20→24-Actionwarnung sichtbar. PR bleibt offen. Dieser nachfolgende Dokumentationscommit ergänzt tatsächliche Nachweise.
+Implementierung `7de6893211a87c92bc2af42bae498b1d75efee61`, zusätzliche explizite Sperre bekannter unbeschrifteter Plattform-/Providercredentials in `a915c659ebf4937b462ce30af9c0c52feb939e99`. Lokaler Lauf vor Thread-Handoff-Korrektur 116 Tests; Remote-Lauf 34788948064 für diesen Code vollständig grün (1m16s). Nicht blockierende bekannte Node-20→24-Actionwarnung sichtbar. PR bleibt offen. Dieser nachfolgende Dokumentationscommit ergänzt tatsächliche Nachweise.
 
 Preview auf 0.4.0.dev0 neu gestartet, Health operational/ok. Tatsächlich abgefragte AI-Policy: default-deny, privacy_lock=true, local_only=true, external_ai=false, allow_remote=false; Provider und Modellregister leer. Keine Testmodelle/Prompts/Testprovider in Betriebsdaten; keine externe Inferenz aktiviert. Kein Browser-E2E-/Produktionsnachweis.
 
