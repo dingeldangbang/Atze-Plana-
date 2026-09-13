@@ -9,7 +9,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Python-Paket, OpenAPI, Dokumentationskonsistenz | VALIDATED lokal | [Validierungsbericht](FINAL_VALIDATION_REPORT.md) |
 | Memory / Archive / Cache / lokale FTS-Suche | IMPLEMENTED / TESTED | [Neue Context-/Storage-Architektur](docs/20-context-storage/architecture.md); kein MCP-/Cloud-/Offline-Sync-Adapter |
 | Challenge Worker / Result Packages | IMPLEMENTED / begrenzt | [Eigener Prozess, Token, fünf Checks, Staleness-/Adopt-Gate](docs/02-core/challenge-worker.md); keine unabhängige Online-Recherche |
-| Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; kein live-validiertes HF-Modell, MCP oder Agentensandbox |
+| Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; separate reale HF-Modell-CI; kein operativer Modellworker, MCP oder Agentensandbox |
 | Dashboard | IMPLEMENTED | Projektanlage, Listen, Triage, Storage/Context, Warum?/Herausfordern/Quellen; Browser-E2E noch offen |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
@@ -57,3 +57,6 @@ Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit
 
 ## Master-Anforderung: nächste reale Abnahme
 Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validation.md) mit gepinnten Gewichten/Runtime und ein [nativer Android-Core-Client](android/README.md) mit echter Build-/Emulator-Pipeline. Diese Pipelines sind keine Erfolgsmeldung: [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [Finale Validierung](FINAL_VALIDATION_REPORT.md) nennen nur ausgeführte Ergebnisse. Keine Dummy-Verzeichnisse für fehlende Geräte-/Unity-/MCP-/Cloudmodule. Gesamtplattform bleibt bis zur vollständigen Abnahme BLOCKED.
+
+### Tatsächlich geprüfte neue Deliverables
+[Lokaler Modell-CI-Nachweis](TEST_REPORT.md): gepinnte Qwen-Inferenz, keine externe Inferenz, nicht-root/Loopback-only. [Android-Debug-APK und SHA256](APK_RELEASE_REPORT.md): echt gebaut/signiert, installiert/gestartet/getestet im SDK-Emulator. Native App ist ein kleiner Read-only-Core-Statusclient, keine volle Device-/Repair-/Agentplattform. Gesamtfreigabe bleibt BLOCKED.

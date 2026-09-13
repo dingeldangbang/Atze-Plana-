@@ -1,3 +1,15 @@
+# Documentation Audit — verified worker/Android increment
+
+ADR-006, Master-Matrix, nativer Androidvertrag, gepinnter Modellvalidierungsvertrag, TEST_REPORT und APK_RELEASE_REPORT parallel zur Implementierung gepflegt. Ergebnisse erst nach tatsächlichen CI-Läufen ergänzt. Drei klare Nachweise: lokaler Python-Core, separater CI-Modellworker, tatsächlich gestarteter SDK-Emulator. Keine Verwechslung mit Produktions-/Honeywell-/AgentRuntime-/MCP-/Sandboxvalidierung.
+
+120 lokale Tests, OpenAPI/lokale Dateilinks/acht Runtime-Envvariablen überprüft; Java typgeprüft/kompiliert durch echten SDK-Build. Native API nutzt vorhandenen Corevertrag, kein neues Backendmodell erfunden. APK-Bericht bindet Branch- und PR-Merge-SHA, tatsächliche Dateigrößen/SHA256, erfolgreichen Installationslauf und zeitlich begrenzten GitHub-Artefaktlink. Nicht lokales Download-PASS behauptet: Sandbox-Blobtransfer EOF. Fehler/AVD-Korrektur und erneute Abnahme dokumentiert. Debug-Signatur nicht als Produktionskey oder reproduzierbare Dauersignatur ausgegeben.
+
+Vollständige Masteranforderung bleibt explizit BLOCKED, offene Module nicht durch leere Verzeichnisse/Mockups ersetzt. Kein aktueller Modell-/Android-CI-Erfolg in historische 0.3/0.4-Runtime-Providerstatus hineingeschrieben. Spätere Report-Hygieneänderungen publizieren nur benötigte Artefakte/strukturierte Fehler statt ungekürzter Emulatorlogs.
+
+---
+
+## Historische Dokumentationsaudits
+
 # Documentation Audit — Master-Inkrement
 
 ADR-006 vor Worker-/Android-CI-Ausführung. Reale Grenzen in android/README.md, lokalem Modellvalidierungsvertrag, APK_RELEASE_REPORT.md und TEST_REPORT.md beschrieben. Baseline 120 Tests; Android lokal BLOCKED; Modellartefakte nicht aus Metadaten als heruntergeladen/verifiziert ausgegeben. Scope klar zwischen Core, eigenem Modell-CI-Prozess, Android-Emulator und physischer Hardware getrennt. Neue Pipelines zunächst NOT RUN, tatsächliche Ergebnisse erst nach CI ergänzen. Kein universeller Gateway-/Sandboxbeweis aus einem Netzwerknamespace. Acht Runtime-Envvariablen unverändert, OpenAPI konsistent; Android ist ein gesonderter nativer Client, keine neue Core-Agentfähigkeit.

@@ -1,3 +1,32 @@
+# Final Validation Report — real model worker + Android prototype
+
+Stand 2026-09-14. **FUNCTIONAL PROTOTYPE / CONDITIONAL**, vollständige Plattform und Production Release **BLOCKED**. Implementierungsbasis fbf4be9; Android-Pfadkorrektur und geprüfter Branchstand `b7912227f2a021cc3664b27e5984312369b1328e`. Keine erfundenen Dienste, Geräte, Modelloutputs oder APKs. Kein Merge/Release/Produktionsdeploy.
+
+## Gelieferter realer Umfang
+- Bestehender Evidence-/Context-/Storage-/Privacy-/Challenge-/Triage-Core bleibt erhalten; 120 Tests/97,78% Coverage und beide echten HTTP-Smokes bestanden.
+- Reale lokale Qwen-Inferenz auf separat betriebenem **GitHub-CI-Worker**, gepinnte Modell-/Runtimebytes, unprivilegierter Prozess, Netzwerknamespace nur Loopback, explizit synthetischer Prompt, tatsächlicher Output READY, anschließend Kindprozesse beendet. Keine operative Modellkonfiguration oder vollständige AgentRuntime daraus abgeleitet.
+- Nativer **Android-Core-Statusclient** mit realem HTTPS-Transportcode, explizitem Ziel/Token, keinen automatischen Daten/Devices, TLS1.2+/Systemtrust, keinem Redirect-/Klartextfallback. Echte Debug-APKs gebaut/signaturgeprüft, im SDK-Emulator installiert/gestartet und native UI-/Sicherheitsgrenzen geprüft. Keine Repair-/Bridgefähigkeit vorgetäuscht.
+
+## Ausgeführte Gates / Artefakte
+[TEST_REPORT](TEST_REPORT.md) nennt konkrete Laufresultate, [APK_RELEASE_REPORT](APK_RELEASE_REPORT.md) die echten Dateien/Signatur-/Installationsgrenzen und SHA256-Werte.
+
+- [Modell-CI 34790349657](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34790349657): PASS; UID1001, LOOPBACK_ONLY_NO_EXTERNAL_ROUTE, tatsächlicher einzelner Request0.881s, Ausgabe READY, children_stopped=true. Kein allgemeiner Qualitäts-/Performancebeweis.
+- [Android-CI 34790349728](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34790349728): PASS in3m19s; tatsächliche APK-Erzeugung/Signaturprüfung/Installation/Start/Instrumentation.
+- [Download der geprüften APKs und Nachweise](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34790349728/artifacts/10328670450). Branchcommit b791222, PR-Mergecode c9d5f9c31349013fbc7bc0bdeabb3adedce4ca01. Appdatei **atze-app-debug.apk**,16811Bytes,SHA256`b7893a6d8e4da3650b21c75d10796d7db4032410c2a5be65ee7c45af30f03b14`. Test-APK separat, nicht normale Appinstallation.
+- Downloads aus Blob-Store in Arena scheitern mit EOF; **keine lokale APK-Kopie behauptet**. Dateien und Prüfsummen wurden im tatsächlichen CI erzeugt; GitHub-Artefaktmetadaten und Original-Check-Annotationen authentifiziert abgerufen. User kann Original über GitHub downloaden; Retention14Tage, kein dauerhafter Release.
+
+## Fehler ehrlich behoben
+Direkter HF-TLS-Abruf in Sandbox gescheitert; keine Zertifikatsabschaltung/anderer Provider. Lokaler Androidbuild korrekt BLOCKED (JDK/SDK fehlen). Erster CI-Androidbuild erzeugte APKs, Installationsphase scheiterte; Diagnose zeigte AVD-Home-Konflikt. Gemeinsame explizite Pfade/ini-Prüfung eingeführt und der gesamte Lauf erneut bestanden. Keinen alten Teil-PASS als APK-Abnahme ausgegeben.
+
+## Unverändert blockierte Master-Gates
+[Master acceptance matrix](docs/00-overview/master-acceptance.md): vollständiger PLAN-Binary-/CAD-/Device-/Repair-Kontext samt Context Lock, allgemeiner Agent Builder/MCP/Permission-Leases/Tool-Executor/Filesystem-Sandbox, echte USB/WiFi/BLE/ADB/Fastboot/EDL-/Honeywell-/ESP32-/Motor-/Trend-/Unity-/BrightData-/Cloud-/Paymentintegration fehlen oder sind nicht validiert. Kein Messwert/Drehmoment/Cloudgerät erfunden. Android-Emulator-ADB ist Testwerkzeug, keine produktive Device Bridge. Reale Core-TLS-Session aus APK und physische Hardwaretests NOT RUN; AAB nicht gebaut; keine Produktionssignatur. Universeller Egress-/verschlüsselter Secretcache-/2GB-Last-/Security-Audit offen. Deployment und Release bleiben BLOCKED.
+
+Nächste Priorität: begrenzter PLAN-Objekt-/Context-Lock-Vertrag und widerrufbare Permission-Leases vor allgemeiner MCP-/Toolausführung. Reale Geräte/Provider nur mit tatsächlich verfügbaren autorisierten Ressourcen anbinden. [ADR-006](docs/adr/ADR-006-real-worker-and-android-validation.md). Historische Validierungsberichte darunter sind zeitlich markierte frühere Stände, keine aktuellen APK-Buildhashes.
+
+---
+
+## Historische Validierung vor dem erfolgreichen Worker-/Androidlauf
+
 # Master-Inkrement — reale Worker-/Android-Abnahme, noch keine Gesamtfreigabe
 
 Stand 2026-09-14. Basis fbf4be9. Ist-Zustand und unterbrochene Änderungen geprüft; aktuelle Baseline erneut ausgeführt: 120 Tests, 97,78% Core-Coverage, Python-Build, Dokumentation/OpenAPI/No-fake/JS-Syntax PASS. Drei Harness-Tests sind kein realer Modelltest. [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [ADR-006](docs/adr/ADR-006-real-worker-and-android-validation.md).
