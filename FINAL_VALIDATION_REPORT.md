@@ -22,7 +22,7 @@ LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Loca
 | Wheel/sdist Build | PASS 0.4.0.dev0 | tatsächlich erzeugt, keine APK/Modellartefakte |
 | Installiertes Wheel | PASS begrenzt | zweite locked venv, python -I lädt site-packages; isolierte DB/API/default deny/HTML geprüft |
 | Reproduzierbarkeit | CONDITIONAL | zwei Builds mit SOURCE_DATE_EPOCH1789344000: Wheel bytegleich; sdist-Dateien/Inhalte gleich, Archivbytes verschieden |
-| Remote-CI dieses Schnitts | PENDING | wird nach tatsächlichem Commit/Push/Lauf ergänzt |
+| Remote-CI dieses Schnitts | PASS | Implementierungsstand a915c659ebf4937b462ce30af9c0c52feb939e99; [Lauf 34788948064](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34788948064) komplett erfolgreich, inkl. Tests/Build/Docs/Audit/Smokes/JS/Artefaktupload |
 | Browser E2E | NOT RUN | Syntax/HTTP sind kein Bedienungsnachweis |
 | Gesamte HF-Agent-Integration / Release | **BLOCKED** | lokale HF-Inferenz, AgentRuntime/MCP/OS-Sandbox/full privacy/cost/offload noch nicht umgesetzt/validiert |
 
@@ -37,6 +37,11 @@ Lokaler wiederholter Wheel-SHA256: `bfbc8197871fce1bf92b9cf54739405ad3abf8ca7a38
 - **Kosten/Ressourcen/Offloading/2-GB-Core:** keine Kostenberechnung/Provisionierung/GPU-Messung oder Lastgarantie. Core hält keine Gewichte; Inferenzthread hält zeitweise DB-Schreiblock. Sockettimeout ist keine harte Gesamtdeadline. In-flight Daten können durch Policyänderung nicht zurückgeholt werden.
 
 Nächster realer Integrationsschritt: geprüften separaten lokalen Modellworker mit konkreter Runtime, Modelllizenz, gepinnter Revision und Hardwarebudget bereitstellen; reale Inferenz und danach eigenständige Agent-/MCP-/Sandboxpfade jeweils durch eigene Abnahmegates führen. Keine Remote-Inferenz im Produkt automatisch aktivieren.
+
+## Remote-/Preview-Nachweis
+Implementierung `7de6893211a87c92bc2af42bae498b1d75efee61`, zusätzliche explizite Sperre bekannter unbeschrifteter Plattform-/Providercredentials in `a915c659ebf4937b462ce30af9c0c52feb939e99`. Letzter lokaler Gesamtlauf 116 Tests; Remote-Lauf 34788948064 für diesen Code vollständig grün (1m16s). Nicht blockierende bekannte Node-20→24-Actionwarnung sichtbar. PR bleibt offen. Dieser nachfolgende Dokumentationscommit ergänzt tatsächliche Nachweise.
+
+Preview auf 0.4.0.dev0 neu gestartet, Health operational/ok. Tatsächlich abgefragte AI-Policy: default-deny, privacy_lock=true, local_only=true, external_ai=false, allow_remote=false; Provider und Modellregister leer. Keine Testmodelle/Prompts/Testprovider in Betriebsdaten; keine externe Inferenz aktiviert. Kein Browser-E2E-/Produktionsnachweis.
 
 ---
 

@@ -4,7 +4,7 @@ ADR-005 vor Implementierung; fehlende lokale Runtime/HF/MCP/Sandbox ausdrücklic
 
 Nicht fälschlich behauptet: HF-Liveinferenz aus HTTP-Receipt, semantische Geheimnisfreiheit aus Regex, PrivateLink aus Mode-Label, OS-Isolation aus Python-Gateway, universeller Privacy Lock aus KI-Policyschalter, AgentRuntime aus bloßer Modellanfrage. Alle Modalitäts-Protokolle ausdrücklich Verträge, keine fertigen Provider.
 
-Dokumentationsprüfung lokal PASS (vier generierte Produkte, OpenAPI, lokale Dateilinks, acht Envvariablen); semantische Vollständigkeit/Anker/externe Links nicht umfassend maschinell bewiesen. Ausgeführte Ergebnisse im [aktuellen Validierungsbericht](FINAL_VALIDATION_REPORT.md). Remote-CI für diesen Schnitt wird nach realem Lauf nachgetragen.
+Dokumentationsprüfung lokal PASS (vier generierte Produkte, OpenAPI, lokale Dateilinks, acht Envvariablen); semantische Vollständigkeit/Anker/externe Links nicht umfassend maschinell bewiesen. Ausgeführte Ergebnisse im [aktuellen Validierungsbericht](FINAL_VALIDATION_REPORT.md). Remote-CI für Implementierungsstand a915c659ebf4937b462ce30af9c0c52feb939e99: [34788948064](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34788948064) vollständig erfolgreich. Dokumentationsstand ergänzt beobachtete Nachweise, keine neuen Fähigkeiten.
 
 ---
 
