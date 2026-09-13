@@ -56,6 +56,12 @@ class ExternalDataGateway:
             raise GateDenied('PROVIDER_NOT_CONFIGURED')
         return self.providers[provider_id]
 
+    def scan(self, text):
+        scan(text)
+        known = (*self.forbidden_tokens, *(os.environ.get(p.token_env, '') for p in self.providers.values()))
+        if any(secret and secret in text for secret in known):
+            raise GateDenied('KNOWN_CREDENTIAL_BLOCKED')
+
     def model_provider(self, provider_id):
         self.provider(provider_id)
         return OpenAICompatibleProvider(self, provider_id)
@@ -67,7 +73,7 @@ class ExternalDataGateway:
         token = os.environ.get(provider.token_env, '')
         if len(token) < 32 or token in self.forbidden_tokens or '\r' in token or '\n' in token:
             raise GateDenied('PROVIDER_AUTH_NOT_CONFIGURED')
-        scan(context)
+        self.scan(context)
         if target.scheme == 'https':
             tls = ssl.create_default_context()
             tls.minimum_version = ssl.TLSVersion.TLSv1_2
@@ -92,7 +98,7 @@ class ExternalDataGateway:
             text = message['content']
             if not isinstance(text, str) or not text.strip() or len(text) > 16000:
                 raise GateDenied('INVALID_PROVIDER_OUTPUT')
-            scan(text)
+            self.scan(text)
             return text
         finally:
             conn.close()

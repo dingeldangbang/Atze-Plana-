@@ -2,7 +2,7 @@
 from fastapi import Depends, Query
 from fastapi.responses import JSONResponse
 from app.ai_models import AIPolicy, ModelRegistration, AIRequest, AIConsent
-from app.ai_gateway import ExternalDataGateway, GateDenied, scan
+from app.ai_gateway import ExternalDataGateway, GateDenied
 from app.ai_service import policy, prepare, execute
 from app.store import put, get, listing, audit, identity, now
 
@@ -30,7 +30,7 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store)
 
     @app.post('/api/ai/models', tags=['ai'], status_code=201, openapi_extra=contract('reviewer', 'Immutable reviewed manual metadata; no download/discovery/live revision or license validation'))
     def register_model(body: ModelRegistration, who=Depends(reviewer), db=DB) -> dict:
-        scan(body.model_dump_json())
+        gateway.scan(body.model_dump_json())
         gateway.provider(body.provider_id)
         value = put(db, 'ai_model', dict(**body.model_dump(), id=identity(), created_at=now(), approval_state='MANUALLY_REVIEWED', validation='NOT_LIVE_VALIDATED'))
         audit(db, who, 'ai.model_registered', value['id'])

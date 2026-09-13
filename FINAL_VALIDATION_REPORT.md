@@ -11,9 +11,9 @@ LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Loca
 ## Aktuell ausgeführte lokale Gates
 | Gate | Ergebnis | Grenze / Evidence |
 |---|---|---|
-| Gesamtsuite | **115 passed**, 2 sichtbare Deprecation-Warnungen | `reports/ai-tests.log`, JUnit; 90 bestehende + 25 neue parametrisierte Fälle |
-| Statement-Coverage | **97,78%**, 1484 Statements /33 nicht parent-gemessen | Challenge-Kindprozesse nicht in Parent-Coverage; keine Requirements-/Browserabdeckung behauptet |
-| Privacy-/Rollen-/Leak-/Context-/Memory-/Replay-/Stop-/Policytests | TESTED | echte APIs/SQLite, abgewiesene Anfragen ohne Transport; AI-001..013 |
+| Gesamtsuite | **116 passed**, 2 sichtbare Deprecation-Warnungen | `reports/ai-tests.log`, JUnit; 90 bestehende + 26 neue parametrisierte Fälle |
+| Statement-Coverage | **97,78%**, 1489 Statements /33 nicht parent-gemessen | Challenge-Kindprozesse nicht in Parent-Coverage; keine Requirements-/Browserabdeckung behauptet |
+| Privacy-/Rollen-/Leak-/Context-/Memory-/Replay-/Stop-/Policytests | TESTED | echte APIs/SQLite, abgewiesene Anfragen ohne Transport; AI-001..014 |
 | TLS | TESTED begrenzt | echter Loopback-TLS-Handshake: unbekanntes Zertifikat abgewiesen, explizit vertrautes temporäres Testzertifikat akzeptiert; TLSminimum1.2; keine echte PrivateLink-/Remoteproviderabnahme |
 | Text-HTTP-Transport | TESTED, **kein Modelltest** | isolierter Receiver berechnet Hash-Transportbeleg, kein Modell/Fakeprovider in Runtime; HTTP-/Redirect-/Tools-/Malformed-/Oversize-Grenzen |
 | Bestehender realer HTTP-Smoke | PASS | 29 Responses und zwei separate Challenge-Workerprozesse, auch unter python -O |
@@ -26,7 +26,7 @@ LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER-Konfiguration; default Loca
 | Browser E2E | NOT RUN | Syntax/HTTP sind kein Bedienungsnachweis |
 | Gesamte HF-Agent-Integration / Release | **BLOCKED** | lokale HF-Inferenz, AgentRuntime/MCP/OS-Sandbox/full privacy/cost/offload noch nicht umgesetzt/validiert |
 
-Lokaler wiederholter Wheel-SHA256: `eebb8028dd990785310754735ddbb895e8308fcaef660abeb302b5de257e822f`. Weitere ignorierte Laufartefakte: `reports/ai-build.log`, `reports/ai-wheel-install.log`, `reports/ai-reproducibility.json`, `reports/dependency-audit.json`, `reports/smoke*.json`. CI erzeugt eigene commitgebundene Artefakte. Erster Gesamtlauf: 110 bestanden/1 Docsfehler wegen noch fehlendem ATZE_AI_CONFIG in YAML-Spiegel; Spiegel ergänzt, Generator und Gesamtsuite danach neu ausgeführt. Kein Test umgangen.
+Lokaler wiederholter Wheel-SHA256: `bfbc8197871fce1bf92b9cf54739405ad3abf8ca7a380b8dd5c68fc68cb38ecd`. Weitere ignorierte Laufartefakte: `reports/ai-build.log`, `reports/ai-wheel-install.log`, `reports/ai-reproducibility.json`, `reports/dependency-audit.json`, `reports/smoke*.json`. CI erzeugt eigene commitgebundene Artefakte. Erster Gesamtlauf: 110 bestanden/1 Docsfehler wegen noch fehlendem ATZE_AI_CONFIG in YAML-Spiegel; Spiegel ergänzt, Generator und Gesamtsuite danach neu ausgeführt. Kein Test umgangen.
 
 ## Nicht als erfüllt ausgegebene Akzeptanzkriterien
 - **Local Hugging Face model / autonome Agent Runtime / MCP / Multimodel Challenge:** NOT RUN/NOT IMPLEMENTED. Kein Modelloutput oder MCP-Erfolg erfunden. Bestehender deterministischer separater Challenge-Worker ist kein unabhängiges zweites KI-Modell.

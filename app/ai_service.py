@@ -1,7 +1,7 @@
 """Bounded model requests: explicit selected context, reviewer consent, no adoption."""
 import json
 from app.ai_models import AIPolicy
-from app.ai_gateway import GateDenied, fingerprint, scan
+from app.ai_gateway import GateDenied, fingerprint
 from app.store import get, put, audit, identity, now, stopped
 from app.context import update
 
@@ -20,7 +20,7 @@ def prepare(db, body, who, gateway):
         raise GateDenied('SECRET_CLASS_BLOCKED')
     if len(body.evidence_ids) + len(body.memory_ids) > 8:
         raise GateDenied('CONTEXT_COUNT_EXCEEDED')
-    scan(body.prompt)
+    gateway.scan(body.prompt)
     context = [{'type': 'prompt', 'text': body.prompt}]
     for kind, ids in [('evidence', body.evidence_ids), ('memory', body.memory_ids)]:
         if len(ids) != len(set(ids)):
@@ -31,10 +31,10 @@ def prepare(db, body, who, gateway):
                 raise GateDenied('CROSS_PROJECT_CONTEXT')
             if kind == 'memory' and source.get('task_id') not in {None, body.task_id}:
                 raise GateDenied('CROSS_TASK_MEMORY')
-            scan(source['content'])
+            gateway.scan(source['content'])
             context.append({'type': kind, 'id': key, 'text': source['content'], 'untrusted': True})
     text = json.dumps(context, ensure_ascii=False)
-    scan(text)
+    gateway.scan(text)
     # Explicit selected context is conservatively confidential, never auto-public.
     classification = 'CONFIDENTIAL' if len(context) > 1 else body.classification
     value = dict(**body.model_dump(), id=identity(), created_at=now(), project_id=task['project_id'],
@@ -72,7 +72,7 @@ def check(db, request, gateway, consent):
             raise GateDenied('REMOTE_EXPORT_DENIED')
         if provider.mode == 'EXTERNAL_PROVIDER' and not current['external_ai']:
             raise GateDenied('EXTERNAL_AI_DENIED')
-    scan(request['context'])
+    gateway.scan(request['context'])
     return current, model
 
 

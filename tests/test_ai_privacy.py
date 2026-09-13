@@ -253,3 +253,14 @@ def test_ai_duplicate_startup_config(ai):
     *_,config=ai
     data=json.loads(config.read_text());data['providers']*=2;config.write_text(json.dumps(data))
     with pytest.raises(ValueError): ExternalDataGateway(config)
+
+
+def test_ai_known_unlabelled_credentials(ai):
+    """AI-014 | Known credentials | raw platform/provider tokens without labels | prepare | BLOCK before persistence/transport."""
+    c,r,body,pol,seen,output,settings,_=ai
+    for secret in [settings.operator_token,settings.reviewer_token,settings.challenge_token,'isolated-transport-credential-'*2]:
+        body['prompt']='Unlabelled synthetic credential input '+secret
+        value=c.post('/api/ai/requests',json=body)
+        assert value.status_code==409 and value.json()['detail']=='KNOWN_CREDENTIAL_BLOCKED'
+        assert secret not in c.get('/api/audit',headers=r).text
+    assert not seen
