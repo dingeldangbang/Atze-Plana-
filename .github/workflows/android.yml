@@ -25,8 +25,15 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/atze-avd"
+          export ANDROID_USER_HOME="$RUNNER_TEMP/atze-android-home"
+          export ANDROID_EMULATOR_HOME="$ANDROID_USER_HOME"
+          unset ANDROID_SDK_HOME
+          mkdir -p "$ANDROID_AVD_HOME" "$ANDROID_USER_HOME"
           sudo chmod 666 /dev/kvm
-          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force --name atze-test --package 'system-images;android-35;google_apis;x86_64' --device pixel_2
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --force --name atze-test --package 'system-images;android-35;google_apis;x86_64' --device pixel_2 --path "$ANDROID_AVD_HOME/atze-test.avd"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" list avd > reports/android/avd-config.txt
+          test -f "$ANDROID_AVD_HOME/atze-test.ini"
           emulator -avd atze-test -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -memory 1536 > reports/android/emulator.log 2>&1 &
           EMULATOR_PID=$!
           trap 'adb emu kill || true; kill "$EMULATOR_PID" 2>/dev/null || true' EXIT

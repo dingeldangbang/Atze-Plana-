@@ -101,3 +101,9 @@ Leeres Repository → frische SQLite-Schema-v1-Datei. Keine Upgrade-Migrationen.
 
 ### Validation
 Siehe [Final Validation Report](FINAL_VALIDATION_REPORT.md). Keine Hardware- oder Produktionsvalidierung.
+
+## Master increment — real worker and native Android candidates (unreleased)
+- Pinned local-model artifact manifest + actual isolated inference runner/CI, separate from transport-receipt tests. Default operational policy unchanged.
+- Native Java Android read-only HTTPS Core client, TLS1.2/1.3-only sockets, no token persistence/cleartext/redirect fallback, no device/repair buttons pretending integration.
+- Official SDK build/sign/verify/checksum and emulator installation/start/instrumentation pipeline; local SDK preflight fails explicitly, CI outcomes recorded separately.
+- Added APK_RELEASE_REPORT, TEST_REPORT and master acceptance matrix. No overall platform/production release declared.

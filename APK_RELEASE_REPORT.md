@@ -18,3 +18,6 @@ Native read-only Core status client, source in [android](android/README.md). Bui
 | Production signing/release | BLOCKED; no production key used |
 
 Final CI results and exact checksum/artifact references must be added after actual execution. No production distribution, Play Store release or repair capability claimed. Debug key must never be committed/uploaded; only certificate fingerprint and signed APK are deliverables.
+
+## Beobachtete CI-Zwischenergebnisse
+Erster Lauf34789954436: SDK-Build/Signaturprüfung tatsächlich PASS, Emulatorphase Timeout124, kein Installations-PASS. Diagnose-Lauf34790257621: tatsächliche APKs erstellt; Emulator37.1.11 meldet `Unknown AVD name [atze-test]`, fehlende ini im gesuchten AVD-Home. Nicht als erfolgreich installiert ausgegeben. Korrektur: gemeinsame explizite ANDROID_AVD_HOME/ANDROID_USER_HOME/ANDROID_EMULATOR_HOME für avdmanager und emulator, feste AVD-Path- und ini-Prüfung. Erneute Installation/Startprüfung notwendig.
