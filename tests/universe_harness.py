@@ -57,9 +57,15 @@ def plan(root, scope):
             commands.extend([('go tests', ['go', 'test', './...']), ('go build', ['go', 'build', './...'])])
         elif stack == 'gradle':
             commands.extend([('gradle tests', ['./gradlew', 'test']), ('gradle build', ['./gradlew', 'assemble'])])
-        else:
-            if scope == 'core' and atze and stack == 'android':
+        elif stack == 'android':
+            if scope == 'core' and atze:
                 continue
+            script = root / 'scripts' / 'build_android.sh'
+            if script.is_file():
+                commands.append(('Android debug build', ['bash', 'scripts/build_android.sh']))
+            else:
+                blockers.append('android: explicit platform/build/test contract and tools required')
+        else:
             blockers.append(stack + ': explicit platform/build/test contract and tools required')
     if not stacks:
         blockers.append('Unknown stack: no test/build success inferred')

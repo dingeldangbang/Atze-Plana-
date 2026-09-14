@@ -13,17 +13,29 @@ import stat
 import subprocess
 import tokenize
 
-EXTENSIONS = {'.py', '.js', '.jsx', '.ts', '.tsx', '.rs', '.kt', '.kts', '.java', '.c', '.h', '.cpp', '.hpp', '.swift', '.go', '.rb', '.php', '.dart', '.sh', '.html', '.css', '.cs', '.vue', '.svelte'}
-MANIFESTS = {'package.json', 'Cargo.toml', 'build.gradle', 'build.gradle.kts', 'settings.gradle', 'go.mod', 'pyproject.toml', 'composer.json', 'Gemfile', 'Podfile', 'pubspec.yaml', 'CMakeLists.txt', 'Makefile', 'AndroidManifest.xml'}
+# Executable code plus checked-in build, API, workflow and documentation contracts.
+# This deliberately covers CommonJS and declarative files as well as Python/Java/etc.;
+# otherwise a source audit could omit an executable browser harness or CI/OpenAPI contract.
+EXTENSIONS = {'.py', '.js', '.cjs', '.mjs', '.jsx', '.ts', '.tsx', '.rs', '.kt', '.kts', '.java', '.c', '.h', '.cpp', '.hpp', '.swift', '.go', '.rb', '.php', '.dart', '.sh', '.html', '.css', '.cs', '.vue', '.svelte', '.json', '.toml', '.yaml', '.yml', '.xml', '.lock', '.md', '.example'}
+SOURCE_BASENAMES = {'.gitignore', 'Makefile', 'Dockerfile', 'Containerfile', 'Procfile', 'Gemfile', 'Rakefile', 'CMakeLists.txt'}
+MANIFESTS = {'package.json', 'Cargo.toml', 'build.gradle', 'build.gradle.kts', 'settings.gradle', 'go.mod', 'pyproject.toml', 'composer.json', 'Gemfile', 'Podfile', 'pubspec.yaml', 'CMakeLists.txt', 'Makefile', 'AndroidManifest.xml', 'requirements.lock', '.env.example', 'config.example.yaml', 'openapi.yaml'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'backups', 'reports', 'data', 'build', 'dist', 'target', '.cache', '__pycache__'}
 MARKER = re.compile(r'^\s*(?:\*+\s*)?(TODO|FIXME|MOCK|SHIM|STUB|PLACEHOLDER|HACK)\b', re.I)
 STATUS_PRIORITY = ('MOCK', 'STUB', 'FIXME', 'TODO', 'PLACEHOLDER')
 
 
 def safe_source(path):
+    # The checked-in template is a contract, while any real .env remains excluded.
     return not any(p in EXCLUDED for p in path.parts) and not any(
-        p.startswith('.env') or any(s in p.lower() for s in ('secret', 'credential', 'private-key')) for p in path.parts
+        (p.startswith('.env') and path.name != '.env.example')
+        or any(s in p.lower() for s in ('secret', 'credential', 'private-key'))
+        for p in path.parts
     ) and path.suffix.lower() not in {'.pem', '.key', '.p12', '.jks', '.db', '.bak'}
+
+
+def eligible_source(path):
+    """Return whether a safe tracked text file is an auditable source/contract."""
+    return path.suffix.lower() in EXTENSIONS or path.name in SOURCE_BASENAMES
 
 
 def repo_root(path):
@@ -148,12 +160,17 @@ def findings(text, suffix):
         return _python_findings(text)
 
     result = []
+    documentation = suffix == '.md'
     for n, line in enumerate(text.splitlines(), 1):
         # This deliberately requires the comment opener to start a token, reducing
         # false positives from most quoted URLs and examples in non-Python sources.
         match = re.search(r'(?:^|(?<=\s))(?:#|//|/\*|<!--)\s*(TODO|FIXME|MOCK|SHIM|STUB|PLACEHOLDER|HACK)\b', line, re.I)
         if match:
             result.append((n, match[1].upper()))
+        # Markdown is a contract source, but its fenced/inline examples are prose,
+        # not executable stub/assert bodies. Keep only explicit heading/comment markers.
+        if documentation:
+            continue
         if re.search(r'\{\s*return\s+(?:false|0|null|\{\})\s*;?\s*\}', line, re.I):
             result.append((n, 'STUB_CANDIDATE'))
         if re.search(r"\bthrow\s+new\s+Error\s*\(\s*['\"]\s*not\s+implemented\b", line, re.I):
@@ -180,7 +197,7 @@ def inventory(root):
     for path, git_state in files(root):
         if path.name in MANIFESTS:
             manifests.append(str(path))
-        if path.suffix not in EXTENSIONS:
+        if not eligible_source(path):
             continue
         row = {'path': str(path), 'git': git_state, 'status': 'REAL', 'validation': 'NOT VALIDATED'}
         try:
@@ -231,7 +248,7 @@ def audit(root):
 
 def backup(root, relative):
     path = Path(relative)
-    if path.is_absolute() or '..' in path.parts or not safe_source(path) or path.suffix not in EXTENSIONS:
+    if path.is_absolute() or '..' in path.parts or not safe_source(path) or not eligible_source(path):
         raise ValueError('Only eligible relative source paths may be backed up')
     raw = read_source(root, path)
     sha = hashlib.sha256(raw).hexdigest()

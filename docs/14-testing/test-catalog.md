@@ -129,10 +129,12 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | DOC-004: missing local reference is detected and existing reference is accepted. | [test_tools.py: test_broken_link_detection](../../tests/test_tools.py) |
 | DB-THREAD-001 | FastAPI lifecycle handoff | real SQLite/two threads | enter/use/exit separately | commit and rollback correct. | [test_tools.py: test_connection_dependency_thread_handoff](../../tests/test_tools.py) |
 | UNI-001: ignored/secret files excluded, pending source seen, no source excerpt. | [test_universe.py: test_inventory_exclusions_and_pending_files](../../tests/test_universe.py) |
+| UNI-010: CJS, workflow/API/build/docs contracts and safe env template are inventoried; real env remains excluded. | [test_universe.py: test_inventory_covers_cross_language_and_contract_sources](../../tests/test_universe.py) |
 | UNI-002: exception pass not a stub; whole empty function candidate, syntax distinct. | [test_universe.py: test_legitimate_pass_and_syntax](../../tests/test_universe.py) |
 | UNI-003: actual byte copy, idempotent backup, corrupt backup/symlink rejected. | [test_universe.py: test_backup_integrity_and_symlinks](../../tests/test_universe.py) |
 | UNI-004: report writer cannot overwrite symlink target. | [test_universe.py: test_report_symlink_refused](../../tests/test_universe.py) |
 | UNI-005: multiple stacks, actual commands without collect/dry-run; unknown blocked. | [test_universe.py: test_multi_stack_and_unknown](../../tests/test_universe.py) |
+| UNI-011: all-scope Android detection runs the declared build script rather than claiming a platform result. | [test_universe.py: test_android_all_scope_uses_explicit_build_contract](../../tests/test_universe.py) |
 | UNI-006: real failing/successful/timeout processes, no shell; no stdout leak. | [test_universe.py: test_actual_process_exit_and_timeout](../../tests/test_universe.py) |
 | UNI-007: no --execute means no code runs, saved report BLOCKED, nonzero exit. | [test_universe.py: test_plan_only_fails_closed](../../tests/test_universe.py) |
 | UNI-008: FIFO source cannot hang scanner; hardlinked report cannot truncate data. | [test_universe.py: test_nonregular_and_hardlinked_output](../../tests/test_universe.py) |
