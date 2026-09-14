@@ -1,0 +1,20 @@
+[project]
+name = "atze-plana"
+version = "0.4.0.dev0"
+description = "Evidence and approval core with explicit policy-gated model drafts; no tool execution"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.135", "uvicorn>=0.41"]
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+app = ["static/*"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

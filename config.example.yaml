@@ -1,0 +1,10 @@
+# Documentation-only mirror. Runtime reads environment variables, NOT this file.
+ATZE_OPERATOR_TOKEN: "" # required secret, >=32 characters
+ATZE_REVIEWER_TOKEN: "" # required different secret, >=32 characters
+ATZE_DB_PATH: data/atze.db
+ATZE_STORAGE_ROOT: "" # empty = DB parent / objects
+ATZE_SD_ROOT: "" # optional existing removable-tier directory
+ATZE_MODE: operational # operational|test; persistent DB/root markers prevent mode switching
+ATZE_CHALLENGE_TOKEN: "" # separate optional-at-startup service secret, >=32 chars; required for Challenge
+ATZE_AI_CONFIG: "" # optional trusted JSON provider file; empty = no configured AI providers
+ATZE_BRIGHTDATA_OAUTH_TOKEN: "" # optional OAuth access token; discovery only, never API key/query URL

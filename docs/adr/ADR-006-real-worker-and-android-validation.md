@@ -1,0 +1,13 @@
+# ADR-006 — Echte Worker- und Android-Abnahme statt Integrationsbehauptung
+
+Status: accepted, 2026-09-14. Basis fbf4be9; unterbrochene lokale Modellvalidator-Dateien wurden vor Weiterarbeit geprüft, nicht als ausgeführt angenommen. Baseline: 120 tatsächliche pytest-Fälle, 97,78% Core-Coverage, Python-Build. Lokal fehlen Java/Gradle/Android SDK/ADB/Emulator. Direkter Hugging-Face-TLS-Abruf scheitert; kein TLS-Bypass.
+
+## Priorität / echter Umfang
+1. Separater gepinnter llama.cpp/HF-Modellvalidierungsworker in CI. Downloads nur öffentliche feste URLs, HTTPS und SHA256/Größe. Während Inferenz nicht-root, eigenes Linux-Netzwerknamespace nur mit Loopback. Neue Test-DB und frische eigene Credentials. Kein Zugriff auf operative Plattformdaten, keine externe Inferenz. Tatsächliches Modell muss selbst eine kurze Ausgabe erzeugen; Hash-Receiver ist kein Ersatz. Modell bleibt unchallenged, keine automatische Entscheidung. Namespace ist keine vollständige Filesystem-/Syscall-Sandbox.
+2. Kleiner realer nativer Android-Client: expliziter HTTPS-Verbindungsaufbau zum eigenen Core und authentifizierte Runtime-Statusabfrage. Keine Demoansichten für Repair/USB/Unity/MCP. Native ExternalDataGateway erzwingt HTTPS, System-CA/Hostnameprüfung, keine Redirects und begrenzte Antwort. Kein Tokenpersistieren/Logging. Kein Geräte-/Shell-/Model-Toolrecht.
+3. Debug-APK und Instrumentation-APK mit vorhandenen offiziellen Android SDK-Werkzeugen, ohne Framework-/WebView-/Maven-Scheinprojekt. Emulatorinstallation/Start und native UI-/HTTPS-Blockprüfung in separatem CI-Worker. Echtes Emulatorergebnis ist KEIN Honeywell-/physisches Gerätetestat. APK nur mit tatsächlich vorhandener Datei/Signatur/Hash ausliefern. Ohne gestarteten Emulator bleibt Installation NOT RUN.
+
+## Sicherheit und Gates
+Keine neue operative External-AI-Policy. Ein explizit gestarteter CI-Artefaktdownload ist keine Runtime-Provider-Fallbackfunktion. CI-Netzwerknamespace braucht privilegiertes Setup, danach müssen Core/Modell als unprivilegierter Runner laufen. Android benötigt INTERNET ausschließlich für explizit gewählten HTTPS-Core; keine ADB-/USB-/BLE-/Storage-/Paymentrechte. Debugschlüssel ausschließlich temporär in CI, niemals im Repository. Kein Produktionsrelease/Schlüssel, keine automatische Distribution.
+
+Gesamtplattform bleibt BLOCKED: allgemeiner Agent Builder/MCP/Bridge/Hardware/Unity/Cloud/Bright Data/Trend Engine/verschlüsselter Cache/OS-Sandbox und umfassende Release-Abnahme nicht implementiert oder nicht validiert. Keine leeren Verzeichnisse als fertige Module ausgeben. Berichte unterscheiden lokalen Lauf, CI-Worker, Emulator und echte Hardware sowie konkret gebaute Artefakte.

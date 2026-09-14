@@ -1,0 +1,33 @@
+# Teststrategie
+
+## Gates
+- Unit: reine Triage mit fehlender/abgelehnter Evidenz und Grenzwert.
+- Integration: echte temporäre SQLite-Datei über FastAPI TestClient; Rollen, Herkunft, Referenzen, Approval, Stop/Restart und transaktioneller Audit-Rollback.
+- API-E2E-Smoke: `scripts/smoke.py` gegen einen separat gestarteten echten HTTP-Prozess; keine Mocks für HTTP/DB. Dies ist **kein Browser-E2E**.
+- Dokumentation: generierte Drift, OpenAPI-Validator, lokale Datei-Links, Config-/Environment-Abdeckung, Test-Docstrings und tatsächliche Beispielausführung im Smoke.
+- Build: Wheel/sdist; keine Unity-/Android-Builds.
+- Security: Negativtests plus `pip-audit`; kein Penetrationstest.
+
+## Reproduktion / Evidence
+[Development](../../DEVELOPMENT.md) enthält Befehle. `pytest --junitxml=reports/junit.xml` erfasst einzelne parametrische Testfälle, Ergebnisse, Laufzeiten und Fehler. `--cov=app --cov-report=xml:reports/coverage.xml` misst Python-Zeilenabdeckung, nicht Frontend-/Requirements-Abdeckung. Gates: >=90% Python-Statements; keine Test-Bypässe oder ausgeblendete Failures. CI lädt Reports auch bei Fehlern hoch.
+
+[Testkatalog](test-catalog.md) referenziert für jeden Test ID, Zweck, Preconditions/Fixtures, Aktionen und erwartete Assertions. Tatsächlicher Status ist nur aus einem Laufreport ableitbar; der Generator behauptet keine erfolgreichen Tests.
+
+## Offene Nachweise
+Umfassende Browser-/Accessibility-Abnahme außerhalb des neuen PLAN-Laufs, Device-/Agent-/Sandboxtests, Last-/Concurrency-Stresstest, unabhängiger Pentest, Wiederherstellung unter Produktionsbedingungen und plattformübergreifender Build sind NOT IMPLEMENTED bzw. BLOCKED. Temp-DB-Tests sind keine Sandbox-Isolation. Synthetische Daten sind nur Testinputs.
+
+## v0.2 Regressionen
+Zusätzliche echte temporäre Dateisystemtests für Originalbytes/Hash, stabile Pfadauflösung nach Relocation, Source Retention, Copy-/Auditfehler, Symlink-/Traversalschutz, Kapazitätsfallback, Stop, Cache-Expiry/Retry, Memory fact/inference, Live-Evidence, Projektfilter, Reindex und additive Migration. Simuliertes SD-Verzeichnis ist keine SD-Hardwarevalidierung. HTTP-Smoke wurde um Archive/Memory/FTS/Cache/Health erweitert. Multi-Tier-Gesamtbackup, mobile Hardware, MCP, Remote-Sync und Browser-E2E sind weiterhin offene Nachweise.
+
+## v0.2.1 — explizite Realitätsschranke
+`python scripts/smoke.py --allow-fixtures` startet einen echten HTTP-Childprozess mit eigenen temporären Dateien, Modus test und frischen Tokens. Kein `--base-url` mehr, keine Übernahme von ATZE-Umgebungswerten, kein Mockprovider. Normale pytest-Fixtures wählen test ausdrücklich. Eingaben und reproduzierbare Fehler-Injektion liegen nur im Testwerkzeug, nie im App-Providerpfad. Reports enthalten wirkliche Statuscodes und enden nur nach vollständigem Lauf mit PASS; Opt-out/Fehler ersetzen alte Erfolge durch BLOCKED/FAIL.
+
+REAL-001..015 prüfen Empty Start, Mode-/Legacy-/Root-Grenzen, tatsächlichen Rootausfall, unbekannte Kapazität, explizites Opt-in, ausfallsichere Reportzustände und reale Childprozess-Isolation. `scripts/reality_check.py` prüft zusätzlich enge AST-Grenzen. Keine davon beweist reale SD-/Cloud-/MCP-Hardware, Browserbedienung oder semantische Wahrheit beliebiger Benutzertexte.
+
+## v0.3 — Pflicht-Challenge ohne Test-Bypass
+Bisherige Freigabe-/Stop-/Memorytests werden auf den verschärften Vertrag umgestellt (alte Erfolgsannahmen ohne Challenge sind absichtlich nicht mehr gültig). CH-001..017 prüfen Rollen, echte Regelberechnung, Reportfälschung/Replay, Leaseablauf, stalen Kontext, neue Result/Challenge, Stopreset, Widersprüche, Identität/Einheiten/Bedingungen, fehlende Messungen/Alternativen/Kausalität, Limit-BLOCK, atomare Adoption und RAG-Neubewertung.
+
+API-Unit-/Integrationtests führen claim/analyze/complete mit getrennter Worker-Credential gegen echte SQLite aus. **Zusätzlich startet der reale HTTP-Smoke vier separate Worker-OS-Prozesse (inklusive echtem PLAN-BLOCK)** mit ausschließlich ihrem Servicetoken und prüft deren echte Exitcodes/Reports. Childprozesscode wird nicht vollständig vom Eltern-pytest-Coveragezähler erfasst; Coverage nicht als vollständige Worker-/Browserabdeckung ausgeben. Kein Provider/Hardware-/Primäragent simuliert; nur klar deklarierte strukturierte Testinputs.
+
+## PLAN / echter Browser
+PLAN-001–015 (parametrisiert18 Fälle) verwenden echte Datenhaltung/HTTP und explizite synthetische Inputs. `scripts/smoke.py --allow-fixtures --browser` startet seinen eigenen Test-Core und realen installierten Chromium, CDP über Pipes; keine Treiber-DOM-Simulation, kein --no-sandbox. Sieben Browserprüfungen für Anlage, XSS-Textdarstellung, Rollen, Lock, Widerruf, Version und Logout. Sandbox hier lokal nicht mit Chromium ausgestattet → BLOCKED; reale CI-Ergebnisse in TEST_REPORT. Fehlgeschlagene Harnessläufe werden behoben und erneut ausgeführt, nicht als PASS gezählt.

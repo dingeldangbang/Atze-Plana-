@@ -1,0 +1,44 @@
+name: Universe Check
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - run: bash scripts/universe_audit.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: universe-inventory-${{ github.sha }}
+          path: |
+            reports/inventory.md
+            reports/inventory.json
+          retention-days: 14
+  core:
+    needs: audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.lock
+      - name: Actual selected Core tests, build and isolated E2E
+        run: python tests/universe_harness.py --execute --scope core --timeout 120
+      - name: Upload scoped evidence, never raw process logs or source backups
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: universe-core-${{ github.sha }}
+          path: |
+            reports/universe-*.md
+            reports/universe-*.json
+          retention-days: 14
