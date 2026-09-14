@@ -11,7 +11,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 04 Agents | NOT IMPLEMENTED | Kein Agent Builder, Runtime, Tools, Lifecycle; vor Implementierung Tool→Permission→Task→Triage→Execution-Vertrag und isolierte Negativtests |
 | 05 Devices | NOT IMPLEMENTED | USB, WiFi, BLE, Serial, Discovery, Device Bridge fehlen; reale Testgeräte und Adaptermodell nötig |
 | 06 Android | PARTIAL | Nativer read-only HTTPS-Statusclient, echtes SDK-/Debug-APK-/Emulatortest-CI; keine physische Honeywell/Repair-/Fastboot-/EDL-/Firmwarevalidierung |
-| 07 IoT | NOT IMPLEMENTED | ESP32, Sensoren, Telemetrie, Kalibrierung, Echtzeit nicht angeschlossen |
+| 07 IoT | PARTIAL | Echte HTTP-Telemetrie-Ingestion: deklarative Device-/Sensor-Registry, fail-closed Device-Token, unveränderliche hash-verifizierte/versionierte Batches, reviewerbestätigte Deaktivierung ([Vertrag](../23-telemetry/telemetry.md)); WS/MQTT/Serial, Kalibrierung, Firmware-Upload, physische ESP32-Validierung fehlen |
 | 08 Network | PARTIAL | Eigene HTTP-API vorhanden; kein Monitoring/Discovery/MQTT/SSH/Incident-Executor |
 | 09 Cloud | NOT IMPLEMENTED | Kein Hybrid-/Multi-Cloud-/Edge-/Provider-Adapter, kein Provisioning |
 | 10 Web Research | NOT IMPLEMENTED | Bright Data SERP/Scraping/Browser/Crawl/Extraction/PDF/Cache/Rate-Handling fehlen; URLs nur manuelle Referenzen |

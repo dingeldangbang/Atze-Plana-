@@ -15,7 +15,7 @@ Stand 2026-09-14. Full-platform release **BLOCKED**. A working increment is not 
 | Human approval | reviewer roles, bound task approval, emergency stop and invalidation | no full Allow Once/Task/Workflow/Temporary/Revoke permission-lease engine |
 | Sandbox/ephemeral workers | disposable test Core/Challenge/model/Android jobs with lifecycle cleanup | network namespace is not filesystem/syscall sandbox or full escape-test coverage |
 | Dynamic storage | real local/optional filesystem tier, copy/hash/verify before index switch, retained originals | no real SD hardware validation, cloud/remote tier provisioning or complete crash-atomic cleanup |
-| ESP32/Motor Test Lab/Telemetry | NOT IMPLEMENTED | no measured voltage/current/RPM/temperature/torque; no fabricated sensor values |
+| ESP32/Motor Test Lab/Telemetry | real HTTP ingestion implemented/tested: declared device/sensor registry, fail-closed separate device token, immutable hash/size-verified versioned batches, out-of-range/suspect flagging, confirmed deactivation retaining history | no physical ESP32/sensor measurement validated (NOT RUN); WS/MQTT/Serial, calibration, firmware upload NOT IMPLEMENTED; values are device-submitted, never verified physical truth |
 | Trend Engine | NOT IMPLEMENTED | no actual trend dataset/engine; no inference promoted to MEASURED |
 | Bright Data/Web evidence | NOT CONFIGURED / adapter NOT IMPLEMENTED | no account-bound provider request, crawl/browser/source-comparison execution |
 | Unity/3D/avatar | NOT IMPLEMENTED | no Unity runtime/license/project/build/artifact/test |
@@ -31,3 +31,5 @@ Web model metadata is EXTERNAL_SOURCE. Verified byte hashes prove only matching 
 
 ## Next priorities after this increment
 Model/Android predecessor gates are executed. Current bounded PLAN implementation requires new Core/browser/model/Android validation evidence in root reports. Next: explicit permission leases and sandboxed executor before general MCP/tool execution. Real device/provider integration requires concrete authorized resources; missing hardware/accounts cannot be replaced with fake results. Never lower release/security gates merely to produce a green badge.
+
+The binding PLAN UI/interaction/code/dependency specification ([docs](../21-plan/plan-ui-interaction-spec.md)) applies to every future UI increment: each visible UI function requires a real technical path (command/query, dependencies, permissions, error state, audit, tests, documentation) before it may appear available; specification text is never implementation evidence. Confirmed build order: telemetry (this increment) → trend engine → resource manager → MCP tools/call → agent builder v1 → monitoring/visualization with integrations management (add +, confirmed removal −).

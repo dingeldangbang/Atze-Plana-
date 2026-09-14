@@ -8,3 +8,4 @@ ATZE_MODE: operational # operational|test; persistent DB/root markers prevent mo
 ATZE_CHALLENGE_TOKEN: "" # separate optional-at-startup service secret, >=32 chars; required for Challenge
 ATZE_AI_CONFIG: "" # optional trusted JSON provider file; empty = no configured AI providers
 ATZE_BRIGHTDATA_OAUTH_TOKEN: "" # optional OAuth access token; discovery only, never API key/query URL
+ATZE_TELEMETRY_TOKEN: "" # optional shared telemetry device credential, >=32 chars; blank = ingestion disabled (403)

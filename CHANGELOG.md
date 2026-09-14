@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Telemetry increment, PLAN-UI specification, partial integration
+- Reales Telemetrie-Modul (Modul 1 der bestätigten Umsetzungsreihe „alles der Reihe nach"): deklarative Device-/Sensor-Registry (Operator), HTTP-Ingestion mit getrenntem Device-Fleet-Token (ATZE_TELEMETRY_TOKEN; leer = fail-closed 403), unveränderliche, versionierte, hash-/größenverifizierte Messbatches über den bestehenden Storage-Tier, Out-of-Range-/Suspect-Flagging, reviewerbestätigte Einzel-Deaktivierung ohne Datenlöschung, Not-Stop-Integration. 14 neue Tests, 183 PASS. WS/MQTT/Serial NOT IMPLEMENTED; keine physische ESP32-Validierung (NOT RUN); Werte sind eingereichte Device-Angaben.
+- Verbindliche PLAN-UI-/Interaktions-/Code-/Abhängigkeitsspezifikation (Nutzervorgabe 2026-09-14) aufgenommen: jede sichtbare UI-Funktion benötigt einen realen technischen Pfad (UI → Command/Query → Domain → Dependency → Result → Audit/Test); keine Fake-Interaktion, keine toten Buttons, Action-/Dependency-Registry und Feature-Traceability als Abnahmekriterien künftiger UI-Inkremente. Spezifikation ist SOLL-Zustand, dokumentiert keinen Implementierungsstand.
+- Fehlerbehebung: 422-Validierungsantworten serialisieren nicht-endliche Floats (NaN/Infinity) als Strings, statt beim Fehler-Echo einen JSON-Renderfehler (500) zu erzeugen; Schema-Ablehnung bleibt unverändert.
+
 ## Unreleased — Privacy-first model boundary, partial integration
 - Abgleich der vollständigen ChatGPT-Masterkonversation (Reality First/No Fiction Data, Triage/Challenge, PLAN/Context Lock, APK-Auslieferungspflicht, 2-GB-Korrektur) gegen den tatsächlichen Repositorysstand: [MASTER_ABGLEICH](MASTER_ABGLEICH.md). Am 2026-09-14 tatsächlich ausgeführt: 169 lokale Tests PASS, docs.py --check PASS, reality_check.py PASS. Deltas (u. a. 2-GB-Neuinterpretation, Statusvokabular, Workflow-Editor, Auslieferungsformate) dokumentiert; kein Produkt-/Testcode geändert.
 - Fixed actual SQLite/FastAPI sync dependency thread-handoff error observed in live preview; one connection per unit of work remains, real two-thread commit/rollback regression added.

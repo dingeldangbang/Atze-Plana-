@@ -1,10 +1,13 @@
 """Application factory: importing schemas does not require production secrets."""
 import hashlib
+import math
 import secrets
 import sqlite3
 from pathlib import Path
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +21,7 @@ from app.mcp_api import register_mcp_api
 from app.plan_api import register_plan_api
 from app.ai_api import register_ai_api
 from app.challenge_api import register_challenge_api
+from app.telemetry_api import register_telemetry_api
 from app.challenge_service import decide_task
 
 STATIC = Path(__file__).parent / 'static'
@@ -32,6 +36,22 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
                   description='Single-workspace evidence registry and explicit policy-gated model drafts. No tool/device execution.',
                   docs_url=None, redoc_url=None, openapi_url=None)
     bearer = HTTPBearer(auto_error=False)
+
+    def finite_errors(value):
+        # Python JSON parsing accepts NaN/Infinity tokens; schema validation rejects them,
+        # but echoing them in the 422 body would crash JSON rendering (allow_nan=False).
+        if isinstance(value, float) and not math.isfinite(value):
+            return str(value)
+        if isinstance(value, dict):
+            return {key: finite_errors(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [finite_errors(item) for item in value]
+        return value
+
+    async def validation_errors(request, exc: RequestValidationError):
+        return JSONResponse(status_code=422, content={'detail': finite_errors(jsonable_encoder(exc.errors()))})
+
+    app.exception_handler(RequestValidationError)(validation_errors)
 
     def actor(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]):
         token = credentials.credentials if credentials else ''
@@ -175,6 +195,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     register_ai_api(app, settings, actor, operator, reviewer, connection, store, storage)
     register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)
+    register_telemetry_api(app, settings, bearer, actor, operator, reviewer, connection, store, storage)
 
     @app.get('/', include_in_schema=False)
     def index():

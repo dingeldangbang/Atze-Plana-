@@ -2270,6 +2270,447 @@ paths:
       x-role: reviewer
       x-side-effects: Rebuild one page of derived FTS chunks from hash-verified archive
         originals or memory; audit; stop blocks; failure rolls back page
+  /api/telemetry/devices:
+    post:
+      tags:
+      - telemetry
+      summary: Device Create
+      operationId: device_create_api_telemetry_devices_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Register declared device identity + audit; no hardware discovery
+        or capability invention; stop blocks
+    get:
+      tags:
+      - telemetry
+      summary: Devices
+      operationId: devices_api_telemetry_devices_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+                title: Response Devices Api Telemetry Devices Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; declared registry only, no reachability or liveness claims
+  /api/telemetry/devices/{device_id}/sensors:
+    post:
+      tags:
+      - telemetry
+      summary: Sensor Create
+      operationId: sensor_create_api_telemetry_devices__device_id__sensors_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Device Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Declare sensor identity + audit; declared_range is an owner
+        assertion, not a calibration; stop blocks
+    get:
+      tags:
+      - telemetry
+      summary: Sensors
+      operationId: sensors_api_telemetry_devices__device_id__sensors_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Device Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sensor'
+                title: Response Sensors Api Telemetry Devices  Device Id  Sensors
+                  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; declared registry only, no sensor health or accuracy claims
+  /api/telemetry/ingest:
+    post:
+      tags:
+      - telemetry
+      summary: Ingest
+      operationId: ingest_api_telemetry_ingest_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestInput'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: device
+      x-side-effects: Append immutable timestamped batch blob (hash/size verified
+        on read) + metadata + audit; flags out-of-declared-range and device-suspect
+        samples; no sensor-health or physical-truth claims; stop blocks
+  /api/telemetry/batches:
+    get:
+      tags:
+      - telemetry
+      summary: Batches
+      operationId: batches_api_telemetry_batches_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter batches by device
+          title: Device Id
+        description: Filter batches by device
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Batch'
+                title: Response Batches Api Telemetry Batches Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; immutable batch metadata only
+  /api/telemetry/batches/{batch_id}/samples:
+    get:
+      tags:
+      - telemetry
+      summary: Batch Samples
+      operationId: batch_samples_api_telemetry_batches__batch_id__samples_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: batch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Batch Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSamples'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; hash/size verified blob read; corrupt or unavailable returns
+        503; raw submitted values, not verified physical truth
+  /api/telemetry/devices/{device_id}/deactivate:
+    post:
+      tags:
+      - telemetry
+      summary: Device Deactivate
+      operationId: device_deactivate_api_telemetry_devices__device_id__deactivate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Device Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed deactivation + audit; retains devices/sensors/batches,
+        never deletes submitted measurement history; blocks further ingest for this
+        device
+  /api/telemetry/sensors/{sensor_id}/deactivate:
+    post:
+      tags:
+      - telemetry
+      summary: Sensor Deactivate
+      operationId: sensor_deactivate_api_telemetry_sensors__sensor_id__deactivate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: sensor_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sensor Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sensor'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed deactivation + audit; retains sensors and all previously
+        ingested samples; blocks further ingest for this sensor
 components:
   schemas:
     AIConsent:
@@ -2697,6 +3138,97 @@ components:
       - entity_id
       - details
       title: Audit
+    Batch:
+      properties:
+        id:
+          type: string
+          title: Id
+        device_id:
+          type: string
+          title: Device Id
+        session:
+          type: string
+          title: Session
+        conditions:
+          type: string
+          title: Conditions
+        received_at:
+          type: string
+          title: Received At
+        sample_count:
+          type: integer
+          title: Sample Count
+        first_timestamp:
+          type: string
+          title: First Timestamp
+        last_timestamp:
+          type: string
+          title: Last Timestamp
+        sensor_ids:
+          items:
+            type: string
+          type: array
+          title: Sensor Ids
+        flagged_out_of_range:
+          type: integer
+          title: Flagged Out Of Range
+        suspect_samples:
+          type: integer
+          title: Suspect Samples
+        sha256:
+          type: string
+          title: Sha256
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        tier:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Tier
+        key:
+          type: string
+          title: Key
+        version:
+          type: integer
+          const: 1
+          title: Version
+          default: 1
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - device_id
+      - session
+      - conditions
+      - received_at
+      - sample_count
+      - first_timestamp
+      - last_timestamp
+      - sensor_ids
+      - flagged_out_of_range
+      - suspect_samples
+      - sha256
+      - size_bytes
+      - tier
+      - key
+      title: Batch
+    BatchSamples:
+      properties:
+        batch:
+          $ref: '#/components/schemas/Batch'
+        samples:
+          items:
+            $ref: '#/components/schemas/Sample'
+          type: array
+          title: Samples
+      additionalProperties: false
+      type: object
+      required:
+      - batch
+      - samples
+      title: BatchSamples
     CacheInput:
       properties:
         task_id:
@@ -2932,6 +3464,23 @@ components:
       - fingerprint
       - analysis
       title: Completion
+    DeactivateInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: DeactivateInput
     Decision:
       properties:
         task_id:
@@ -3013,6 +3562,74 @@ components:
       - evidence_ids
       - confidence
       title: Decision
+    DeclaredRange:
+      properties:
+        minimum:
+          type: number
+          title: Minimum
+        maximum:
+          type: number
+          title: Maximum
+      additionalProperties: false
+      type: object
+      required:
+      - minimum
+      - maximum
+      title: DeclaredRange
+    Device:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+        id:
+          type: string
+          title: Id
+        state:
+          type: string
+          enum:
+          - active
+          - deactivated
+          title: State
+        created_at:
+          type: string
+          title: Created At
+        deactivated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deactivated At
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - id
+      - state
+      - created_at
+      title: Device
+    DeviceInput:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      title: DeviceInput
     Discover:
       properties:
         task_id:
@@ -3255,6 +3872,30 @@ components:
       - message
       - next_validation
       title: Finding
+    IngestInput:
+      properties:
+        samples:
+          items:
+            $ref: '#/components/schemas/Sample'
+          type: array
+          maxItems: 1000
+          minItems: 1
+          title: Samples
+        session:
+          type: string
+          maxLength: 120
+          title: Session
+          default: ''
+        conditions:
+          type: string
+          maxLength: 2000
+          title: Conditions
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - samples
+      title: IngestInput
     JobStatus:
       properties:
         id:
@@ -4239,6 +4880,149 @@ components:
       - state
       - reason
       title: Review
+    Sample:
+      properties:
+        sensor_id:
+          type: string
+          title: Sensor Id
+        value:
+          type: number
+          title: Value
+        timestamp:
+          type: string
+          title: Timestamp
+        quality:
+          type: string
+          enum:
+          - ok
+          - suspect
+          title: Quality
+          default: ok
+      additionalProperties: false
+      type: object
+      required:
+      - sensor_id
+      - value
+      - timestamp
+      title: Sample
+    Sensor:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        kind:
+          type: string
+          enum:
+          - voltage
+          - current
+          - rpm
+          - temperature
+          - imu
+          - throttle
+          - steering
+          - speed
+          - custom
+          title: Kind
+        unit:
+          type: string
+          maxLength: 32
+          title: Unit
+          default: ''
+        declared_range:
+          anyOf:
+          - $ref: '#/components/schemas/DeclaredRange'
+          - type: 'null'
+        identification:
+          type: string
+          enum:
+          - IDENTIFIED
+          - UNKNOWN
+          title: Identification
+          default: UNKNOWN
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+        id:
+          type: string
+          title: Id
+        device_id:
+          type: string
+          title: Device Id
+        state:
+          type: string
+          enum:
+          - active
+          - deactivated
+          title: State
+        created_at:
+          type: string
+          title: Created At
+        deactivated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deactivated At
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - kind
+      - id
+      - device_id
+      - state
+      - created_at
+      title: Sensor
+    SensorInput:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        kind:
+          type: string
+          enum:
+          - voltage
+          - current
+          - rpm
+          - temperature
+          - imu
+          - throttle
+          - steering
+          - speed
+          - custom
+          title: Kind
+        unit:
+          type: string
+          maxLength: 32
+          title: Unit
+          default: ''
+        declared_range:
+          anyOf:
+          - $ref: '#/components/schemas/DeclaredRange'
+          - type: 'null'
+        identification:
+          type: string
+          enum:
+          - IDENTIFIED
+          - UNKNOWN
+          title: Identification
+          default: UNKNOWN
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - kind
+      title: SensorInput
     Stop:
       properties:
         active:

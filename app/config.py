@@ -18,10 +18,13 @@ class Settings:
 
     ai_config_path: Path | None = None
     brightdata_oauth_token: str = field(default="", repr=False)
+    telemetry_token: str = field(default="", repr=False)
 
     def __post_init__(self):
         if self.brightdata_oauth_token and self.brightdata_oauth_token in {self.operator_token, self.reviewer_token, self.challenge_token}:
             raise ValueError("Bright Data OAuth credential must be separate")
+        if self.telemetry_token and (len(self.telemetry_token) < 32 or self.telemetry_token in {self.operator_token, self.reviewer_token, self.challenge_token, self.brightdata_oauth_token}):
+            raise ValueError('Telemetry device credential must be separate and at least 32 characters')
         if self.challenge_token and (len(self.challenge_token) < 32 or self.challenge_token in {self.operator_token, self.reviewer_token}):
             raise ValueError('Challenge credential must be separate and at least 32 characters')
         if self.mode not in {"operational", "test"}:
@@ -40,4 +43,5 @@ class Settings:
                    os.getenv('ATZE_MODE', 'operational'),
                    os.getenv('ATZE_CHALLENGE_TOKEN', ''),
                    Path(os.environ['ATZE_AI_CONFIG']) if os.getenv('ATZE_AI_CONFIG') else None,
-                   os.getenv('ATZE_BRIGHTDATA_OAUTH_TOKEN', ''))
+                   os.getenv('ATZE_BRIGHTDATA_OAUTH_TOKEN', ''),
+                   os.getenv('ATZE_TELEMETRY_TOKEN', ''))

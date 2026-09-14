@@ -23,6 +23,8 @@
 - `app/plan_service.py`: digest, latest, task_plan, guard, manifest, append_version, create_plan, revise_plan, create_lock, revoke_lock, status, task_gate, locked_context
 - `app/storage.py`: guard, Storage
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
+- `app/telemetry_api.py`: parse_timestamp, register_telemetry_api
+- `app/telemetry_models.py`: DeviceInput, Device, DeclaredRange, SensorInput, Sensor, Sample, IngestInput, Batch, BatchSamples, DeactivateInput
 - `app/triage.py`: evaluate
 
-Environment: `ATZE_AI_CONFIG`, `ATZE_BRIGHTDATA_OAUTH_TOKEN`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`
+Environment: `ATZE_AI_CONFIG`, `ATZE_BRIGHTDATA_OAUTH_TOKEN`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`, `ATZE_TELEMETRY_TOKEN`

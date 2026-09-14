@@ -12,6 +12,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; separate reale HF-Modell-CI; kein operativer Modellworker, MCP oder Agentensandbox |
 | PLAN / Context Lock | IMPLEMENTED / API- und browsergetestet | [Versionen, echte Quellen, Lock/Widerruf, Challenge-/Triage-/AI-Bindung](docs/21-plan/context-lock.md); keine Wahrheit oder Ausführungsrechte |
 | Dashboard | IMPLEMENTED | Reale PLAN-Bedienung ergänzt; 7 echte Chromium-PLAN-Prüfungen PASS; Resultate im Testbericht |
+| Telemetrie (IoT-Ingest) | IMPLEMENTED / TESTED | [Device-/Sensor-Registry, fail-closed Device-Token, unveränderliche hash-verifizierte Batches](docs/23-telemetry/telemetry.md); kein WS/MQTT/Serial, keine physische ESP32-Validierung |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
@@ -63,7 +64,10 @@ Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validati
 [Lokaler Modell-CI-Nachweis](TEST_REPORT.md): gepinnte Qwen-Inferenz, keine externe Inferenz, nicht-root/Loopback-only. [Android-Debug-APK und SHA256](APK_RELEASE_REPORT.md): echt gebaut/signiert, installiert/gestartet/getestet im SDK-Emulator. Native App ist ein kleiner Read-only-Core-Statusclient, keine volle Device-/Repair-/Agentplattform. Gesamtfreigabe bleibt BLOCKED.
 
 ## PLAN-Inkrement
-[Context-Lock-Vertrag](docs/21-plan/context-lock.md): genau ein PLAN je Task, unveränderliche Quellenfassungen, Reviewer-Sperre/Widerruf. Neue Challenge-Policy `challenge-2-context` erfordert erneute Gegenprüfung vorhandener Results. Kein universeller Object Workspace/Executor. Aktuelle tatsächlich ausgeführte Gates im [Testbericht](TEST_REPORT.md).
+[Context-Lock-Vertrag](docs/21-plan/context-lock.md): genau ein PLAN je Task, unveränderliche Quellenfassungen, Reviewer-Sperre/Widerruf. Neue Challenge-Policy `challenge-2-context` erfordert erneute Gegenprüfung vorhandener Results. Kein universeller Object Workspace/Executor. Aktuelle tatsächlich ausgeführte Gates im [Testbericht](TEST_REPORT.md). Verbindliche [UI-/Interaktions-/Code-/Abhängigkeitsspezifikation](docs/21-plan/plan-ui-interaction-spec.md) ergänzt: jede sichtbare UI-Funktion benötigt einen realen technischen Pfad (Command/Query → Service → Dependency → Audit/Test), keine Fake-Interaktion, keine toten Buttons; Spezifikation ist Vorgabe, kein Implementierungsstand.
+
+## Telemetrie-Inkrement (Modul 1 der bestätigten Umsetzungsreihe)
+[Echter Ingest-Vertrag](docs/23-telemetry/telemetry.md): deklarative Device-/Sensor-Registry (Operator, +), HTTP-Ingestion mit getrenntem Device-Fleet-Token (leer = fail-closed 403), unveränderliche kanonische JSON-Batches mit sha256/Größenverifikation beim Lesen (Korruption → 503), Out-of-Range-/Suspect-Flagging gegen deklarierte (nicht kalibrierte) Ranges, reviewerbestätigte Einzel-Deaktivierung (−) ohne Datenlöschung, Stop-Integration. **WS/MQTT/Serial NOT IMPLEMENTED; keine physische ESP32-/Sensormessung validiert (NOT RUN); Werte sind eingereichte Device-Angaben, keine verifizierte physikalische Messung.**
 
 ## Bright Data MCP: begrenzte Tool-Erkennung
 [OAuth-Bearer-Handshake und begrenzte MCP-Erkennung](docs/22-mcp/brightdata.md) implementiert; standardmäßig gesperrt. **Keine tools/call-Ausführung, keine Webabfrage oder Live-Bright-Data-Abnahme.** Ein isolierter TLS-Protokolltest ist kein Provider-Nachweis. Bestehende Tool-/Permission-Lease-/Sandbox-Gates bleiben offen.

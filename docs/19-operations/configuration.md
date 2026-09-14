@@ -43,3 +43,10 @@ Acht feste App-Environmentvariablen. Providercredential dynamisch über explizit
 
 ## Bright Data discovery only
 `ATZE_BRIGHTDATA_OAUTH_TOKEN`: optional OAuth access token, secret environment/secret manager only; default blank (disabled). No login/refresh automation or API-key URL fallback. Never commit a value. Existing Privacy Lock/default deny still applies; [contract](../22-mcp/brightdata.md).
+
+## Telemetry device credential
+| Name | Type | Required | Default | Description | Security sensitivity | Example |
+|---|---|---|---|---|---|---|
+| ATZE_TELEMETRY_TOKEN | string | nein | leer → Ingest 403 | gemeinsames Device-Fleet-Bearer für POST /api/telemetry/ingest, >=32 Zeichen, von allen Plattform-Credentials verschieden | secret, geräteseitig verteilen, nie loggen/committen | secrets.token_urlsafe(48) |
+
+Neun App-Variablen. Leerer Wert deaktiviert Ingest fail-closed (403 NOT CONFIGURED), Registration/Reading bleiben Platform-Rollen vorbehalten. Ein geteilter Device-Token bedeutet: jedes Gerät mit diesem Token kann für jedes aktive Device senden (device_id folgt aus der Sensor-Registry, nicht aus dem Token); Geräteidentitäten sind deklarativ, keine kryptografische Geräteauthentifizierung. Kein Token-Austausch über die API; Rotation durch Neustart mit neuem Wert. Abgestellte (deaktivierte) Devices/Sensoren blockieren weiteren Ingest (409), historische Batches bleiben lesbar. Verbleibende Transporte (WS/MQTT/Serial) sind NOT IMPLEMENTED; nur HTTP/HTTPS. [Telemetry contract](../23-telemetry/telemetry.md).
