@@ -65,7 +65,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     const task=await api('/api/tasks','POST',{project_id:p.id,title:'Browser test task',action:'read',evidence_ids:[e.id],preconditions_met:true});
     await api('/api/archive','POST',{project_id:p.id,relative_path:'browser-input.txt',content:'Selected synthetic browser archive'});
     const login=async token=>{
-      await evaluate(`document.getElementById('token').value=${JSON.stringify(token)}; document.getElementById('login').requestSubmit()`);
+      assert(!(await evaluate(`document.getElementById('token').value=${JSON.stringify(token)}; document.getElementById('login').requestSubmit(); document.getElementById('status').textContent.startsWith('Verbunden.')`)), 'Old connected status survived new login');
       await wait("document.getElementById('status').textContent.startsWith('Verbunden.')",'Authenticated refresh failed');
     };
     await login(config.operator);
@@ -99,7 +99,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     await evaluate("document.getElementById('plan-title').value='Actual second browser version'; document.getElementById('plan-editor').requestSubmit()");
     await wait("document.getElementById('plan-version-id').value===''",'Revision did not finish');
     assert((await api(`/api/plans/${plan.id}/versions`))[0].version===2,'Browser revision not append-only'); check('BROWSER-PLAN-06-IMMUTABLE-REVISION');
-    await evaluate("document.getElementById('logout').click()");
+    await evaluate(`document.getElementById('token').value=${JSON.stringify(config.operator)}; document.getElementById('logout').click()`);
     assert(await evaluate("document.getElementById('token').value==='' && document.getElementById('plan-detail').textContent==='' && !document.getElementById('plan-resources').options.length"),'Logout retained PLAN source UI'); check('BROWSER-PLAN-07-LOGOUT-CLEAR');
     report.status='PASS';
   } catch(error){report.error=error.message; process.exitCode=1;}

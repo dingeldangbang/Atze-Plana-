@@ -37,6 +37,7 @@ function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
 async function refresh() {
   const current = session;
   const request = ++refreshRequest;
+  status('Lade aktuelle Workspace-Daten…');
   try {
     const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory'].map(path => api(path)));
     if (current !== session || request !== refreshRequest) return;
@@ -67,7 +68,7 @@ async function refresh() {
   } catch (error) { if (current === session && request === refreshRequest) { clearWorkspace('Daten nicht verfügbar — kein Ersatz durch Beispieldaten.'); status(error.message); } }
 }
 el('login').onsubmit = event => { event.preventDefault(); session++; clearWorkspace(); token = el('token').value; el('token').value = ''; refresh(); };
-el('logout').onclick = () => { session++; token = ''; clearWorkspace('Getrennt — keine aktuellen Daten.'); status('Getrennt.'); };
+el('logout').onclick = () => { session++; token = ''; el('token').value = ''; clearWorkspace('Getrennt — keine aktuellen Daten.'); status('Getrennt.'); };
 el('refresh').onclick = refresh;
 el('project').onsubmit = async event => { event.preventDefault(); const current = session; try { const body = Object.fromEntries(new FormData(event.target)); await api('projects', 'POST', body); if (current !== session) return; event.target.reset(); await refresh(); } catch (error) { if (current === session) status(error.message); } };
 
