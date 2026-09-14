@@ -9,7 +9,7 @@ from app.store import put, get, listing, audit, identity, now
 
 def register_ai_api(app, settings, actor, operator, reviewer, connection, store, storage=None):
     gateway = ExternalDataGateway(settings.ai_config_path if settings else None,
-                                  (settings.operator_token, settings.reviewer_token, settings.challenge_token) if settings else ())
+                                  (settings.operator_token, settings.reviewer_token, settings.challenge_token, settings.brightdata_oauth_token) if settings else ())
     DB = Depends(connection, scope='function')
 
     def contract(role, effects):
@@ -19,7 +19,7 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store,
     def status(who=Depends(actor), db=DB) -> dict:
         return {'policy': policy(db), 'providers': [{'id': p.id, 'mode': p.mode, 'region': p.region,
                  'status': 'CONFIGURED_NOT_VALIDATED'} for p in gateway.providers.values()],
-                'model_inference': 'NOT_VALIDATED', 'mcp': 'NOT_IMPLEMENTED', 'tool_execution': 'BLOCKED',
+                'model_inference': 'NOT_VALIDATED', 'mcp': 'DISCOVERY_ONLY_NO_TOOL_EXECUTION', 'tool_execution': 'BLOCKED',
                 'model_discovery': 'NOT_IMPLEMENTED', 'agent_runtime': 'TEXT_REQUESTS_ONLY', 'production_ready': False}
 
     @app.post('/api/ai/policy', tags=['ai'], status_code=201, openapi_extra=contract('reviewer', 'Append policy and audit; invalidates pending requests; no network'))

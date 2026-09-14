@@ -32,3 +32,6 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 
 ## PLAN / Context Lock
 [Vertrag, UI/API, Sicherheit, Migration und Grenzen](21-plan/context-lock.md) · [ADR-007](adr/ADR-007-plan-context-lock.md). Gebundene echte Quellen, keine Wahrheit/Toolberechtigung.
+
+## Bright Data MCP discovery
+[Enger Vertrag: Authentifizierung, API, Datenschutz und offene Live-Abnahme](22-mcp/brightdata.md). Kein allgemeiner Tool-Executor.

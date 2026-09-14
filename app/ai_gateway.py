@@ -1,4 +1,4 @@
-"""Only model egress transport. No model import/download, tools, proxies or fallback."""
+"""Model egress and bounded MCP discovery gateway. No model import/download, tools, proxies or fallback."""
 import hashlib
 import http.client
 import json
@@ -50,6 +50,11 @@ class ExternalDataGateway:
         for p in config.providers:
             origin(p)
         self.config_hash = fingerprint(config.model_dump())
+
+    def discover_brightdata(self, oauth_token):
+        """Called only after MCP service consent/policy/audit gates; no tools/call."""
+        from app.mcp_client import DiscoveryClient
+        return DiscoveryClient(oauth_token).discover()
 
     def provider(self, provider_id):
         if provider_id not in self.providers:

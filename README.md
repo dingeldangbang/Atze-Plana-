@@ -64,3 +64,6 @@ Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validati
 
 ## PLAN-Inkrement
 [Context-Lock-Vertrag](docs/21-plan/context-lock.md): genau ein PLAN je Task, unveränderliche Quellenfassungen, Reviewer-Sperre/Widerruf. Neue Challenge-Policy `challenge-2-context` erfordert erneute Gegenprüfung vorhandener Results. Kein universeller Object Workspace/Executor. Aktuelle tatsächlich ausgeführte Gates im [Testbericht](TEST_REPORT.md).
+
+## Bright Data MCP: begrenzte Tool-Erkennung
+[OAuth-Bearer-Handshake und begrenzte MCP-Erkennung](docs/22-mcp/brightdata.md) implementiert; standardmäßig gesperrt. **Keine tools/call-Ausführung, keine Webabfrage oder Live-Bright-Data-Abnahme.** Ein isolierter TLS-Protokolltest ist kein Provider-Nachweis. Bestehende Tool-/Permission-Lease-/Sandbox-Gates bleiben offen.

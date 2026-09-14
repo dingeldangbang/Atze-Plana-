@@ -15,6 +15,8 @@
 - `app/context_api.py`: register_context_api
 - `app/context_models.py`: LinkedInput, ArchiveInput, Replica, Archive, ArchiveContent, MoveInput, MemoryInput, Memory, RetrievalQuery, EvidenceState, RetrievalHit, CacheInput, CacheObject, CleanupInput, CleanupResult, TierHealth, StorageHealth, ReindexInput, ReindexResult
 - `app/main.py`: create_app
+- `app/mcp_api.py`: Discover, gate, register_mcp_api
+- `app/mcp_client.py`: unique_object, DiscoveryClient
 - `app/models.py`: Input, ProjectInput, Project, Observation, EvidenceInput, Evidence, Review, Action, TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit
 - `app/plan_api.py`: register_plan_api
 - `app/plan_models.py`: PlanResource, PlanContent, PlanCreate, PlanRevise, PlanLockInput, PlanRevoke, Plan, PlanVersion, PlanLock, PlanStatus
@@ -23,4 +25,4 @@
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
 - `app/triage.py`: evaluate
 
-Environment: `ATZE_AI_CONFIG`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`
+Environment: `ATZE_AI_CONFIG`, `ATZE_BRIGHTDATA_OAUTH_TOKEN`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`

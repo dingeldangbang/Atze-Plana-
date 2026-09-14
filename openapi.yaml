@@ -635,6 +635,84 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+  /api/mcp/brightdata/status:
+    get:
+      tags:
+      - mcp
+      summary: Status
+      operationId: status_api_mcp_brightdata_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Status Api Mcp Brightdata Status Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: Read-only configuration; no network, OAuth or live validation
+  /api/mcp/brightdata/discover:
+    post:
+      tags:
+      - mcp
+      summary: Discover
+      operationId: discover_api_mcp_brightdata_discover_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Discover'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Discover Api Mcp Brightdata Discover Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Explicit once-per-call external metadata consent; durable audit
+        before HTTPS MCP handshake/list, no tool invocation; PUBLIC/project/region/Privacy/stop/PLAN
+        gates; 200 envelope may be BLOCKED/UNAVAILABLE
   /api/plans:
     post:
       tags:
@@ -2935,6 +3013,31 @@ components:
       - evidence_ids
       - confidence
       title: Decision
+    Discover:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        allow_external_discovery:
+          type: boolean
+          title: Allow External Discovery
+          default: false
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+        plan_lock_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Plan Lock Id
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - reason
+      title: Discover
     Evidence:
       properties:
         observations:

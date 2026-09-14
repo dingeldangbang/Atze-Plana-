@@ -14,6 +14,7 @@ from app.context_api import register_context_api
 from app.models import (ProjectInput, Project, EvidenceInput, Evidence, Review,
                         TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit)
 from app.store import Store, get, put, listing, audit, stopped, identity, now
+from app.mcp_api import register_mcp_api
 from app.plan_api import register_plan_api
 from app.ai_api import register_ai_api
 from app.challenge_api import register_challenge_api
@@ -169,6 +170,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     def audit_log(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(reviewer), db=DB):
         return listing(db, 'audit', limit, offset)
 
+    register_mcp_api(app, settings, actor, reviewer, connection, store, storage)
     register_plan_api(app, storage, actor, operator, reviewer, connection)
     register_ai_api(app, settings, actor, operator, reviewer, connection, store, storage)
     register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)

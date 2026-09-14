@@ -97,6 +97,9 @@ def _exercise(client, operator, reviewer, records, *, worker_url, worker_token, 
     call('POST', f"/api/tasks/{t['id']}/approve", {'reason':'New synthetic context approval'}, role='reviewer', expected=201)
     call('POST', f"/api/plan-locks/{lock['id']}/revoke", {'reason':'Stop old context use'}, role='reviewer')
     _require(call('POST', f"/api/tasks/{t['id']}/triage")['state']=='blocked','Revocation must invalidate approval')
+    _require(call('GET', '/api/mcp/brightdata/status')['validation']=='NOT_LIVE_VALIDATED','Configuration is not provider validation')
+    denied = call('POST', '/api/mcp/brightdata/discover', {'task_id':t['id'], 'allow_external_discovery':True, 'reason':'Default deny verification'}, role='reviewer')
+    _require(denied['attempt']['state']=='BLOCKED' and denied['catalog'] is None, 'MCP default deny must hold')
     call('GET', '/api/audit', role='reviewer')
 
 

@@ -1,3 +1,13 @@
+## Bright Data MCP discovery addendum — 2026-09-14
+
+Bounded real Streamable HTTP client/API added: OAuth bearer only, fixed TLS endpoint, initialize/initialized/tools-list plus session cleanup. Existing gateway, explicit reviewer/project/PUBLIC/provider-region permission, Privacy Lock, stop and current PLAN gate precede dispatch. Durable audit before I/O; no source/context/credentials in metadata reports. Only candidate names search_engine/scrape_as_markdown surfaced, **no tools/call or enabled tool permissions**. [Contract, sources, operations and limitations](docs/22-mcp/brightdata.md).
+
+**168 local tests PASS /97.65% app coverage**,2 known warnings; baseline146 before changes.22 new parametrized cases use an actual verified local HTTPS peer with explicitly synthetic MCP responses, not Bright Data live results. Normal/-O HTTP smoke43 responses/four independent workers each; actual package build, docs/OpenAPI (nine fixed env variables), reality gate PASS. Final remote regression runs remain a separate gate and are recorded in PR after execution.
+
+**Live Bright Data: NOT CONFIGURED / NOT VALIDATED.** No credentials supplied, no account registration, proxy changes, live scraping/search, purchases or provider success claimed. OAuth login/refresh, full MCP tools, permission leases and production privacy/sandbox gates still absent. Counterclaims such as “98% success/any webpage/anonymous” not promoted to facts. No deployment or release. This updates capability scope, not full-platform acceptance.
+
+---
+
 ## Universe tooling addendum — 2026-09-14
 
 Actual source inventory, agent instruction profile, opt-in multi-stack command harness and push/PR workflow added; [contract and limitations](docs/14-testing/universe.md). No automatic stub replacement, silent fallback, port scanning or deployment. **146 local tests PASS /98.04% app coverage**,2 known warnings; tooling uses8 real isolated Git/file/process tests. Real selected Core harness execution PASS for each command, overall **PARTIAL**, not universal READY. New wheel/sdist hashes and revision/dirty-state/inventory digest in reports/universe-2026-09-14.json; inventory reports contain no source excerpts. Existing application functions unchanged.

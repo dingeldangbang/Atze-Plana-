@@ -10,7 +10,7 @@ Stand 2026-09-14. Full-platform release **BLOCKED**. A working increment is not 
 | Real local HF model | pinned separate CI worker candidate; actual CI result in TEST_REPORT | no operational model deployment, autonomy, production model-security/quality approval |
 | Android client/APK | actual native HTTPS Core-status client and SDK build pipeline | physical Honeywell/generic hardware, real Core connection from APK and release validation separate; see APK_RELEASE_REPORT |
 | Android repair/device bridge | NOT IMPLEMENTED | no ADB/Fastboot/EDL write, USB/BLE/Serial/MQTT bridge; emulator adb installation is test tooling only |
-| MCP | NOT IMPLEMENTED | no MCP tool servers/transports for GitHub/files/devices/cloud/etc.; REST is not MCP |
+| MCP | Bright Data Streamable HTTP discovery only, OAuth bearer, init/list/cleanup implemented | tools/call, OAuth login/refresh, live provider validation and general MCP tool execution NOT IMPLEMENTED/NOT VALIDATED |
 | RAG/Memory | real local FTS/source offsets/hashes and structured history/decision provenance | no semantic embeddings, PDF positioning, external MCP/RAG tools; retrieval is not truth |
 | Human approval | reviewer roles, bound task approval, emergency stop and invalidation | no full Allow Once/Task/Workflow/Temporary/Revoke permission-lease engine |
 | Sandbox/ephemeral workers | disposable test Core/Challenge/model/Android jobs with lifecycle cleanup | network namespace is not filesystem/syscall sandbox or full escape-test coverage |

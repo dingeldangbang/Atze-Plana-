@@ -40,3 +40,6 @@ Sieben App-Variablen. Kein Token → keine akzeptierten neuen Taskentscheidungen
 | ATZE_AI_CONFIG | JSON file path | nein | leer → keine Provider | trusted host config, at startup; providers with id/mode/origin/token_env/region | außerhalb Git; niemals Tokens in JSON; nur administrativ editieren | /srv/atze/private/ai-providers.json |
 
 Acht feste App-Environmentvariablen. Providercredential dynamisch über explizites `token_env` mit Präfix `ATZE_AI_TOKEN_`; mindestens 32 Zeichen, getrennt von Operator/Reviewer/Challenge. Kein Defaulttoken. Fehlende Credential → BLOCKED ohne Socket. Keine URL-/Credentialkonfiguration durch Modellantwort oder Operator-API. System-CA-Trust für TLS; kein `verify=false`. `SSL_CERT_FILE` ist Python/OpenSSL Trust-Konfiguration, keine Option zur Abschaltung von TLS-Prüfung. Hostkonfiguration/Secrets/CA-Rechte separat absichern. JSON-Vertrag und realer API-Ablauf: [Model Gateway](../02-core/model-gateway.md).
+
+## Bright Data discovery only
+`ATZE_BRIGHTDATA_OAUTH_TOKEN`: optional OAuth access token, secret environment/secret manager only; default blank (disabled). No login/refresh automation or API-key URL fallback. Never commit a value. Existing Privacy Lock/default deny still applies; [contract](../22-mcp/brightdata.md).

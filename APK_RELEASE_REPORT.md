@@ -1,3 +1,9 @@
+## MCP discovery scope addendum — 2026-09-14
+
+Core-only metadata integration; no native Android source changes, no OS proxy/APN manipulation and no native MCP/tool client. Existing selected APK source/hashes below remain unchanged. New Android regression CI is separate from live Bright Data/device proof; no new physical install or provider validation claimed.
+
+---
+
 # APK-Nachweis — aktuell ausgewähltes Debug-Artefakt
 
 ## Abschließender CI-Nachweis69e6676

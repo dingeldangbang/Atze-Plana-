@@ -80,6 +80,16 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
 | LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
 | LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |
+| MCP-001: actual verified TLS/JSON or SSE → ordered RPC and cleanup, only candidate names, no tools/call. | [test_mcp.py: test_mcp_real_tls_handshake_and_cleanup](../../tests/test_mcp.py) |
+| MCP-002: real adverse TLS replies → reject redirect/format/scope/injection/cleanup; no fallback or tool execution. | [test_mcp.py: test_mcp_response_fail_closed](../../tests/test_mcp.py) |
+| MCP-003: actual API auth/default policy/absent OAuth; no network and durable BLOCKED evidence. | [test_mcp.py: test_mcp_api_default_deny_roles_and_config](../../tests/test_mcp.py) |
+| MCP-004: full real HTTP API→TLS peer with explicit policy; stop/privacy/PLAN deny further IO; no source text transferred. | [test_mcp.py: test_mcp_api_real_peer_and_stop_plan_gates](../../tests/test_mcp.py) |
+| MCP-005: untrusted real TLS certificate refused, never CERT_NONE/-k fallback. | [test_mcp.py: test_mcp_certificate_verification](../../tests/test_mcp.py) |
+| MCP-006: invalid bearer/header injection and expired deadline stop before transport. | [test_mcp.py: test_mcp_invalid_credential_and_deadline](../../tests/test_mcp.py) |
+| MCP-007: real SQLite audit insert failure rolls back attempt before any TLS traffic. | [test_mcp.py: test_mcp_reserved_audit_failure_prevents_io](../../tests/test_mcp.py) |
+| MCP-008: missing project/data-class/region permission or explicit consent cannot contact peer. | [test_mcp.py: test_mcp_scope_mismatch](../../tests/test_mcp.py) |
+| MCP-009: real bad peer responses persist failure without catalog/credential disclosure. | [test_mcp.py: test_mcp_api_transport_outcome_persisted](../../tests/test_mcp.py) |
+| MCP-010: configuration cannot reuse a platform role credential for external authentication. | [test_mcp.py: test_mcp_separate_platform_credential](../../tests/test_mcp.py) |
 | PLAN-001 | selected real sources | temp evidence/memory/archive | create/lock | hashes/provenance only, no truth/permissions | asserted. | [test_plan.py: test_plan_real_multi_resource_manifest](../../tests/test_plan.py) |
 | PLAN-002 | role/optimistic boundaries | current lock | append old/new versions | wrong roles/stale expectations blocked. | [test_plan.py: test_plan_roles_and_immutable_versions](../../tests/test_plan.py) |
 | PLAN-003 | stop/reset/revoke | actual control audit | lock then stop | no revived lock, revoke allowed during stop. | [test_plan.py: test_plan_stop_and_revocation](../../tests/test_plan.py) |
