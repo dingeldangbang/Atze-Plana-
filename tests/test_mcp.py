@@ -187,3 +187,17 @@ def test_mcp_api_transport_outcome_persisted(settings,reviewer,peer,case,state):
 def test_mcp_separate_platform_credential(settings):
     """MCP-010: configuration cannot reuse a platform role credential for external authentication."""
     with pytest.raises(ValueError):replace(settings,brightdata_oauth_token=settings.operator_token)
+
+
+from test_ai_privacy import ai, receiver  # Explicit isolated real HTTP transport fixtures, not model inference.
+
+
+def test_mcp_oauth_never_model_context(ai):
+    """MCP-011: configured OAuth credential in prompt is blocked by the actual model API before any HTTP transport."""
+    _, _, body, _, seen, _, settings, _ = ai
+    credential = 'opaque-brightdata-oauth-test-credential'
+    with TestClient(create_app(replace(settings, brightdata_oauth_token=credential))) as c:
+        c.headers['Authorization'] = 'Bearer ' + settings.operator_token
+        result = c.post('/api/ai/requests', json={**body, 'prompt': credential})
+        assert result.status_code == 409 and result.json()['detail'] == 'KNOWN_CREDENTIAL_BLOCKED'
+        assert seen == []

@@ -90,6 +90,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | MCP-008: missing project/data-class/region permission or explicit consent cannot contact peer. | [test_mcp.py: test_mcp_scope_mismatch](../../tests/test_mcp.py) |
 | MCP-009: real bad peer responses persist failure without catalog/credential disclosure. | [test_mcp.py: test_mcp_api_transport_outcome_persisted](../../tests/test_mcp.py) |
 | MCP-010: configuration cannot reuse a platform role credential for external authentication. | [test_mcp.py: test_mcp_separate_platform_credential](../../tests/test_mcp.py) |
+| MCP-011: configured OAuth credential in prompt is blocked by the actual model API before any HTTP transport. | [test_mcp.py: test_mcp_oauth_never_model_context](../../tests/test_mcp.py) |
 | PLAN-001 | selected real sources | temp evidence/memory/archive | create/lock | hashes/provenance only, no truth/permissions | asserted. | [test_plan.py: test_plan_real_multi_resource_manifest](../../tests/test_plan.py) |
 | PLAN-002 | role/optimistic boundaries | current lock | append old/new versions | wrong roles/stale expectations blocked. | [test_plan.py: test_plan_roles_and_immutable_versions](../../tests/test_plan.py) |
 | PLAN-003 | stop/reset/revoke | actual control audit | lock then stop | no revived lock, revoke allowed during stop. | [test_plan.py: test_plan_stop_and_revocation](../../tests/test_plan.py) |
