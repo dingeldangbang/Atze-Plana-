@@ -116,3 +116,10 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | DOC-003: changed generated output causes nonzero check status instead of silent acceptance. | [test_tools.py: test_documentation_drift_detection](../../tests/test_tools.py) |
 | DOC-004: missing local reference is detected and existing reference is accepted. | [test_tools.py: test_broken_link_detection](../../tests/test_tools.py) |
 | DB-THREAD-001 | FastAPI lifecycle handoff | real SQLite/two threads | enter/use/exit separately | commit and rollback correct. | [test_tools.py: test_connection_dependency_thread_handoff](../../tests/test_tools.py) |
+| UNI-001: ignored/secret files excluded, pending source seen, no source excerpt. | [test_universe.py: test_inventory_exclusions_and_pending_files](../../tests/test_universe.py) |
+| UNI-002: exception pass not a stub; whole empty function candidate, syntax distinct. | [test_universe.py: test_legitimate_pass_and_syntax](../../tests/test_universe.py) |
+| UNI-003: actual byte copy, idempotent backup, corrupt backup/symlink rejected. | [test_universe.py: test_backup_integrity_and_symlinks](../../tests/test_universe.py) |
+| UNI-004: report writer cannot overwrite symlink target. | [test_universe.py: test_report_symlink_refused](../../tests/test_universe.py) |
+| UNI-005: multiple stacks, actual commands without collect/dry-run; unknown blocked. | [test_universe.py: test_multi_stack_and_unknown](../../tests/test_universe.py) |
+| UNI-006: real failing/successful/timeout processes, no shell; no stdout leak. | [test_universe.py: test_actual_process_exit_and_timeout](../../tests/test_universe.py) |
+| UNI-007: no --execute means no code runs, saved report BLOCKED, nonzero exit. | [test_universe.py: test_plan_only_fails_closed](../../tests/test_universe.py) |

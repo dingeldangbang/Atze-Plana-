@@ -11,3 +11,6 @@ reports/*
 build/
 dist/
 *.egg-info/
+
+# Local verified source backups; never publish originals
+backups/
