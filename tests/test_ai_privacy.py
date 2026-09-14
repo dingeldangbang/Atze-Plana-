@@ -149,7 +149,7 @@ def test_ai_transport_failures_no_fallback(ai, failure):
     assert result['output'] is None and len(seen) == 1
 
 
-@pytest.mark.parametrize('mode,url', [('LOCAL', 'http://localhost:80'), ('SELF_HOSTED','http://127.0.0.1'), ('PRIVATE_ENDPOINT','http://host'), ('EXTERNAL_PROVIDER','http://host'), ('LOCAL','https://user:pw@127.0.0.1'), ('LOCAL','http://127.0.0.1/path')])
+@pytest.mark.parametrize('mode,url', [('LOCAL', 'http://localhost:80'), ('SELF_HOSTED','http://127.0.0.1'), ('PRIVATE_ENDPOINT','http://host'), ('EXTERNAL_PROVIDER','http://host'), ('LOCAL','https://user:pw@127.0.0.1'), ('LOCAL','http://127.0.0.1/path'), ('LOCAL','http://127.0.0.1:0'), ('SELF_HOSTED','https://host:0')])
 def test_ai_reject_unsafe_origin(tmp_path, mode, url):
     """AI-007 | Origin constraints | bad startup config | construct gateway | reject before socket | ValueError asserted."""
     path = tmp_path/'bad.json'

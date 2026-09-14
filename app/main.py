@@ -13,7 +13,7 @@ from app.storage import Storage
 from app.context_api import register_context_api
 from app.models import (ProjectInput, Project, EvidenceInput, Evidence, Review,
                         TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit)
-from app.store import Store, get, put, listing, audit, stopped, identity, now
+from app.store import Store, get, put, listing, audit, stop_view, change_stop, identity, now
 from app.mcp_api import register_mcp_api
 from app.plan_api import register_plan_api
 from app.ai_api import register_ai_api
@@ -57,6 +57,9 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
 
     DB = Depends(connection, scope='function')
 
+    def contract(role, effects):
+        return {'x-role': role, 'x-side-effects': effects}
+
     @app.middleware('http')
     async def security_headers(request, call_next):
         response = await call_next(request)
@@ -74,30 +77,38 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     async def filesystem_error(request, error):
         return JSONResponse(status_code=503, content={'detail': 'Storage unavailable; check configured tier and permissions'})
 
-    @app.get('/health', tags=['system'])
-    def health(db=DB) -> dict[str, str]:
-        db.execute('SELECT 1')
+    @app.get('/health', tags=['system'],
+             openapi_extra=contract('public', 'None; read-only liveness probe with a real database read; 503 when no runtime store is bound'))
+    def health() -> dict[str, str]:
+        if store is None:
+            # A schema-only instance has no database bound; never report ok without a real read.
+            raise HTTPException(503, 'Schema-only instance has no runtime store; health is not assertable')
+        with store.connect() as db:
+            db.execute('SELECT 1')
         return {'status': 'ok', 'version': '0.4.0.dev0', 'mode': settings.mode}
 
-    @app.get('/api/runtime', tags=['system'])
+    @app.get('/api/runtime', tags=['system'], openapi_extra=contract('both', 'None; read-only'))
     def runtime(who=Depends(actor)) -> dict[str, str]:
         return {'mode': settings.mode, 'data_scope': 'TEST INPUTS — NOT LIVE EVIDENCE' if settings.mode == 'test' else 'OPERATIONAL — NO SEEDED DATA', 'production_readiness': 'NOT VALIDATED', 'challenge_worker': 'CONFIGURED — liveness not asserted' if settings.challenge_token else 'NOT CONFIGURED — decisions blocked'}
 
-    @app.get('/api/openapi.json', tags=['system'])
+    @app.get('/api/openapi.json', tags=['system'], openapi_extra=contract('both', 'None; read-only'))
     def specification(who=Depends(actor)) -> dict:
         return app.openapi()
 
-    @app.post('/api/projects', response_model=Project, status_code=201, tags=['projects'])
+    @app.post('/api/projects', response_model=Project, status_code=201, tags=['projects'],
+              openapi_extra=contract('operator', 'Project + audit; no evidence requirement'))
     def create_project(body: ProjectInput, who=Depends(operator), db=DB):
         value = put(db, 'project', dict(**body.model_dump(mode='json'), id=identity(), created_at=now()))
         audit(db, who, 'project.created', value['id'])
         return value
 
-    @app.get('/api/projects', response_model=list[Project], tags=['projects'])
+    @app.get('/api/projects', response_model=list[Project], tags=['projects'],
+             openapi_extra=contract('both', 'None; read-only'))
     def projects(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(actor), db=DB):
         return listing(db, 'project', limit, offset)
 
-    @app.post('/api/evidence', response_model=Evidence, status_code=201, tags=['evidence'])
+    @app.post('/api/evidence', response_model=Evidence, status_code=201, tags=['evidence'],
+              openapi_extra=contract('operator', 'Store original text/hash/provenance + audit; existing project required; initially unverified'))
     def create_evidence(body: EvidenceInput, who=Depends(operator), db=DB):
         get(db, 'project', body.project_id)
         value = dict(**body.model_dump(mode='json'), id=identity(), created_at=now(),
@@ -106,15 +117,18 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         audit(db, who, 'evidence.created', value['id'], {'sha256': value['sha256']})
         return value
 
-    @app.get('/api/evidence', response_model=list[Evidence], tags=['evidence'])
+    @app.get('/api/evidence', response_model=list[Evidence], tags=['evidence'],
+             openapi_extra=contract('both', 'None; read-only'))
     def evidence(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(actor), db=DB):
         return listing(db, 'evidence', limit, offset)
 
-    @app.get('/api/evidence/{evidence_id}', response_model=Evidence, tags=['evidence'])
+    @app.get('/api/evidence/{evidence_id}', response_model=Evidence, tags=['evidence'],
+             openapi_extra=contract('both', 'None; read-only'))
     def evidence_source(evidence_id: str, who=Depends(actor), db=DB):
         return get(db, 'evidence', evidence_id)
 
-    @app.post('/api/evidence/{evidence_id}/review', response_model=Evidence, tags=['evidence'])
+    @app.post('/api/evidence/{evidence_id}/review', response_model=Evidence, tags=['evidence'],
+              openapi_extra=contract('reviewer', 'One immutable manual evidence review + audit; reason required'))
     def review(evidence_id: str, body: Review, who=Depends(reviewer), db=DB):
         import json
         value = get(db, 'evidence', evidence_id)
@@ -125,7 +139,8 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         audit(db, who, 'evidence.reviewed', evidence_id, body.model_dump())
         return value
 
-    @app.post('/api/tasks', response_model=Task, status_code=201, tags=['tasks'])
+    @app.post('/api/tasks', response_model=Task, status_code=201, tags=['tasks'],
+              openapi_extra=contract('operator', 'Immutable task + audit; all evidence references must belong to project'))
     def create_task(body: TaskInput, who=Depends(operator), db=DB):
         get(db, 'project', body.project_id)
         if len(body.evidence_ids) != len(set(body.evidence_ids)):
@@ -137,17 +152,20 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         audit(db, who, 'task.created', value['id'])
         return value
 
-    @app.get('/api/tasks', response_model=list[Task], tags=['tasks'])
+    @app.get('/api/tasks', response_model=list[Task], tags=['tasks'],
+             openapi_extra=contract('both', 'None; read-only'))
     def tasks(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(actor), db=DB):
         return listing(db, 'task', limit, offset)
 
-    @app.post('/api/tasks/{task_id}/triage', response_model=Decision, tags=['tasks'])
+    @app.post('/api/tasks/{task_id}/triage', response_model=Decision, tags=['tasks'],
+              openapi_extra=contract('both', 'Decision snapshot in audit; current mandatory Challenge + verified evidence, confidence >=0.8, preconditions, no stop'))
     def triage(task_id: str, who=Depends(actor), db=DB):
         decision = decide_task(db, task_id, storage)
         audit(db, who, 'task.triaged', task_id, decision.model_dump())
         return decision
 
-    @app.post('/api/tasks/{task_id}/approve', response_model=Approval, status_code=201, tags=['tasks'])
+    @app.post('/api/tasks/{task_id}/approve', response_model=Approval, status_code=201, tags=['tasks'],
+              openapi_extra=contract('reviewer', 'Approval bound to current Result/Challenge/fingerprint + audit; current triage must require approval; never executes'))
     def approve(task_id: str, body: ApprovalInput, who=Depends(reviewer), db=DB):
         decision = decide_task(db, task_id, storage)
         if decision.state != 'approval_required':
@@ -156,17 +174,20 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
         audit(db, who, 'task.approved', task_id, value)
         return value
 
-    @app.get('/api/control/stop', response_model=Stop, tags=['control'])
+    @app.get('/api/control/stop', response_model=Stop, tags=['control'],
+             openapi_extra=contract('both', 'None; read-only current stop state with recorded revision/actor, unknown when unrecorded'))
     def stop_state(who=Depends(actor), db=DB):
-        return stopped(db)
+        return stop_view(db)
 
-    @app.post('/api/control/stop', response_model=Stop, tags=['control'])
+    @app.post('/api/control/stop', response_model=Stop, tags=['control'],
+              openapi_extra=contract('reviewer', 'Persist global stop + reason in audit; does not interrupt external processes'))
     def set_stop(body: StopInput, who=Depends(reviewer), db=DB):
-        db.execute('UPDATE control SET active=?,reason=? WHERE id=1', (body.active, body.reason))
+        value = change_stop(db, body, who)
         audit(db, who, 'control.stop_changed', 'global', body.model_dump())
-        return body
+        return value
 
-    @app.get('/api/audit', response_model=list[Audit], tags=['audit'])
+    @app.get('/api/audit', response_model=list[Audit], tags=['audit'],
+             openapi_extra=contract('reviewer', 'None; read-only'))
     def audit_log(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(reviewer), db=DB):
         return listing(db, 'audit', limit, offset)
 

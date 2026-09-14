@@ -79,3 +79,29 @@ def audit(db, actor, event, entity_id, details=None):
 def stopped(db):
     active, reason = db.execute('SELECT active,reason FROM control WHERE id=1').fetchone()
     return dict(active=bool(active), reason=reason)
+
+
+def stop_record(db):
+    row = db.execute("SELECT body FROM records WHERE kind='stop_state' ORDER BY seq DESC LIMIT 1").fetchone()
+    return json.loads(row[0]) if row else None
+
+
+def stop_view(db):
+    """Authoritative control state plus recorded provenance; unknown stays unknown."""
+    state = stopped(db)
+    record = stop_record(db)
+    if record and record['active'] == state['active'] and record['reason'] == state['reason']:
+        return dict(active=state['active'], reason=state['reason'], revision=record['revision'],
+                    actor=record['actor'], created_at=record['created_at'], record_id=record['id'])
+    # No matching record: either a legacy database or a control change made outside this API.
+    return dict(active=state['active'], reason=state['reason'], revision=0, actor=None,
+                created_at=None, record_id=None)
+
+
+def change_stop(db, body, actor):
+    """Persist the global stop and append an immutable provenance record in one transaction."""
+    value = dict(id=identity(), active=body.active, reason=body.reason,
+                 revision=stop_view(db)['revision'] + 1, actor=actor, created_at=now())
+    db.execute('UPDATE control SET active=?,reason=? WHERE id=1', (body.active, body.reason))
+    put(db, 'stop_state', value)
+    return stop_view(db)

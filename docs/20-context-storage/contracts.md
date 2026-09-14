@@ -10,7 +10,7 @@ Python 3.11+, FastAPI/Pydantic, lokales SQLite mit FTS5, POSIX-Dateisystem mit `
 
 **Inputs:** Projekt, eindeutiger relativer ASCII-Pfad, UTF-8-Text (1..65.536 Zeichen), Evidence-IDs, placement=auto/local. Pfadsegmente dürfen nicht leer, `.` oder `..` sein. Kein absolutes Verzeichnis, `%`-Encoding oder Backslash. **Outputs:** ID, `/project/{id}/{relative_path}`, Hash, Bytelänge, Ort/Retained Copies/Version. Text inkl. führender/abschließender Whitespaces wird exakt gespeichert und gehasht; anders als normalisierte Evidence-Strings.
 
-**Side Effects:** Blob schreiben, file-/directory-fsync, zurücklesen/vergleichen, danach Archivmetadaten + FTS + Audit in einer SQLite-Transaktion. **Validation/Tests:** STO-001/002/003/004/005/006/010; Duplicate 409, Cross-Project/Schema 422, fehlendes Projekt 404, Storage/Hash 503, Kapazität 507. Stop blockiert Erfassung/Umplatzierung, nicht Lesen.
+**Side Effects:** Blob schreiben, file-/directory-fsync, zurücklesen/vergleichen, danach Archivmetadaten + FTS + Audit in einer SQLite-Transaktion. **Validation/Tests:** STO-001/002/003/004/005/006/010/011/012; STO-011 verweigert einen nicht konfigurierten Tier und jeden nicht kanonischen Objektschlüssel, STO-012 prüft einen konkurrierend erzeugten Modusmarker (validieren statt überschreiben, fremder Modus 503); Duplicate 409, Cross-Project/Schema 422, fehlendes Projekt 404, Storage/Hash 503, Kapazität 507. Stop blockiert Erfassung/Umplatzierung, nicht Lesen.
 
 **Examples:** `POST /api/archive`; `GET /api/archive/{id}/content`; `GET /api/archive/resolve?logical_path=...` liefert jeweils das aktuelle hashgeprüfte Original. Query-Parameter URL-encodieren. `POST /api/archive/{id}/relocate` mit target=local/sd und Reviewer-Grund.
 

@@ -1,3 +1,37 @@
+## Core-Vertrags-Hardening-Addendum — 2026-09-14
+
+Stand: Branch `arena/01a09e11-atze-plana`, Basis `f1ed5dd`. Fünf Punkte aus [TODO](TODO.md) real umgesetzt (TODO-001, 002, 004, 008, 010). **Keine neue Plattformfähigkeit, kein Release, kein Merge.** Vollplattform/Produktion bleibt BLOCKED.
+
+### Tatsächlich ausgeführte Gates
+| Gate | Ergebnis |
+|---|---|
+| Unit/Integration/Security/PLAN/MCP-Suite mit Coverage | **188 PASS**, 99 % App-Statement-Coverage (1940 Statements, 1 Lücke), 2 bekannte Deprecation-Warnungen, 64,6 s |
+| Verbleibende Coverage-Lücke | `app/challenge_worker.py:64` (`raise SystemExit(main())`) — wird im Test real als eigener OS-Prozess ausgeführt, aber nicht vom Eltern-Coveragezähler erfasst |
+| Realer HTTP-/Worker-Smoke, normal | **PASS**, 43 geprüfte Responses, 4 separate Worker-OS-Prozesse mit Exitcode 0 und echten Report-IDs |
+| Realer HTTP-/Worker-Smoke, `python -O` | **PASS**, 43 geprüfte Responses |
+| Paketbuild | wheel + sdist 0.4.0.dev0 real gebaut; SHA256 im Universe-Report |
+| Dokumentation/OpenAPI | **PASS**: 4 generierte Produkte, formale OpenAPI-Gültigkeit, lokale Dateilinks, 9 Envvariablen |
+| Reality-Grenzgate | **PASS** (enges AST-/Smoke-Gate, kein semantischer Beweis) |
+| JS-Syntax | `node --check app/static/app.js` PASS |
+| Universe-Harness `--execute --scope core` | 5/5 Checks PASS (pytest, build, docs, reality, Smoke); Gesamtverdict **PARTIAL** by design; Lauf bei noch nicht committetem Baum (`working tree dirty: true`) |
+| Browser-E2E (Chromium) | **NOT RUN** — in dieser Sandbox ist kein Chromium installiert; kein `--no-sandbox`-Fallback, keine erfundene Browserabnahme |
+| Dependency-Audit, Remote-CI, Modell-/Android-Pipeline, Last-/2-GB-Test | **NOT RUN** in diesem Schnitt |
+
+### Umgesetzt und geprüft
+- `GET /health` in einer `schema_only`-Instanz: vorher unbehandelter `AttributeError`, jetzt 503 mit explizitem Grund; alle Datenrouten verweigern dort weiterhin fail-closed (401 bzw. 503 NOT CONFIGURED), die OpenAPI-Erzeugung bleibt unverändert nutzbar (DOC-005).
+- Alle 16 vertragslosen Kern-Operationen deklarieren `x-role`/`x-side-effects`; der Generator rät nichts mehr und bricht bei fehlendem Vertrag ab. `docs/08-network/APIs.md` änderte sich dadurch nur in den zwei Zeilen, deren Semantik sich tatsächlich änderte.
+- `plan_service.status()` liefert für eine PLAN-Identität ohne Version `BLOCKED`/`NO_PLAN_VERSION_RECORDED`; das API-Modell akzeptiert den Zustand (PLAN-016).
+- `POST /api/control/stop` antwortet nicht mehr mit dem Eingabekörper: `stop_state`-Record mit aufsteigender Revision, Rolle, Zeitstempel und ID, atomic mit der `control`-Tabelle; `GET` liefert denselben Zustand, Legacy/außerhalb der API geänderte Bestände melden null/0 (SEC-005).
+- Worker-Transport, CLI-Exitcodes, echter Kindprozess und Dauerpollen regressionsgeprüft (CH-018..021); `MCP_POLICY_CHANGED` (MCP-012) und `PLAN_CONTEXT_CHANGED` (PLAN-017) erstmals ausgeführt; Storage-/Gateway-Randzweige geschlossen (STO-011/012, AI-007 Portgrenze, MCP-002 um sechs reale Fehlerfälle).
+
+### Grenzen / ausdrücklich nicht behauptet
+- `PLAN_CONTEXT_CHANGED` ist **Defense-in-depth**: über die heutige API kann eine CURRENT-Bindung nicht geändert werden, ohne Lock, Version oder Zustand zu ändern. Der Test injiziert die Drift deshalb und kennzeichnet das im Docstring; es ist kein beobachteter Produktfehler.
+- `MCP_POLICY_CHANGED` benötigt eine Policyänderung zwischen zwei Prüfungen desselben Requests; ebenfalls deterministisch injiziert, kein Nachweis realer Nebenläufigkeit.
+- Stop-Provenienz liegt in derselben SQLite wie das Audit und ist **nicht** manipulationssicher; ein DB-/Host-Administrator kann sie ändern. TODO-003 (`stop_revision` aus Audit-IDs) bleibt offen und wurde bewusst nicht im selben Schnitt geändert, weil sie bestehende PLAN-Manifeste entwerten würde.
+- Der MCP-Testpeer ist synthetische Testinfrastruktur, kein Bright-Data-Provider; der Worker-Loopback-Peer ist kein Challenge-Server. Live-Provider, Hardware, Browser, Last und Produktion bleiben NOT RUN/BLOCKED.
+
+---
+
 ## Bright Data MCP discovery addendum — 2026-09-14
 
 Bounded real Streamable HTTP client/API added: OAuth bearer only, fixed TLS endpoint, initialize/initialized/tools-list plus session cleanup. Existing gateway, explicit reviewer/project/PUBLIC/provider-region permission, Privacy Lock, stop and current PLAN gate precede dispatch. Durable audit before I/O; no source/context/credentials in metadata reports. Only candidate names search_engine/scrape_as_markdown surfaced, **no tools/call or enabled tool permissions**. [Contract, sources, operations and limitations](docs/22-mcp/brightdata.md).

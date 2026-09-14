@@ -357,3 +357,47 @@ def test_transaction_finalization_precedes_success(tiered, monkeypatch, endpoint
     with sqlite3.connect(config.db_path) as db:
         assert db.execute("SELECT COUNT(*) FROM records WHERE kind='project'").fetchone()[0] == 1
         assert db.execute("SELECT COUNT(*) FROM records WHERE kind='archive'").fetchone()[0] == 0
+
+
+def test_unconfigured_tier_and_noncanonical_key_fail_closed(settings, tmp_path):
+    """STO-011: an unconfigured tier and an internal object key that is not the canonical server UUID are refused; no host path is ever derived from caller input."""
+    from fastapi import HTTPException
+    storage = Storage(replace(settings, storage_root=tmp_path / 'objects'))
+    assert list(storage.roots) == ['local']
+    with pytest.raises(HTTPException) as missing:
+        storage.directory('sd')
+    assert missing.value.status_code == 503
+    with pytest.raises(HTTPException):
+        storage.read('sd', '6492c63d-91a4-4eb4-b1a1-f63c76a7f9f7')
+    for key in ['6492C63D-91A4-4EB4-B1A1-F63C76A7F9F7', 'urn:uuid:6492c63d-91a4-4eb4-b1a1-f63c76a7f9f7',
+                '../escape', 'not-a-uuid']:
+        with pytest.raises(ValueError):
+            storage.filename(key)
+
+
+@pytest.mark.parametrize('concurrent_mode,accepted', [('test', True), ('operational', False)])
+def test_concurrent_marker_creation_is_validated_not_overwritten(settings, tmp_path, monkeypatch, concurrent_mode, accepted):
+    """STO-012: a concurrently created object-root mode marker is validated instead of overwritten, and a foreign mode still refuses cross-mode access."""
+    from fastapi import HTTPException
+    root = tmp_path / 'objects'
+    root.mkdir()
+    real_open, raced = os.open, {'done': False}
+
+    def racing(path, flags, *args, **kwargs):
+        if not raced['done'] and path == '.atze-mode' and flags & os.O_CREAT:
+            raced['done'] = True
+            descriptor = real_open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600, dir_fd=kwargs.get('dir_fd'))
+            with os.fdopen(descriptor, 'wb') as concurrent:
+                concurrent.write(concurrent_mode.encode())
+            raise FileExistsError('isolated concurrent initializer won the race')
+        return real_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(os, 'open', racing)
+    if accepted:
+        storage = Storage(replace(settings, storage_root=root))
+        assert storage.mode == 'test'
+    else:
+        with pytest.raises(HTTPException) as denied:
+            Storage(replace(settings, storage_root=root))
+        assert denied.value.status_code == 503 and 'mode mismatch' in denied.value.detail
+    assert raced['done'] and (root / '.atze-mode').read_text() == concurrent_mode

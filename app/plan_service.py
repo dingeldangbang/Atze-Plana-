@@ -137,6 +137,10 @@ def revoke_lock(db, lock_id, body, who):
 
 def status(db, plan, storage):
     version = latest(db, 'plan_version', 'plan_id', plan['id'])
+    if version is None:
+        # Defensive: a PLAN without any recorded version can never bind context.
+        return dict(plan_id=plan['id'], version_id=None, lock_id=None, manifest_hash=None,
+                    allowed_for_action=False, state='BLOCKED', reason='NO_PLAN_VERSION_RECORDED')
     lock = latest(db, 'plan_lock', 'plan_id', plan['id'])
     base = dict(plan_id=plan['id'], version_id=version['id'], lock_id=lock['id'] if lock else None,
                 manifest_hash=version['manifest_hash'], allowed_for_action=False)

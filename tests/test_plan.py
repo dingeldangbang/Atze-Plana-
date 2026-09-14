@@ -283,3 +283,43 @@ def test_plan_concurrent_optimistic_append(client,reviewer):
     assert sorted(r.status_code for r in responses)==[201,409]
     versions=client.get(f"/api/plans/{plan['id']}/versions").json()
     assert [version['version'] for version in versions]==[2,1]
+
+
+def test_plan_without_recorded_version_blocks(settings):
+    """PLAN-016: a PLAN identity without any stored version reports BLOCKED with an explicit reason instead of failing with an unhandled error, and the API model accepts that state."""
+    from app.plan_models import PlanStatus
+    from app.store import put, identity, now
+    with Store(settings.db_path, 'test').connect() as db:
+        put(db, 'plan', dict(id=identity(), task_id='isolated-task', project_id='isolated-project', created_at=now()))
+        gate = task_gate(db, 'isolated-task', None)
+    assert gate['state'] == 'BLOCKED' and gate['reason'] == 'NO_PLAN_VERSION_RECORDED'
+    assert gate['version_id'] is None and gate['lock_id'] is None and gate['manifest_hash'] is None
+    assert gate['allowed_for_action'] is False
+    assert PlanStatus(**gate).state == 'BLOCKED'
+
+
+def test_ai_plan_binding_drift_blocks_transport(ai, monkeypatch):
+    """PLAN-017: a bound context that no longer matches the prepared binding blocks model transport; defense-in-depth branch exercised by injection because the API cannot change a CURRENT binding without also changing lock, version or state."""
+    import app.ai_service as service
+    c, r, body, pol, seen, output, settings, _ = ai
+    project = c.get('/api/projects').json()[0]
+    a = c.post('/api/archive', json={'project_id': project['id'], 'relative_path': 'drift.txt',
+                                     'content': 'Synthetic drift detection context'}).json()
+    plan, v, _ = make(c, r, tid=body['task_id'], resources=[{'kind': 'archive', 'id': a['id']}])
+    body['plan_lock_id'] = lock(c, r, plan, v)['id']
+    c.post('/api/ai/policy', headers=r, json=pol)
+    req = c.post('/api/ai/requests', json=body).json()
+    assert req['state'] == 'AWAITING_REVIEW' and req['plan_binding']['state'] == 'CURRENT'
+    real = service.locked_context
+
+    def drifted(db, task_id, lock_id, storage):
+        gate, texts = real(db, task_id, lock_id, storage)
+        return dict(gate, manifest_hash='0' * 64), texts
+
+    monkeypatch.setattr(service, 'locked_context', drifted)
+    outcome = c.post(f"/api/ai/requests/{req['id']}/run", headers=r,
+                     json={'context_hash': req['context_hash'], 'reason': 'Explicit isolated transport'}).json()
+    assert outcome['attempt']['state'] == 'BLOCKED'
+    assert outcome['attempt']['reason'] == 'PLAN_CONTEXT_CHANGED'
+    assert outcome['output'] is None and outcome['allowed_for_action'] is False
+    assert seen == []

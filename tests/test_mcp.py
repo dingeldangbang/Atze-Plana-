@@ -18,20 +18,24 @@ from conftest import seed, task
 def peer(tmp_path, monkeypatch):
     seen, behavior = [], {'case':'json'}
     class Handler(BaseHTTPRequestHandler):
+        protocol_version = 'HTTP/1.1'  # Real Streamable HTTP keeps the connection; exercises per-read timeout re-arming.
         def log_message(self, *args):
             pass  # Only isolated peer logs; never dump bearer credentials.
         def do_DELETE(self):
             seen.append(('DELETE', self.path, None))
-            self.send_response(500 if behavior['case']=='cleanup' else 204);self.end_headers()
+            self.send_response(500 if behavior['case']=='cleanup' else 204)
+            self.send_header('Content-Length','0');self.end_headers()
         def do_POST(self):
             body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             seen.append(('POST',self.path,body))
             assert self.headers['Authorization']=='Bearer synthetic-oauth-access'
             case=behavior['case']
             if case=='http':
-                self.send_response(302);self.send_header('Location','https://example.org/not-followed');self.end_headers();return
+                self.send_response(302);self.send_header('Location','https://example.org/not-followed')
+                self.send_header('Content-Length','0');self.end_headers();return
             if body['method']=='notifications/initialized':
-                self.send_response(202);self.end_headers();return
+                self.send_response(200 if case=='notification-rejected' else 202)
+                self.send_header('Content-Length','0');self.end_headers();return
             if body['method']=='initialize':
                 result={'protocolVersion':'invalid' if case=='version' else VERSION,'capabilities':{'tools':{}}}
             else:
@@ -48,9 +52,12 @@ def peer(tmp_path, monkeypatch):
             if case=='oversize':raw=b'x'*(512*1024+1)
             if case=='reflection':raw=b'{"value":"synthetic-oauth-access"}'
             if case=='sse':raw=b'event: message\ndata: '+raw+b'\n\n'
+            if case=='sse-empty':raw=b'event: message\n\n'
+            if case=='sse-incomplete':raw=b'event: message\ndata: '+raw
             self.send_response(200)
-            self.send_header('Content-Type','text/event-stream' if case=='sse' else 'application/json')
-            self.send_header('Mcp-Session-Id','isolated-session')
+            stream=case in {'sse','sse-empty','sse-incomplete'}
+            self.send_header('Content-Type','text/plain' if case=='content-type' else 'text/event-stream' if stream else 'application/json')
+            self.send_header('Mcp-Session-Id','x'*300 if case=='session-invalid' else f'session-{len(seen)}' if case=='session-changed' else 'isolated-session')
             self.send_header('Content-Length',str(len(raw)));self.end_headers();self.wfile.write(raw)
     key,cert=tmp_path/'key.pem',tmp_path/'cert.pem'
     subprocess.run(['openssl','req','-x509','-newkey','rsa:2048','-nodes','-keyout',str(key),'-out',str(cert),'-days','1','-subj','/CN=127.0.0.1','-addext','subjectAltName=IP:127.0.0.1'],check=True,capture_output=True,timeout=20)
@@ -77,9 +84,10 @@ def test_mcp_real_tls_handshake_and_cleanup(peer,case):
     assert all(v[1]=='/mcp' for v in seen)
 
 
-@pytest.mark.parametrize('case',['http','version','id','pagination','duplicate','malformed','oversize','reflection','server-request','cleanup','keys'])
+@pytest.mark.parametrize('case',['http','version','id','pagination','duplicate','malformed','oversize','reflection','server-request','cleanup','keys',
+                                 'session-invalid','session-changed','notification-rejected','content-type','sse-empty','sse-incomplete'])
 def test_mcp_response_fail_closed(peer,case):
-    """MCP-002: real adverse TLS replies → reject redirect/format/scope/injection/cleanup; no fallback or tool execution."""
+    """MCP-002: real adverse TLS replies → reject redirect/format/scope/injection/cleanup plus invalid, changed or absent sessions, rejected notifications, unsupported content types and empty/incomplete SSE events; no fallback or tool execution."""
     seen,behavior,_=peer;behavior['case']=case
     with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').discover()
     assert all(v[1]=='/mcp' and (not v[2] or v[2]['method']!='tools/call') for v in seen)
@@ -208,3 +216,32 @@ def test_mcp_oauth_never_model_context(ai):
         result = c.post('/api/ai/requests', json={**body, 'prompt': credential})
         assert result.status_code == 409 and result.json()['detail'] == 'KNOWN_CREDENTIAL_BLOCKED'
         assert seen == []
+
+
+def test_mcp_policy_change_between_reservation_and_io(settings, reviewer, peer, monkeypatch):
+    """MCP-012: a reviewer policy change after the durable reservation blocks the handshake before any TLS traffic and records the honest reason; injected because the change must land between two checks of one request."""
+    import app.mcp_api as mcp_api
+    from app.ai_models import AIPolicy
+    from app.store import put, identity, now
+    settings = replace(settings, brightdata_oauth_token='synthetic-oauth-access')
+    with TestClient(create_app(settings)) as c:
+        c.headers['Authorization'] = 'Bearer ' + settings.operator_token
+        body, pol = setup(c, reviewer)
+        c.post('/api/ai/policy', headers=reviewer, json=pol)
+        real_gate, calls = mcp_api.gate, {'count': 0}
+
+        def changed_after_reservation(db, request, storage):
+            calls['count'] += 1
+            if calls['count'] == 2:
+                # Reproducible injection of a concurrent permissive policy revision.
+                put(db, 'ai_policy', dict(**AIPolicy(**pol).model_dump(), id=identity(), created_at=now()))
+            return real_gate(db, request, storage)
+
+        monkeypatch.setattr(mcp_api, 'gate', changed_after_reservation)
+        result = c.post('/api/mcp/brightdata/discover', headers=reviewer, json=body).json()
+        assert calls['count'] == 2
+        assert result['attempt']['state'] == 'BLOCKED' and result['attempt']['reason'] == 'MCP_POLICY_CHANGED'
+        assert result['catalog'] is None and result['allowed_for_action'] is False
+        assert peer[0] == []
+        events = c.get('/api/audit', headers=reviewer).json()
+        assert [v['event'] for v in events if v['event'].startswith('mcp.')][-1] == 'mcp.discovery_outcome'

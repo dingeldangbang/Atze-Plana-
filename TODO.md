@@ -12,7 +12,23 @@ Stand 2026-09-14. Basis: Branch `arena/01a09e11-atze-plana`, Commit `f1ed5dd`. D
 | OpenAPI-Vertragsabgleich | eigener Abgleich `openapi.yaml` ↔ Routendekorationen | 43 Pfade; **16 Operationen ohne `x-role`/`x-side-effects`** |
 | Defektprobe Schema-only-Modus | `create_app(schema_only=True)` + `GET /health` | **AttributeError** (`'NoneType' object has no attribute 'connect'`) |
 
-Nicht ausgeführt und deshalb hier ausdrücklich **nicht** als Ergebnis behauptet: Browser-E2E, HTTP-/Worker-Smoke, Paketbuild, Android-Build, lokale Modell-CI, Lasttest, Deployment. Diese Gates stehen in [TEST_REPORT](TEST_REPORT.md), [APK_RELEASE_REPORT](APK_RELEASE_REPORT.md) und [FINAL_VALIDATION_REPORT](FINAL_VALIDATION_REPORT.md).
+Nicht ausgeführt und deshalb hier ausdrücklich **nicht** als Ergebnis behauptet: Browser-E2E, HTTP-/Worker-Smoke, Paketbuild, Android-Build, lokale Modell-CI, Lasttest, Deployment.
+
+### Stand nach dem ersten Umsetzungsschnitt (2026-09-14, TODO-001/002/004/008/010)
+
+| Prüfung | Ergebnis |
+|---|---|
+| `pytest --cov=app --cov-report=term-missing` | **188 passed**, 99 % Coverage, **1** nicht überdecktes Statement (`challenge_worker.py:64`, läuft real im Kindprozess) |
+| `scripts/smoke.py --allow-fixtures` (normal und `-O`) | PASS, je **43** geprüfte Responses, 4 separate Worker-OS-Prozesse |
+| `python -m build` | wheel + sdist real gebaut |
+| `scripts/docs.py --check` | PASS |
+| `scripts/reality_check.py` | PASS |
+| `node --check app/static/app.js` | PASS |
+| `tests/universe_harness.py --execute --scope core` | 5/5 Checks PASS, Verdict PARTIAL (by design) |
+| OpenAPI-Vertragsabgleich | **0** Operationen ohne `x-role`/`x-side-effects` |
+| Browser-E2E, Dependency-Audit, Remote-CI, Modell-/Android-CI, Lasttest | **NOT RUN** — kein Chromium in dieser Sandbox; keine erfundene Abnahme |
+
+Details und Grenzen: [Addendum im Validierungsbericht](FINAL_VALIDATION_REPORT.md), [Changelog](CHANGELOG.md). Diese Gates stehen in [TEST_REPORT](TEST_REPORT.md), [APK_RELEASE_REPORT](APK_RELEASE_REPORT.md) und [FINAL_VALIDATION_REPORT](FINAL_VALIDATION_REPORT.md).
 
 Legende: `P1` = korrektheits-/sicherheitsrelevant, vor jedem Release. `P2` = Vollständigkeit/Bedienbarkeit. `P3` = Zielplattform, benötigt externe Ressourcen (Hardware, Credentials, Autorisierung).
 Status nach Policy: `DEFECT` (nachvollziehbarer Fehler im vorhandenen Code), `PARTIAL` (teilweise implementiert), `MISSING` (Funktion fehlt im vorhandenen Modul), `NOT IMPLEMENTED` (kein Adapter/Workflow), `BLOCKED` (externe Voraussetzung fehlt).
@@ -21,24 +37,24 @@ Status nach Policy: `DEFECT` (nachvollziehbarer Fehler im vorhandenen Code), `PA
 
 ## A. Konkrete Code-Defekte und Robustheitslücken
 
-- [ ] **TODO-001 · `GET /health` bricht im Schema-only-Modus ab** — `DEFECT` · P2
+- [x] **TODO-001 · `GET /health` bricht im Schema-only-Modus ab** — `DEFECT` · P2 · **ERLEDIGT 2026-09-14**
   - Nachweis: `create_app(schema_only=True)` setzt `store = None`; `health()` nutzt `db=DB` → `AttributeError: 'NoneType' object has no attribute 'connect'` (in dieser Session reproduziert). [app/main.py](app/main.py) Zeilen 26–30, 77–80.
   - Warum relevant: [docs/19-operations/configuration.md](docs/19-operations/configuration.md) dokumentiert `schema_only=True` als legitimen Betriebsweg für die OpenAPI-Erzeugung; jeder Health-Check dagegen liefert 500 statt einer ehrlichen Antwort.
-  - Fertig, wenn: Health im Schema-only-Modus einen expliziten Nicht-Betriebszustand (z. B. `SCHEMA_ONLY`) liefert oder die Route dort nicht registriert wird; Regressionstest ergänzt; Dokumentation synchron aktualisiert.
+  - Umgesetzt: Health öffnet die Transaktion selbst und liefert ohne gebundenen Store 503 mit explizitem Grund statt eines unbehandelten Fehlers oder eines Erfolgs ohne Datenbankprüfung; alle Datenrouten bleiben dort fail-closed (401 bzw. 503 NOT CONFIGURED), die OpenAPI-Erzeugung unverändert nutzbar. Test DOC-005; [docs/19-operations/operations.md](docs/19-operations/operations.md) und [SECURITY](SECURITY.md) synchron.
 
-- [ ] **TODO-002 · 16 API-Operationen ohne Rollen-/Nebeneffekt-Vertrag** — `PARTIAL` · P1
+- [x] **TODO-002 · 16 API-Operationen ohne Rollen-/Nebeneffekt-Vertrag** — `PARTIAL` · P1 · **ERLEDIGT 2026-09-14**
   - Nachweis: eigener Abgleich gegen [openapi.yaml](openapi.yaml) — `GET /health`, `GET /api/runtime`, `GET /api/openapi.json`, `POST/GET /api/projects`, `POST/GET /api/evidence`, `GET /api/evidence/{id}`, `POST /api/evidence/{id}/review`, `POST/GET /api/tasks`, `POST /api/tasks/{id}/triage`, `POST /api/tasks/{id}/approve`, `GET/POST /api/control/stop`, `GET /api/audit` tragen kein `x-role`/`x-side-effects`.
   - Warum relevant: Alle neueren Module (PLAN, AI, MCP, Challenge, Context) deklarieren den Vertrag explizit; der Kern verlässt sich stattdessen auf hartkodierte Spezialfälle in [scripts/docs.py](scripts/docs.py) Zeilen 42–68. Rollen-/Effektaussagen sind damit an zwei Stellen definiert und können auseinanderlaufen.
-  - Fertig, wenn: alle `/api/`- und `/health`-Operationen den Vertrag deklarieren, `scripts/docs.py` die Fallback-Sonderfälle verliert und `python scripts/docs.py` neu generiert + `--check` PASS liefert.
+  - Umgesetzt: alle 16 Operationen deklarieren `x-role`/`x-side-effects`; [scripts/docs.py](scripts/docs.py) rät nichts mehr und bricht bei fehlendem Vertrag ab (dauerhaftes Drift-Gate). OpenAPI/APIs.md neu generiert; `--check` PASS. `docs/08-network/APIs.md` änderte sich nur in den zwei Zeilen, deren Semantik sich tatsächlich änderte (Health, Stop-GET).
 
 - [ ] **TODO-003 · `stop_revision` wird aus Audit-IDs abgeleitet** — `PARTIAL` · P1
   - Nachweis: [app/plan_service.py](app/plan_service.py) Zeile 79 liest `latest(db,'audit','event','control.stop_changed')`; [THREAT_MODEL](THREAT_MODEL.md) hält fest, dass Audit weder kryptografisch verkettet noch gegen DB-Administratoren geschützt ist.
   - Warum relevant: Eine zentrale Staleness-/Invalidierungsgröße für PLAN, Challenge und Adoption hängt an einer Tabelle, die laut eigenem Threat Model manipuliert werden kann.
-  - Fertig, wenn: Stop-Revision aus einer dedizierten, monotonen Control-Tabelle (mit Actor, Zeitstempel, Revision) stammt und Manipulations-/Negativtests ergänzt sind.
+  - Fertig, wenn: `plan_service.stop_revision` aus einer dedizierten, monotonen Control-Quelle stammt und Manipulations-/Negativtests ergänzt sind. **Zwischenstand:** mit TODO-008 existiert jetzt ein `stop_state`-Record mit aufsteigender Revision als natürliche Grundlage; die Umstellung wurde bewusst nicht im selben Schnitt gemacht, weil sie den Manifest-Hash bestehender PLANs ändern und damit alte Locks/Freigaben entwerten würde (Migrationsentscheidung nötig).
 
-- [ ] **TODO-004 · `plan_service.status()` ohne Guard für fehlende Version** — `DEFECT` (latent) · P2
+- [x] **TODO-004 · `plan_service.status()` ohne Guard für fehlende Version** — `DEFECT` (latent) · P2 · **ERLEDIGT 2026-09-14**
   - Nachweis: [app/plan_service.py](app/plan_service.py) Zeilen 138–142 greifen auf `version['id']` zu, ohne `version is None` zu prüfen. Über die API derzeit nicht erreichbar (`create_plan` schreibt Version atomar), aber jeder künftige Pfad/Teilfehler erzeugt 500 statt `BLOCKED`.
-  - Fertig, wenn: `None`-Fall als expliziter `BLOCKED`-Zustand mit Grund behandelt und getestet ist.
+  - Umgesetzt: liefert `BLOCKED`/`NO_PLAN_VERSION_RECORDED` mit `version_id`/`lock_id`/`manifest_hash = null`; `PlanStatus` akzeptiert den Zustand. Test PLAN-016 gegen echte SQLite; [docs/21-plan/context-lock.md](docs/21-plan/context-lock.md) und Datenarchitektur synchron.
 
 - [ ] **TODO-005 · Evidence-Text ist nicht durchsuchbar** — `MISSING` · P1
   - Nachweis: `index_text()` wird nur aus `create_memory`, `adopt_result`, `storage.archive` und `reindex` (archive/memory) aufgerufen — [app/context.py](app/context.py) Zeile 23, [app/challenge_service.py](app/challenge_service.py) Zeile 154, [app/storage.py](app/storage.py) Zeile 153, [app/context_api.py](app/context_api.py) Zeile 97. `POST /api/evidence` indiziert nichts.
@@ -54,15 +70,15 @@ Status nach Policy: `DEFECT` (nachvollziehbarer Fehler im vorhandenen Code), `PA
   - Nachweis: [app/store.py](app/store.py) Zeile 71 `listing()` liefert nur `limit`/`offset`; alle 8 Listenendpunkte ohne Total. UI-Fußzeile: „Listen zeigen maximal 100 Einträge“.
   - Fertig, wenn: Paginierungsinformation (oder dokumentierter Cursor) verfügbar ist und UI/Doku sie nutzen.
 
-- [ ] **TODO-008 · `POST /api/control/stop` antwortet mit dem Eingabekörper** — `PARTIAL` · P2
+- [x] **TODO-008 · `POST /api/control/stop` antwortet mit dem Eingabekörper** — `PARTIAL` · P2 · **ERLEDIGT 2026-09-14**
   - Nachweis: [app/main.py](app/main.py) Zeilen 163–167 gibt `body` zurück; `Stop` erbt nur `active`/`reason` ([app/models.py](app/models.py) Zeilen 122–128). Kein Actor, kein Zeitstempel, keine Revision — wer wann gestoppt hat, ist nur über das reviewer-only Audit sichtbar.
-  - Fertig, wenn: Stop-Zustand Actor/Zeitstempel/Revision trägt und beide Endpunkte dasselbe Modell liefern.
+  - Umgesetzt: additiver `stop_state`-Record (Revision, Actor, Zeitstempel, Record-ID) wird atomar mit der `control`-Tabelle geschrieben; beide Endpunkte liefern denselben Zustand. Ohne passenden Record (Legacy-Bestand oder Änderung außerhalb der API) bleiben die Werte null/0 statt erfunden. Test SEC-005 prüft zusätzlich den Legacy-Fall per realem SQLite-Eingriff. **Grenze:** die Provenienz liegt in derselben DB und ist nicht manipulationssicher (siehe TODO-062); [THREAT_MODEL](THREAT_MODEL.md) führt sie als eigene Zeile mit Restrisiko.
 
 - [ ] **TODO-009 · Inkonsistente `created_by`-Typisierung** — `PARTIAL` · P3
   - Nachweis: `Task.created_by: str` ([app/models.py](app/models.py) Zeile 89) vs. `Result.created_by: Literal['operator']` ([app/challenge_models.py](app/challenge_models.py) Zeile 39).
   - Fertig, wenn: einheitliche Rollentypisierung über alle erzeugten Records.
 
-- [ ] **TODO-010 · 42 nicht überdeckte Statements; Worker-Kern kaum unitgetestet** — `PARTIAL` · P1
+- [x] **TODO-010 · 42 nicht überdeckte Statements; Worker-Kern kaum unitgetestet** — `PARTIAL` · P1 · **ERLEDIGT 2026-09-14 (1 Restzeile)**
   - Nachweis (Coverage-Lauf dieser Session):
     | Modul | Coverage | Nicht überdeckt |
     |---|---|---|
@@ -73,7 +89,9 @@ Status nach Policy: `DEFECT` (nachvollziehbarer Fehler im vorhandenen Code), `PA
     | [app/ai_service.py](app/ai_service.py) | 99 % | 95 (`PLAN_CONTEXT_CHANGED`) |
     | [app/mcp_api.py](app/mcp_api.py) | 98 % | 61 (`MCP_POLICY_CHANGED`) |
   - Warum relevant: Der Worker ist das Pflichtgate jeder Freigabe; sein reales Transport-/CLI-Verhalten wird nur im separaten HTTP-Smoke geübt, nicht in der Regressionssuite. Zwei Gate-Zweige (`PLAN_CONTEXT_CHANGED`, `MCP_POLICY_CHANGED`) sind unbeobachtet.
-  - Fertig, wenn: Worker-Transport gegen einen echten lokalen Loopback-Peer, CLI-Validierung und beide Gate-Zweige in `tests/` regressionsgeprüft sind; Coverage-Bericht neu ausgeführt.
+  - Umgesetzt: 42 → **1** nicht überdecktes Statement (98 % → 99 %). Neu: CH-018 (Claim/Complete über echten Loopback-Peer, Reihenfolge, nur Servicetoken, exakte deterministische Analyse), CH-019 (Redirect/Serverfehler ohne erfundenen Report, keine Credential-Weiterleitung), CH-020 (CLI-Exitcodes 0/1 plus realer `python -m app.challenge_worker`-Kindprozess), CH-021 (Dauerpollen), MCP-012 (`MCP_POLICY_CHANGED`), PLAN-017 (`PLAN_CONTEXT_CHANGED`), STO-011/012, AI-007-Portgrenze, sechs neue MCP-002-Fehlerfälle (Session ungültig/geändert, Notification abgelehnt, Content-Type, SSE leer/unvollständig) gegen einen HTTP/1.1-TLS-Peer.
+  - Verbleibend: `app/challenge_worker.py:64` (`raise SystemExit(main())`) — real im Kindprozess ausgeführt, aber nicht vom Eltern-Coveragezähler erfasst; bekannte, dokumentierte Grenze statt Testlücke.
+  - **Befund:** `PLAN_CONTEXT_CHANGED` ist über die heutige API **nicht erreichbar** (eine CURRENT-Bindung kann sich nicht ändern, ohne Lock, Version oder Zustand zu ändern) — reiner Defense-in-depth-Zweig, per injizierter Drift geprüft und im Docstring als solcher gekennzeichnet. `MCP_POLICY_CHANGED` benötigt eine Änderung zwischen zwei Prüfungen desselben Requests und ist ebenfalls nur injiziert deterministisch prüfbar.
 
 ---
 
@@ -265,7 +283,7 @@ Nachweis je Bereich: [docs/00-overview/roadmap.md](docs/00-overview/roadmap.md),
 
 ## I. Empfohlene Reihenfolge
 
-1. **Klein, real, sofort prüfbar:** TODO-001, TODO-002, TODO-004, TODO-008, TODO-009, TODO-010, TODO-021 — jeder Punkt mit Test + synchroner Doku/OpenAPI-Regenerierung.
+1. **Klein, real, sofort prüfbar:** ~~TODO-001~~, ~~TODO-002~~, ~~TODO-004~~, ~~TODO-008~~, ~~TODO-010~~ erledigt; offen: TODO-007, TODO-009, TODO-021 — jeder Punkt mit Test + synchroner Doku/OpenAPI-Regenerierung.
 2. **Korrektheits-/Sicherheitskern:** TODO-003, TODO-005, TODO-023, TODO-024, TODO-020, TODO-026.
 3. **Betriebsvoraussetzungen:** TODO-025, TODO-053, TODO-054, TODO-022, TODO-062, TODO-063.
 4. **Vor jeder Tool-/Agent-/Executor-Arbeit zwingend:** TODO-027, TODO-065, TODO-070.

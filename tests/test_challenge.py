@@ -1,14 +1,21 @@
 """Synthetic inputs, real challenge rules/HTTP/SQLite; separate process in smoke."""
 import hashlib
 import json
+import os
 import sqlite3
+import subprocess
+import sys
+import threading
+import urllib.error
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from app.main import create_app
 from app.challenge_rules import analyze, equal_value
-from app.challenge_worker import run_once, NoRedirects
+from app.challenge_worker import run_once, main, NoRedirects
 from conftest import seed, task, result_body, challenged_result, process_job_api, observation
 
 
@@ -322,3 +329,130 @@ def test_scope_limits_block_instead_of_partial_validation(client, reviewer, monk
                              'result': {'claims': [], 'alternatives': [], 'unknowns': [], 'kind': 'plan', 'falsification_test': 'inspect original'}, 'evidence': []})
     assert limited.verdict == 'BLOCK'
     assert limited.findings[-1].code == 'FINDING_LIMIT'
+
+
+WORKER_TOKEN = 'isolated-worker-transport-credential-0000'
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def worker_peer():
+    """Real loopback HTTP peer for the two worker endpoints; payloads are explicitly synthetic, never a challenge verdict source."""
+    seen, behavior = [], {'case': 'job', 'job': None}
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass  # Isolated peer logs only; never echo the service credential.
+
+        def do_POST(self):
+            length = int(self.headers.get('Content-Length') or 0)
+            body = json.loads(self.rfile.read(length)) if length else None
+            seen.append((self.path, self.headers.get('Authorization'), body))
+            if behavior['case'] == 'redirect':
+                self.send_response(302)
+                self.send_header('Location', 'http://127.0.0.1:9/never-follow')
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+                return
+            payload = {'detail': 'isolated peer failure'} if behavior['case'] == 'error' else (
+                behavior['job'] if self.path == '/api/challenge/jobs/claim'
+                else {'id': 'synthetic-report-id', 'analysis': {'verdict': 'PASS'}})
+            raw = json.dumps(payload).encode()
+            self.send_response(500 if behavior['case'] == 'error' else 200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield server, seen, behavior
+    server.shutdown()
+    server.server_close()
+    thread.join(timeout=3)
+
+
+def test_worker_transport_claims_and_completes_real_job(client, reviewer, settings, worker_peer):
+    """CH-018: the separate worker code path claims a real API job and submits the deterministic report over actual loopback HTTP with its own credential, never a platform token."""
+    server, seen, behavior = worker_peer
+    _, evidence, key, result = setup_result(client, reviewer)
+    job = client.post('/api/challenge/jobs/claim', headers=worker_headers(settings)).json()
+    behavior['job'] = job
+    outcome = run_once(f'http://127.0.0.1:{server.server_port}', WORKER_TOKEN)
+    assert outcome == {'job_id': job['job_id'], 'report_id': 'synthetic-report-id', 'verdict': 'PASS'}
+    assert [entry[0] for entry in seen] == ['/api/challenge/jobs/claim', f"/api/challenge/jobs/{job['job_id']}/complete"]
+    assert all(entry[1] == 'Bearer ' + WORKER_TOKEN for entry in seen)
+    assert settings.operator_token not in json.dumps(seen) and settings.reviewer_token not in json.dumps(seen)
+    completion = seen[1][2]
+    assert completion['lease'] == job['lease'] and completion['fingerprint'] == job['fingerprint']
+    assert completion['analysis'] == analyze(job['snapshot']).model_dump()
+    behavior['job'] = None
+    assert run_once(f'http://127.0.0.1:{server.server_port}', WORKER_TOKEN) is None
+    assert len(seen) == 3 and seen[2][0] == '/api/challenge/jobs/claim'
+
+
+def test_worker_transport_refuses_redirect_and_server_error(worker_peer):
+    """CH-019: a redirect or failing server yields a transport error instead of a fabricated report, and the service credential is never forwarded to another origin."""
+    server, seen, behavior = worker_peer
+    url = f'http://127.0.0.1:{server.server_port}'
+    behavior['case'] = 'redirect'
+    with pytest.raises(urllib.error.HTTPError):
+        run_once(url, WORKER_TOKEN)
+    assert len(seen) == 1 and seen[0][0] == '/api/challenge/jobs/claim'
+    behavior['case'] = 'error'
+    with pytest.raises(urllib.error.HTTPError):
+        run_once(url, WORKER_TOKEN)
+    assert len(seen) == 2 and all(entry[0].startswith('/api/challenge/') for entry in seen)
+
+
+def test_worker_cli_exit_codes_and_module_entry(client, reviewer, settings, worker_peer, monkeypatch, capsys):
+    """CH-020: the documented CLI exits 0 after a real completed job and 1 on transport failure, in process and as an actual separate OS process, reporting BLOCKED without inventing a verdict."""
+    server, seen, behavior = worker_peer
+    url = f'http://127.0.0.1:{server.server_port}'
+    _, evidence, key, result = setup_result(client, reviewer)
+    behavior['job'] = client.post('/api/challenge/jobs/claim', headers=worker_headers(settings)).json()
+    monkeypatch.setenv('ATZE_CHALLENGE_TOKEN', WORKER_TOKEN)
+    monkeypatch.setattr(sys, 'argv', ['app.challenge_worker', '--url', url, '--once'])
+    assert main() == 0
+    assert json.loads(capsys.readouterr().out)['report_id'] == 'synthetic-report-id'
+    behavior['case'] = 'error'
+    monkeypatch.setattr(sys, 'argv', ['app.challenge_worker', '--url', url, '--once'])
+    assert main() == 1
+    assert json.loads(capsys.readouterr().out)['status'] == 'BLOCKED'
+    environment = {**os.environ, 'ATZE_CHALLENGE_TOKEN': WORKER_TOKEN, 'PYTHONPATH': str(ROOT)}
+    failed = subprocess.run([sys.executable, '-m', 'app.challenge_worker', '--url', url, '--once'],
+                            env=environment, cwd=ROOT, capture_output=True, text=True, timeout=60)
+    assert failed.returncode == 1 and json.loads(failed.stdout)['status'] == 'BLOCKED'
+    new_challenge(client, result)
+    behavior['case'] = 'job'
+    behavior['job'] = client.post('/api/challenge/jobs/claim', headers=worker_headers(settings)).json()
+    succeeded = subprocess.run([sys.executable, '-m', 'app.challenge_worker', '--url', url, '--once'],
+                               env=environment, cwd=ROOT, capture_output=True, text=True, timeout=60)
+    assert succeeded.returncode == 0
+    assert json.loads(succeeded.stdout)['verdict'] == 'PASS' and WORKER_TOKEN not in succeeded.stdout
+
+
+def test_worker_continuous_poll_until_interrupted(worker_peer, monkeypatch, capsys):
+    """CH-021: without --once the worker keeps polling after a failure and invents no verdict in between; the documented interrupt point is the wait between attempts."""
+    import app.challenge_worker as worker
+    server, seen, behavior = worker_peer
+    behavior['case'] = 'error'
+    monkeypatch.setenv('ATZE_CHALLENGE_TOKEN', WORKER_TOKEN)
+    monkeypatch.setattr(sys, 'argv', ['app.challenge_worker', '--url', f'http://127.0.0.1:{server.server_port}'])
+
+    class Interrupted(Exception):
+        pass
+
+    waits = []
+
+    def interrupt(seconds):
+        waits.append(seconds)
+        raise Interrupted('isolated test interrupt of the poll loop')
+
+    monkeypatch.setattr(worker.time, 'sleep', interrupt)
+    with pytest.raises(Interrupted):
+        worker.main()
+    assert waits == [2]
+    assert json.loads(capsys.readouterr().out) == {'status': 'BLOCKED', 'error_type': 'HTTPError'}
+    assert len(seen) == 1 and seen[0][0] == '/api/challenge/jobs/claim'

@@ -11,6 +11,7 @@ Secrets im Prozess/Browser, SQLite mit Originaltexten und Freigaben, Audit, Buil
 | Browser | XSS / Tokenabfluss | textContent, CSP, Token nur in Memory | kompromittierter Origin/Browser bleibt gefährlich |
 | DB | SQL-Injection / Datenverlust | parametrisierte SQL, Transaktionen | Host-Admin kann lesen/manipulieren; Backups nötig |
 | Audit | Spurenverfälschung | keine API für Update/Delete | nicht kryptografisch verkettet, keine externe Senke |
+| Stop-Provenienz | nachträgliche Änderung von Revision/Actor | unveränderliche `stop_state`-Records; fehlende Passung bleibt unknown | Records liegen in derselben DB; Host-/DB-Admin bleibt Vertrauensgrenze |
 | Ressourcen | große Bodies, parallele Writes | begrenzte Felder/Listen, SQLite-Timeout | Request wird vor Feldvalidierung gelesen; Reverse Proxy erforderlich |
 | Dependencies/CI | Supply-chain | versionsgepinnt, pip-audit, read-only CI-Berechtigung | keine Hash-Locks, kein unabhängiger Audit |
 | Terminal/USB/BLE/Netzgeräte | unkontrollierte Ausführung | NOT IMPLEMENTED | vor Adaptern separates Threat Model |
@@ -32,7 +33,7 @@ Kein Penetrationstest, kein Secret-Scanner-Vollscan der gesamten Git-Historie, k
 | Kontextfremde Quellen | same-project Referenzvalidierung, Query-Projektfilter | beide Rollen sehen alle Projekte, keine Tenant-Grenze |
 | Datenverlust | unveränderliche Archive, lesende Hashchecks | DB-only Backup nicht mehr vollständig; Gesamtrestore noch kein Produktionsnachweis |
 
-Regressionen: STO-001..010, CACHE-001/002, MEM-001/002, RAG-001/002, MIG-001. Tests verwenden temporäre Verzeichnisse als **simulierten** zweiten Tier, keine behauptete SD-Hardware.
+Regressionen: STO-001..012, CACHE-001/002, MEM-001/002, RAG-001/002, MIG-001. Tests verwenden temporäre Verzeichnisse als **simulierten** zweiten Tier, keine behauptete SD-Hardware.
 
 ## v0.2.1 — Testdatenkontamination / falsche Erfolgsanzeigen
 Risiko: beliebig adressierbarer Smoke-Runner könnte Testeingaben in Betriebs-DB schreiben; alte UI-Werte oder PASS-Dateien könnten einen ausgefallenen/neuen Lauf verdecken. Kontrolle: keine fremde Ziel-URL, selbst gestartete temporäre echte Testinstanz, eigenständige Credentials, explizites Opt-in und Modusprobe, dauerhafte DB-/Objektroot-Modusmarker, Reportstatus vor Beginn neu schreiben, Werte nach UI-Refreshfehler verwerfen. Kein Fake-Fallback bei fehlenden Adaptern/Roots oder Nullkapazität. Test-SD bleibt Dateiverzeichnis, kein Device-Profil/Live-Gerät.
@@ -44,7 +45,7 @@ Neue Angriffsflächen: eingereichte strukturierte Claims, Challenge-Jobs/Snapsho
 
 Bedrohungen: falsche Evidence-Metadaten, unterdrückte Gegenquellen, überbreiter Primärtext, Replay, stale Daten nach Freigabe, Reviewer-Umgehung kritischer Lücken, Credentialleck/Redirect, Snapshot-DoS. Kontrollen: projektweite beschränkte Gegenprüfung, exakte strukturierte Befunde, freier Primärtext nicht adoptiert, Context-/Stopinvalidierung, zwingende Gateprüfung vor Approval/Adopt, keine HTTP-Redirects für Servicetoken, keine Remote-Plaintext-Verbindung, 4-MiB-/500-Source-/500-Finding-Bounds mit BLOCK statt Teil-PASS. Kein unabhängiger Source-Provider, semantischer Truth-Check oder Host-Sandbox vorhanden. Der Worker kann unter demselben OS-Nutzer prinzipiell Hostdateien lesen; API-Rechtetrennung ist keine Hostisolation.
 
-CH-001..017 plus echte separate Workerprozesse im HTTP-Smoke prüfen diese begrenzten Softwareverträge. Kein Hardware-/Kausal-/Produktionssicherheitsnachweis daraus ableiten.
+CH-001..021 plus echte separate Workerprozesse im HTTP-Smoke prüfen diese begrenzten Softwareverträge. Kein Hardware-/Kausal-/Produktionssicherheitsnachweis daraus ableiten.
 
 ## Privacy-first AI boundary
 Keine Appdaten unverschlüsselt an Dritte. Neue Model-Egresspfade ausschließlich über ExternalDataGateway und die gebundene Policy-/Reviewer-Prüfung. Standard local-only/external-deny, keine stillen Fallbacks/Redirects, keine Credentials im Kontext, kein Modell-Toolrecht. TLS schützt Transport, nicht Providerverarbeitung. Diese Python-Kontrolle ist KEIN universeller OS-/Netzwerkbeweis; Challenge-Control-Transport ist noch separat, MCP/Agent-Tools fehlen. Host-/Ingress-/Klassifizierungs-/verschlüsselter-Cache-/MCP-/Sandboxgates bleiben release-blockierend. [Begrenzter tatsächlicher Vertrag](docs/02-core/model-gateway.md).

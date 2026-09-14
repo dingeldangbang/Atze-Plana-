@@ -39,33 +39,14 @@ def products():
         for method, operation in methods.items():
             if method not in {'get', 'post'}:
                 raise ValueError('Document new HTTP method explicitly')
-            role = 'both'
-            if path == '/health':
-                role = 'public'
-            elif method == 'post' and path in ['/api/projects', '/api/tasks', '/api/evidence']:
-                role = 'operator'
-            elif path.endswith(('/review', '/approve')) or path == '/api/audit' or (path == '/api/control/stop' and method == 'post'):
-                role = 'reviewer'
+            # Roles and side effects are declared by the route itself; the generator
+            # must not invent or guess them, so a missing contract fails the run.
+            if 'x-role' not in operation or 'x-side-effects' not in operation:
+                raise ValueError(f'Missing x-role/x-side-effects contract: {method.upper()} {path}')
+            role = operation['x-role']
+            effect = operation['x-side-effects']
             request = operation.get('requestBody', {}).get('content', {}).get('application/json', {}).get('schema', {})
             responses = {k: v for k, v in operation['responses'].items() if k.startswith('2')}
-            effect = 'None; read-only'
-            if method == 'post':
-                if path.endswith('/review'):
-                    effect = 'One immutable manual evidence review + audit; reason required'
-                elif path.endswith('/approve'):
-                    effect = 'Approval bound to current Result/Challenge/fingerprint + audit; current triage must require approval; never executes'
-                elif path.endswith('/triage'):
-                    effect = 'Decision snapshot in audit; current mandatory Challenge + verified evidence, confidence >=0.8, preconditions, no stop'
-                elif path.endswith('/stop'):
-                    effect = 'Persist global stop + reason in audit; does not interrupt external processes'
-                elif path.endswith('/evidence'):
-                    effect = 'Store original text/hash/provenance + audit; existing project required; initially unverified'
-                elif path.endswith('/tasks'):
-                    effect = 'Immutable task + audit; all evidence references must belong to project'
-                else:
-                    effect = 'Project + audit; no evidence requirement'
-            role = operation.get('x-role', role)
-            effect = operation.get('x-side-effects', effect)
             name = request.get('$ref', '').split('/')[-1] or '—'
             response = json.dumps(responses, ensure_ascii=False).replace('|', '\\|')
             lines.append(f'| {method.upper()} | `{path}` | {role} | {name} | `{response}` | {effect} |')

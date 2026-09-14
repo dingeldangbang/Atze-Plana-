@@ -1,7 +1,7 @@
 # Betrieb, Monitoring, Backup, Recovery und Maintenance
 
 ## Monitoring
-`GET /health` prüft eine SQLite-Transaktion und liefert Status/Version, bei Storage-OperationalError redacted 503. Keine Prometheusmetriken, automatischen Alerts, WebSockets oder externen Checks. Betreiber überwacht Prozess, RSS, CPU, freien Diskplatz, HTTP-Fehler und Backuplauf. Audit über Reviewer-API exportieren/paginieren; keine Tokens in Logsammler übernehmen.
+`GET /health` öffnet eine echte SQLite-Transaktion und liefert Status/Version/Modus, bei Storage-OperationalError redacted 503. Eine Instanz ohne gebundenen Runtime-Store (`schema_only`, ausschließlich Dokumentenerzeugung) liefert ebenfalls 503 mit explizitem Grund statt eines Erfolgs ohne Datenbankprüfung. `GET /api/control/stop` zeigt zusätzlich `revision`, `actor`, `created_at` und `record_id` des letzten aufgezeichneten Wechsels; ohne dazu passenden Record bleiben diese Werte null/0. Keine Prometheusmetriken, automatischen Alerts, WebSockets oder externen Checks. Betreiber überwacht Prozess, RSS, CPU, freien Diskplatz, HTTP-Fehler und Backuplauf. Audit über Reviewer-API exportieren/paginieren; keine Tokens in Logsammler übernehmen.
 
 ## Backup
 **Ab v0.2 ist dieser Befehl nur ein DB-Backup. Original-/Cachewurzeln sind NICHT enthalten; siehe die v0.2-Erweiterung unten.**

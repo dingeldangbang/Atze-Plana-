@@ -1,6 +1,7 @@
 """Executable cases: docstrings identify purpose and expected behavior; JUnit records actual outcome."""
 import hashlib
 import sqlite3
+from datetime import datetime
 import pytest
 from fastapi.testclient import TestClient
 from app.config import Settings
@@ -164,8 +165,36 @@ def test_schema(client):
     assert '/api/tasks/{task_id}/approve' in schema['paths']
 
 
-def test_stop_read(client, reviewer):
-    """SEC-005: both roles can inspect real stop state; write is reviewer-only."""
-    assert client.get('/api/control/stop').json()['active'] is False
-    client.post('/api/control/stop', headers=reviewer, json={'active': True, 'reason': 'Readback test'})
-    assert client.get('/api/control/stop').json() == {'active': True, 'reason': 'Readback test'}
+def test_stop_read(client, reviewer, settings):
+    """SEC-005: both roles inspect the real stop state with recorded revision/actor/time; write stays reviewer-only; an unrecorded legacy change reports unknown provenance instead of invented values."""
+    initial = client.get('/api/control/stop').json()
+    assert initial == {'active': False, 'reason': 'Initial state', 'revision': 0,
+                       'actor': None, 'created_at': None, 'record_id': None}
+    first = client.post('/api/control/stop', headers=reviewer, json={'active': True, 'reason': 'Readback test'}).json()
+    assert set(first) == {'active', 'reason', 'revision', 'actor', 'created_at', 'record_id'}
+    assert first['active'] is True and first['reason'] == 'Readback test'
+    assert first['revision'] == 1 and first['actor'] == 'reviewer'
+    assert datetime.fromisoformat(first['created_at']).tzinfo is not None
+    assert client.get('/api/control/stop').json() == first
+    second = client.post('/api/control/stop', headers=reviewer, json={'active': False, 'reason': 'Resume review'}).json()
+    assert second['revision'] == 2 and second['record_id'] != first['record_id']
+    with sqlite3.connect(settings.db_path) as db:
+        db.execute("UPDATE control SET active=1,reason='Legacy change without provenance record'")
+    assert client.get('/api/control/stop').json() == {
+        'active': True, 'reason': 'Legacy change without provenance record',
+        'revision': 0, 'actor': None, 'created_at': None, 'record_id': None}
+
+
+def test_schema_only_instance_fails_closed(settings):
+    """DOC-005: a schema-only instance has no runtime store, so health returns an honest 503 instead of asserting ok or raising an unhandled error, while every data route still refuses access."""
+    from app.main import create_app
+    with TestClient(create_app(schema_only=True)) as schema_client:
+        response = schema_client.get('/health')
+        assert response.status_code == 503
+        assert response.json() == {'detail': 'Schema-only instance has no runtime store; health is not assertable'}
+        for path in ['/api/runtime', '/api/projects', '/api/storage/health', '/api/ai/status', '/api/openapi.json']:
+            assert schema_client.get(path).status_code == 401
+        claim = schema_client.post('/api/challenge/jobs/claim',
+                                   headers={'Authorization': 'Bearer ' + settings.challenge_token})
+        assert claim.status_code == 503 and 'NOT CONFIGURED' in claim.json()['detail']
+        assert '/api/tasks/{task_id}/approve' in create_app(schema_only=True).openapi()['paths']

@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased — Kernverträge, Stop-Provenienz und Testlücken (0.4.0.dev0)
+
+### Added
+`stop_state`-Record: jeder Stop-Wechsel schreibt Revision, Rolle, Zeitstempel und Record-ID unveränderlich in derselben Transaktion wie die `control`-Tabelle. `GET`/`POST /api/control/stop` liefern diese Provenienz; ohne passenden Record bleiben die Werte null/0. Neun neue ausführbare Fälle: CH-018..021 (Worker-Transport, Redirect-/Fehlerverweigerung, CLI-Exitcodes, realer Modul-Kindprozess, Dauerpollen), MCP-012 (Policywechsel zwischen Reservierung und Dispatch), PLAN-016/017 (versionsloser PLAN, Binding-Drift), STO-011/012 (nicht konfigurierte Tier/nicht kanonischer Schlüssel, konkurrierender Modusmarker), DOC-005 (Schema-only-Instanz), plus zwei neue Origin-Grenzfälle in AI-007 und sechs neue MCP-002-Fehlerfälle.
+
+### Changed
+Alle 16 bisher vertragslosen Kern-Operationen deklarieren `x-role`/`x-side-effects`; `scripts/docs.py` lehnt eine Operation ohne Vertrag jetzt ab, statt Rollen/Effekte zu erraten. MCP-Testpeer spricht HTTP/1.1 und prüft damit das reale Timeout-Nachziehen pro Lesevorgang. SEC-005 prüft Stop-Provenienz statt nur `active`/`reason`.
+
+### Fixed
+`GET /health` brach in einer `schema_only`-Instanz mit einem unbehandelten `AttributeError` ab und meldet jetzt 503 mit explizitem Grund. `plan_service.status()` lieferte für eine PLAN-Identität ohne gespeicherte Version einen unbehandelten Fehler statt `BLOCKED`/`NO_PLAN_VERSION_RECORDED`.
+
+### Security
+Health behauptet keinen Erfolg ohne echte Datenbankprüfung. Stop-Zustand ist nachvollziehbar, ohne dass fehlende Provenienz erfunden wird. Worker-Transporttests belegen, dass das Servicecredential bei Redirects nicht weitergeleitet wird und ein Serverfehler keinen Report erzeugt. Coverage-Lücken in Gateway/Storage/MCP-Client geschlossen; beide bisher unbeobachteten Gate-Zweige (`MCP_POLICY_CHANGED`, `PLAN_CONTEXT_CHANGED`) sind regressionsgeprüft.
+
+### Breaking Changes
+Keine. `Stop` erhält zusätzliche Felder mit Defaults; bestehende Clients lesen weiterhin `active`/`reason`. `stop_state` ist ein additiver Recordkind.
+
+### Migration
+Additiv, kein Schemaeingriff: `stop_state` nutzt die vorhandene `records`-Tabelle. Legacy-Bestände ohne solche Records melden `revision=0`/`actor=null`; die `control`-Tabelle bleibt maßgeblich, bestehende Stop-Zustände wirken unverändert.
+
+### Validation
+188 lokale Tests PASS, 99 % App-Statement-Coverage (1940 Statements, 1 Lücke: `challenge_worker.py:64` läuft real im Kindprozess und erscheint nicht im Elternzähler), 2 bekannte Warnungen. Realer HTTP-Smoke normal und `-O`: je 43 geprüfte Responses, 4 separate Workerprozesse mit Exitcode 0. Paketbuild, `scripts/docs.py --check`, `scripts/reality_check.py`, `node --check` und `tests/universe_harness.py --execute --scope core` (5 Checks PASS, Verdict PARTIAL) tatsächlich ausgeführt. Browser-E2E, Dependency-Audit, Remote-CI, Modell-/Android-Pipeline und Lasttest in diesem Schnitt NOT RUN. [Addendum](FINAL_VALIDATION_REPORT.md).
+
 ## Unreleased — Privacy-first model boundary, partial integration
 - Fixed actual SQLite/FastAPI sync dependency thread-handoff error observed in live preview; one connection per unit of work remains, real two-thread commit/rollback regression added.
 - Provider-neutral contracts and real OpenAI-compatible text transport through an explicit model data gate. LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER policy categories, empty defaults.

@@ -21,6 +21,9 @@ paths:
                   type: string
                 type: object
                 title: Response Health Health Get
+      x-role: public
+      x-side-effects: None; read-only liveness probe with a real database read; 503
+        when no runtime store is bound
   /api/runtime:
     get:
       tags:
@@ -55,6 +58,8 @@ paths:
           description: Storage unavailable
       security:
       - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; read-only
   /api/openapi.json:
     get:
       tags:
@@ -88,6 +93,8 @@ paths:
           description: Storage unavailable
       security:
       - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; read-only
   /api/projects:
     post:
       tags:
@@ -125,6 +132,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: operator
+      x-side-effects: Project + audit; no evidence requirement
     get:
       tags:
       - projects
@@ -176,6 +185,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only
   /api/evidence:
     post:
       tags:
@@ -213,6 +224,9 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: operator
+      x-side-effects: Store original text/hash/provenance + audit; existing project
+        required; initially unverified
     get:
       tags:
       - evidence
@@ -264,6 +278,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only
   /api/evidence/{evidence_id}:
     get:
       tags:
@@ -302,6 +318,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only
   /api/evidence/{evidence_id}/review:
     post:
       tags:
@@ -346,6 +364,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: One immutable manual evidence review + audit; reason required
   /api/tasks:
     post:
       tags:
@@ -383,6 +403,9 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: operator
+      x-side-effects: Immutable task + audit; all evidence references must belong
+        to project
     get:
       tags:
       - tasks
@@ -434,6 +457,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only
   /api/tasks/{task_id}/triage:
     post:
       tags:
@@ -472,6 +497,9 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: both
+      x-side-effects: Decision snapshot in audit; current mandatory Challenge + verified
+        evidence, confidence >=0.8, preconditions, no stop
   /api/tasks/{task_id}/approve:
     post:
       tags:
@@ -516,6 +544,9 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Approval bound to current Result/Challenge/fingerprint + audit;
+        current triage must require approval; never executes
   /api/control/stop:
     get:
       tags:
@@ -547,6 +578,9 @@ paths:
           description: Storage unavailable
       security:
       - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; read-only current stop state with recorded revision/actor,
+        unknown when unrecorded
     post:
       tags:
       - control
@@ -583,6 +617,9 @@ paths:
           description: Storage unavailable
       security:
       - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Persist global stop + reason in audit; does not interrupt external
+        processes
   /api/audit:
     get:
       tags:
@@ -635,6 +672,8 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: None; read-only
   /api/mcp/brightdata/status:
     get:
       tags:
@@ -4249,6 +4288,26 @@ components:
           maxLength: 2000
           minLength: 1
           title: Reason
+        revision:
+          type: integer
+          title: Revision
+          default: 0
+        actor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Actor
+        created_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created At
+        record_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Record Id
       additionalProperties: false
       type: object
       required:

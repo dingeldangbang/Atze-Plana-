@@ -125,7 +125,12 @@ class StopInput(Input):
 
 
 class Stop(StopInput):
-    pass
+    # Recorded provenance of the current stop state. Legacy databases that were
+    # changed before this record existed report unknown values, never invented ones.
+    revision: int = 0
+    actor: str | None = None
+    created_at: datetime | None = None
+    record_id: str | None = None
 
 
 class Audit(Input):

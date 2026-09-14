@@ -19,7 +19,7 @@ Neue Evidence, neues Result, erneute Challenge und Stopereignisse entwerten alte
 Was: unveränderliche Task + Result. Warum: Triagegründe und fünf Challenge-Prüfarten. Quellen: Evidence-IDs, Originaltext/SHA, strukturierte Beobachtungen. Voraussetzungen: Operator-Attestierung plus Gegenprüfung. Risiken: read low, write medium, übrige high; keine kontextsensitive Schadensprognose. Freigabe: Result/Report/Fingerprint-gebundenes Reviewer-Approval. Ergebnis: ACCEPT/CONDITIONAL/BLOCK und executed=false. Snapshot in Audit bei POST triage.
 
 ## Failure Modes / Tests / Security
-401/403 Rollen, 404 fehlende Entität, 409 unzulässiger Zustand/Adoption, 422 ungültige Inputs/gefälschter Workerreport, 503 Storage-/Worker-Konfiguration. CH-001..017 und TRI-/SEC-Regressionen prüfen tatsächliche Fail-closed-Gates. Kein API-Schalter zum Überspringen von Challenge, kein Mock bei Worker-Ausfall. Kein Source-/LLM-/Device-Executor.
+401/403 Rollen, 404 fehlende Entität, 409 unzulässiger Zustand/Adoption, 422 ungültige Inputs/gefälschter Workerreport, 503 Storage-/Worker-Konfiguration. CH-001..021 und TRI-/SEC-Regressionen prüfen tatsächliche Fail-closed-Gates. Kein API-Schalter zum Überspringen von Challenge, kein Mock bei Worker-Ausfall. Kein Source-/LLM-/Device-Executor.
 
 ## Configuration / Examples / Limits
 [Sieben Konfigurationsvariablen](../19-operations/configuration.md), [isolierter echter HTTP-Smoke](../../scripts/smoke.py). Preconditions/Confidence bleiben deklarierte Angaben; Challenge ist begrenzte strukturierte Datenprüfung, kein globaler Wahrheits-/Semantik-/Kausalitätsnachweis. Details zu Unabhängigkeit, Scope-Limits und Lease-Recovery im Challenge-Vertrag.
