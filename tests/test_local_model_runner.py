@@ -31,3 +31,9 @@ def test_local_model_artifact_hash(tmp_path):
     with pytest.raises(RuntimeError,match='SHA256'):verify(p,{**expected,'sha256':'0'*64})
     link=tmp_path/'link';link.symlink_to(p)
     with pytest.raises(RuntimeError,match='symlink'):verify(link,expected)
+
+
+def test_local_model_lock_never_claims_executed_inference():
+    """LM-004 | static manifest status | checked-in lock | inspect execution marker | NOT_RUN, never a fabricated model result."""
+    lock = json.loads((Path(__file__).parents[1] / 'validation/local-model.lock.json').read_text())
+    assert lock['execution'] == 'NOT_RUN_BY_LOCK; require a commit-bound workflow report'

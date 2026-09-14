@@ -80,6 +80,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
 | LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
 | LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |
+| LM-004 | static manifest status | checked-in lock | inspect execution marker | NOT_RUN, never a fabricated model result. | [test_local_model_runner.py: test_local_model_lock_never_claims_executed_inference](../../tests/test_local_model_runner.py) |
 | MCP-001: actual verified TLS/JSON or SSE → ordered RPC and cleanup, only candidate names, no tools/call. | [test_mcp.py: test_mcp_real_tls_handshake_and_cleanup](../../tests/test_mcp.py) |
 | MCP-002: real adverse TLS replies → reject redirect/format/scope/injection/cleanup; no fallback or tool execution. | [test_mcp.py: test_mcp_response_fail_closed](../../tests/test_mcp.py) |
 | MCP-003: actual API auth/default policy/absent OAuth; no network and durable BLOCKED evidence. | [test_mcp.py: test_mcp_api_default_deny_roles_and_config](../../tests/test_mcp.py) |

@@ -3,7 +3,7 @@
 [ADR-006](../adr/ADR-006-real-worker-and-android-validation.md). Core/model APIs already exist; this adds an actual integration harness, not a provider mock.
 
 ## Inputs / provenance
-`validation/local-model.lock.json` pins official Qwen/Qwen2.5-0.5B-Instruct-GGUF revision9217f5db79a29953eb74d5343926648285ec7e67, Q4_K_M file491400032bytes, advertised LFS SHA256. Apache2 license text inspected at pinned URL. Runtime official llama.cpp b10948 ubuntu-x64 archive with GitHub-advertised digest. Metadata is EXTERNAL_SOURCE; only a successful file check proves bytes match it. No automatic legal/quality/production approval. No weights/library binaries in Git.
+`validation/local-model.lock.json` pins official Qwen/Qwen2.5-0.5B-Instruct-GGUF revision9217f5db79a29953eb74d5343926648285ec7e67, Q4_K_M file491400032bytes, advertised LFS SHA256. Apache2 license text inspected at pinned URL. Runtime official llama.cpp b10948 ubuntu-x64 archive with GitHub-advertised digest. Its `execution` field deliberately remains `NOT_RUN_BY_LOCK`; a static lock cannot claim downloaded bytes or inference. Metadata is EXTERNAL_SOURCE; only a successful file check proves bytes match it. No automatic legal/quality/production approval. No weights/library binaries in Git.
 
 ## Stages / exact meaning
 1. Explicit CI workflow stages public artifacts over verified HTTPS only, no platform input/credential; SHA256+size verified. Failed download => BLOCKED, no substituted model.
