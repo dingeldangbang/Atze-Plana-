@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Trend engine increment (module 2)
+- Reale Trend-Engine als deterministische Query (CQRS, lesend, ohne Nebenwirkungen/Audit, bei jedem Aufruf aus unveränderlichen Batches neu berechnet): fünf dokumentierte statistische Prüfarten (Drift mit Steigung/SNR, Level-Shift, Varianzänderung, Out-of-Range-Rate, Suspect-Rate) über hash-verifizierte Telemetrie-Batches eines Sensors, optional pro Session; Kriterien-Endpoint mit exakten Schwellen; VERIFIED TREND vs. INSUFFICIENT EVIDENCE mit expliziten failed_criteria; Arbeitsgrenzen 200 Batches/200.000 Samples (422); Blob-Korruption fail-closed 503; Not-Stop blockt Leseanalyse nicht. 17 neue Tests (TRD-001..017), 200 PASS. CALCULATED, nie MEASURED; kein ML, keine Prognose; keine Validierung an realer Hardware (NOT RUN).
+
+
 ## Unreleased — Telemetry increment, PLAN-UI specification, partial integration
 - Reales Telemetrie-Modul (Modul 1 der bestätigten Umsetzungsreihe „alles der Reihe nach"): deklarative Device-/Sensor-Registry (Operator), HTTP-Ingestion mit getrenntem Device-Fleet-Token (ATZE_TELEMETRY_TOKEN; leer = fail-closed 403), unveränderliche, versionierte, hash-/größenverifizierte Messbatches über den bestehenden Storage-Tier, Out-of-Range-/Suspect-Flagging, reviewerbestätigte Einzel-Deaktivierung ohne Datenlöschung, Not-Stop-Integration. 14 neue Tests, 183 PASS. WS/MQTT/Serial NOT IMPLEMENTED; keine physische ESP32-Validierung (NOT RUN); Werte sind eingereichte Device-Angaben.
 - Verbindliche PLAN-UI-/Interaktions-/Code-/Abhängigkeitsspezifikation (Nutzervorgabe 2026-09-14) aufgenommen: jede sichtbare UI-Funktion benötigt einen realen technischen Pfad (UI → Command/Query → Domain → Dependency → Result → Audit/Test); keine Fake-Interaktion, keine toten Buttons, Action-/Dependency-Registry und Feature-Traceability als Abnahmekriterien künftiger UI-Inkremente. Spezifikation ist SOLL-Zustand, dokumentiert keinen Implementierungsstand.

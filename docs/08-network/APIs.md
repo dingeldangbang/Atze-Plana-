@@ -77,6 +77,8 @@ Source: `app/main.py` and Pydantic models. Regenerate: `python scripts/docs.py`.
 | GET | `/api/telemetry/batches/{batch_id}/samples` | both | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchSamples"}}}}}` | None; hash/size verified blob read; corrupt or unavailable returns 503; raw submitted values, not verified physical truth |
 | POST | `/api/telemetry/devices/{device_id}/deactivate` | reviewer | DeactivateInput | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Device"}}}}}` | Confirmed deactivation + audit; retains devices/sensors/batches, never deletes submitted measurement history; blocks further ingest for this device |
 | POST | `/api/telemetry/sensors/{sensor_id}/deactivate` | reviewer | DeactivateInput | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Sensor"}}}}}` | Confirmed deactivation + audit; retains sensors and all previously ingested samples; blocks further ingest for this sensor |
+| POST | `/api/telemetry/trends` | both | TrendQueryInput | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TrendReport"}}}}}` | None; deterministic read-only analysis of immutable submitted samples; recomputed per query, no persistence, no prediction, no physical truth claim |
+| GET | `/api/telemetry/trends/checks` | both | — | `{"200": {"description": "Successful Response", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CheckCatalog"}}}}}` | None; static criteria catalog |
 
 ## Static surface
 

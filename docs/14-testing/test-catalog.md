@@ -141,6 +141,23 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | DOC-003: changed generated output causes nonzero check status instead of silent acceptance. | [test_tools.py: test_documentation_drift_detection](../../tests/test_tools.py) |
 | DOC-004: missing local reference is detected and existing reference is accepted. | [test_tools.py: test_broken_link_detection](../../tests/test_tools.py) |
 | DB-THREAD-001 | FastAPI lifecycle handoff | real SQLite/two threads | enter/use/exit separately | commit and rollback correct. | [test_tools.py: test_connection_dependency_thread_handoff](../../tests/test_tools.py) |
+| TRD-001: criteria catalog exposes exactly the five implemented checks with explicit thresholds and limits. | [test_trends.py: test_catalog_lists_all_documented_checks](../../tests/test_trends.py) |
+| TRD-002: analysis of an unknown sensor id fails 404 without computation. | [test_trends.py: test_unknown_sensor_rejected](../../tests/test_trends.py) |
+| TRD-003: sensor without ingested samples yields INSUFFICIENT EVIDENCE for every check, no window. | [test_trends.py: test_empty_history_is_insufficient_evidence](../../tests/test_trends.py) |
+| TRD-004: 30 monotonically rising samples verify drift with exact slope, CALCULATED provenance, no prediction. | [test_trends.py: test_rising_series_verifies_drift](../../tests/test_trends.py) |
+| TRD-005: fewer than min_samples yields INSUFFICIENT EVIDENCE with the explicit failed criterion. | [test_trends.py: test_few_samples_are_insufficient_evidence](../../tests/test_trends.py) |
+| TRD-006: flat alternating series within range verifies no check; noise is not promoted to a trend. | [test_trends.py: test_flat_series_verifies_nothing](../../tests/test_trends.py) |
+| TRD-007: step from 10 to 50 across the window verifies level_shift. | [test_trends.py: test_step_series_verifies_level_shift](../../tests/test_trends.py) |
+| TRD-008: constant thirds with a volatile last third verify variance_change but not drift. | [test_trends.py: test_dispersion_change_verifies_variance_change_only](../../tests/test_trends.py) |
+| TRD-009: 20% of samples outside the declared range verify out_of_range_rate. | [test_trends.py: test_out_of_declared_range_rate_verifies](../../tests/test_trends.py) |
+| TRD-010: 20% device-declared suspect samples verify suspect_rate. | [test_trends.py: test_device_declared_suspect_rate_verifies](../../tests/test_trends.py) |
+| TRD-011: without a declared_range the out_of_range_rate check stays INSUFFICIENT EVIDENCE with explicit reason. | [test_trends.py: test_out_of_range_requires_declared_range](../../tests/test_trends.py) |
+| TRD-012: session filter narrows analysis to that session's batches only; empty session means all. | [test_trends.py: test_session_scoping_filters_basis](../../tests/test_trends.py) |
+| TRD-013: corrupted batch blob makes analysis fail 503; no partial trend is computed. | [test_trends.py: test_corrupt_blob_fails_closed_on_analysis](../../tests/test_trends.py) |
+| TRD-014: identical query over immutable batches returns byte-identical report. | [test_trends.py: test_analysis_is_deterministic](../../tests/test_trends.py) |
+| TRD-015: platform roles required (device token 401); emergency stop does not block read-only trend queries. | [test_trends.py: test_roles_and_stop_do_not_block_read_only_analysis](../../tests/test_trends.py) |
+| TRD-016: more than max_batches stored batches for one device rejects analysis 422 instead of unbounded work. | [test_trends.py: test_batch_limit_fails_explicitly](../../tests/test_trends.py) |
+| TRD-017: reviewer-confirmed sensor deactivation retains and keeps history analyzable. | [test_trends.py: test_deactivated_sensor_history_stays_analyzable](../../tests/test_trends.py) |
 | UNI-001: ignored/secret files excluded, pending source seen, no source excerpt. | [test_universe.py: test_inventory_exclusions_and_pending_files](../../tests/test_universe.py) |
 | UNI-002: exception pass not a stub; whole empty function candidate, syntax distinct. | [test_universe.py: test_legitimate_pass_and_syntax](../../tests/test_universe.py) |
 | UNI-003: actual byte copy, idempotent backup, corrupt backup/symlink rejected. | [test_universe.py: test_backup_integrity_and_symlinks](../../tests/test_universe.py) |

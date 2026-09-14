@@ -19,7 +19,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein universeller CLI-/Softwareprojekt-Builder |
 | 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | Cache TTL/Cleanup und separater Challenge-Prüfprozess; kein Executor oder isolierter Workspace |
 | 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; echter PLAN-Browserlauf ergänzt (Resultate in TEST_REPORT), Geräte/Agenten/Lasttest fehlen |
-| 15 Trends | NOT IMPLEMENTED | Keine Anomalie-, Lifecycle- oder Proaktivitätsengine |
+| 15 Trends | PARTIAL | Echte deterministische Trend-Checks über ingestierte Telemetrie (Drift, Level-Shift, Varianzänderung, Out-of-Range-/Suspect-Raten) als Query mit dokumentierten Kriterien und VERIFIED TREND vs. INSUFFICIENT EVIDENCE ([Vertrag](../24-trends/trends.md)); kein ML, keine Prognose, keine Lifecycle-/Proaktivitäts-/allgemeine Anomalieengine |
 | 16 Evidence | PARTIAL | Manuelle Provenance, Hash, Review; keine Quellenrangfolge, automatische Wahrheit/Aktualität oder Widerspruchserkennung |
 | 17 Security | PARTIAL | Rollen, Fail-closed, Stop; keine individuelle Benutzerverwaltung, MFA, manipulationssicherer Audit |
 | 18 Deployment | PARTIAL | Lokaler Start, Build, CI; kein tatsächliches Free-Tier-/Produktionsdeployment |

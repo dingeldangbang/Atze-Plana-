@@ -36,5 +36,8 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Telemetrie (IoT)
 [Echter Ingest-Vertrag: Device-/Sensor-Registry, fail-closed Device-Token, unveränderliche hash-verifizierte Batches, bestätigte Deaktivierung](23-telemetry/telemetry.md). Kein WS/MQTT/Serial, keine physische ESP32-Validierung, Werte sind eingereicht, nicht verifizierte physikalische Messung.
 
+## Trend-Analyse
+[Deterministische Query-Engine über ingestierte Messreihen: fünf dokumentierte Checks (Drift, Level-Shift, Varianzänderung, Out-of-Range-/Suspect-Rate) mit exakten Kriterien, VERIFIED TREND vs. INSUFFICIENT EVIDENCE](24-trends/trends.md). CALCULATED, nie MEASURED; kein ML, keine Prognose.
+
 ## Bright Data MCP discovery
 [Enger Vertrag: Authentifizierung, API, Datenschutz und offene Live-Abnahme](22-mcp/brightdata.md). Kein allgemeiner Tool-Executor.

@@ -22,6 +22,7 @@ from app.plan_api import register_plan_api
 from app.ai_api import register_ai_api
 from app.challenge_api import register_challenge_api
 from app.telemetry_api import register_telemetry_api
+from app.trend_api import register_trend_api
 from app.challenge_service import decide_task
 
 STATIC = Path(__file__).parent / 'static'
@@ -196,6 +197,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)
     register_telemetry_api(app, settings, bearer, actor, operator, reviewer, connection, store, storage)
+    register_trend_api(app, actor, connection, storage)
 
     @app.get('/', include_in_schema=False)
     def index():

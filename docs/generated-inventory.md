@@ -25,6 +25,9 @@
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
 - `app/telemetry_api.py`: parse_timestamp, register_telemetry_api
 - `app/telemetry_models.py`: DeviceInput, Device, DeclaredRange, SensorInput, Sensor, Sample, IngestInput, Batch, BatchSamples, DeactivateInput
+- `app/trend_api.py`: register_trend_api
+- `app/trend_models.py`: TrendQueryInput, CheckResult, TrendReport, CheckSpec, CheckCatalog
+- `app/trend_service.py`: _mean, _std, _round, _slope, _reference_span, _drift, _level_shift, _variance_change, _out_of_range_rate, _suspect_rate, analyze_sensor, catalog
 - `app/triage.py`: evaluate
 
 Environment: `ATZE_AI_CONFIG`, `ATZE_BRIGHTDATA_OAUTH_TOKEN`, `ATZE_CHALLENGE_TOKEN`, `ATZE_DB_PATH`, `ATZE_MODE`, `ATZE_OPERATOR_TOKEN`, `ATZE_REVIEWER_TOKEN`, `ATZE_SD_ROOT`, `ATZE_STORAGE_ROOT`, `ATZE_TELEMETRY_TOKEN`

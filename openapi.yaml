@@ -2711,6 +2711,80 @@ paths:
       x-role: reviewer
       x-side-effects: Confirmed deactivation + audit; retains sensors and all previously
         ingested samples; blocks further ingest for this sensor
+  /api/telemetry/trends:
+    post:
+      tags:
+      - telemetry
+      summary: Analyze
+      operationId: analyze_api_telemetry_trends_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrendQueryInput'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendReport'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; deterministic read-only analysis of immutable submitted
+        samples; recomputed per query, no persistence, no prediction, no physical
+        truth claim
+  /api/telemetry/trends/checks:
+    get:
+      tags:
+      - telemetry
+      summary: Checks
+      operationId: checks_api_telemetry_trends_checks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckCatalog'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; static criteria catalog
 components:
   schemas:
     AIConsent:
@@ -3353,6 +3427,104 @@ components:
       required:
       - reason
       title: ChallengeRequest
+    CheckCatalog:
+      properties:
+        checks:
+          items:
+            $ref: '#/components/schemas/CheckSpec'
+          type: array
+          title: Checks
+        limits:
+          additionalProperties: true
+          type: object
+          title: Limits
+      additionalProperties: false
+      type: object
+      required:
+      - checks
+      - limits
+      title: CheckCatalog
+    CheckResult:
+      properties:
+        type:
+          type: string
+          enum:
+          - drift
+          - level_shift
+          - variance_change
+          - out_of_range_rate
+          - suspect_rate
+          title: Type
+        status:
+          type: string
+          enum:
+          - VERIFIED TREND
+          - INSUFFICIENT EVIDENCE
+          title: Status
+        sample_count:
+          type: integer
+          title: Sample Count
+        statistic:
+          type: string
+          title: Statistic
+        value:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Value
+        threshold:
+          type: string
+          title: Threshold
+        failed_criteria:
+          items:
+            type: string
+          type: array
+          title: Failed Criteria
+        details:
+          additionalProperties: true
+          type: object
+          title: Details
+      additionalProperties: false
+      type: object
+      required:
+      - type
+      - status
+      - sample_count
+      - statistic
+      - value
+      - threshold
+      - failed_criteria
+      - details
+      title: CheckResult
+    CheckSpec:
+      properties:
+        type:
+          type: string
+          enum:
+          - drift
+          - level_shift
+          - variance_change
+          - out_of_range_rate
+          - suspect_rate
+          title: Type
+        statistic:
+          type: string
+          title: Statistic
+        criteria:
+          additionalProperties: true
+          type: object
+          title: Criteria
+        description:
+          type: string
+          title: Description
+      additionalProperties: false
+      type: object
+      required:
+      - type
+      - statistic
+      - criteria
+      - description
+      title: CheckSpec
     Claim:
       properties:
         subject:
@@ -5217,6 +5389,104 @@ components:
       - status
       - available
       title: TierHealth
+    TrendQueryInput:
+      properties:
+        sensor_id:
+          type: string
+          title: Sensor Id
+        session:
+          anyOf:
+          - type: string
+            maxLength: 120
+          - type: 'null'
+          title: Session
+      additionalProperties: false
+      type: object
+      required:
+      - sensor_id
+      title: TrendQueryInput
+    TrendReport:
+      properties:
+        sensor_id:
+          type: string
+          title: Sensor Id
+        device_id:
+          type: string
+          title: Device Id
+        session:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Session
+        sample_count:
+          type: integer
+          title: Sample Count
+        window_start:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Window Start
+        window_end:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Window End
+        batch_ids:
+          items:
+            type: string
+          type: array
+          title: Batch Ids
+        checks:
+          items:
+            $ref: '#/components/schemas/CheckResult'
+          type: array
+          title: Checks
+        verified_types:
+          items:
+            type: string
+            enum:
+            - drift
+            - level_shift
+            - variance_change
+            - out_of_range_rate
+            - suspect_rate
+          type: array
+          title: Verified Types
+        summary_status:
+          type: string
+          enum:
+          - VERIFIED TREND
+          - INSUFFICIENT EVIDENCE
+          title: Summary Status
+        basis:
+          type: string
+          const: SUBMITTED_DEVICE_SAMPLES
+          title: Basis
+        result_class:
+          type: string
+          const: CALCULATED
+          title: Result Class
+        prediction:
+          type: string
+          const: NONE
+          title: Prediction
+      additionalProperties: false
+      type: object
+      required:
+      - sensor_id
+      - device_id
+      - session
+      - sample_count
+      - window_start
+      - window_end
+      - batch_ids
+      - checks
+      - verified_types
+      - summary_status
+      - basis
+      - result_class
+      - prediction
+      title: TrendReport
     Why:
       properties:
         result:
