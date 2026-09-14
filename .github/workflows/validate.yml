@@ -35,6 +35,18 @@ jobs:
           node --check app/static/app.js
       - name: Real sandboxed Chromium PLAN UI
         run: python scripts/smoke.py --allow-fixtures --browser --report reports/browser-plan.json
+      - name: Publish bounded browser validation evidence
+        if: always()
+        run: |
+          python - <<'PYTHON'
+          import json
+          from pathlib import Path
+          path=Path('reports/browser-plan.json')
+          if path.exists():
+              value=json.loads(path.read_text()).get('browser', {'status':'NOT RUN'})
+              text=json.dumps(value,ensure_ascii=True).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+              print('::notice title=Browser PLAN evidence::'+text)
+          PYTHON
       - name: Upload real validation artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

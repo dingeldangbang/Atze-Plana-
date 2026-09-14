@@ -24,7 +24,14 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     assert(binary,'Real Chromium not installed; browser gate BLOCKED');
     report.browser=execFileSync(binary,['--version'],{encoding:'utf8'}).trim();
     profile=fs.mkdtempSync(path.join(os.tmpdir(),'atze-browser-'));
-    chrome=spawn(binary,['--headless=new','--remote-debugging-pipe','--no-startup-window',`--user-data-dir=${profile}`,'--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run','--disable-default-apps','--metrics-recording-only'],{stdio:['ignore','ignore','ignore','pipe','pipe']});
+    let diagnostic='';
+    chrome=spawn(binary,['--headless=new','--remote-debugging-pipe','--no-startup-window',`--user-data-dir=${profile}`,'--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run','--disable-default-apps','--metrics-recording-only'],{stdio:['ignore','ignore','pipe','pipe','pipe']});
+    chrome.stderr.on('data',chunk=>{ diagnostic=(diagnostic+chunk.toString()).slice(-8192); });
+    chrome.once('exit',()=>{
+      // Bounded startup cause only, no raw profile logs/paths, inputs or credentials.
+      if(/No usable sandbox|Failed to move to new namespace|SUID sandbox|sandbox_host_linux/.test(diagnostic)) report.startup_cause='CHROMIUM_SANDBOX_UNAVAILABLE';
+      else if(/DevTools remote debugging requires/.test(diagnostic)) report.startup_cause='CHROMIUM_DEBUG_PIPE_REJECTED';
+    });
     let next=0,buffer='',session;
     const pending=new Map();
     chrome.stdio[4].on('data',chunk=>{
