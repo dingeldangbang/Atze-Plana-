@@ -134,11 +134,18 @@ def test_mcp_certificate_verification(peer,monkeypatch):
     with pytest.raises(ssl.SSLCertVerificationError):DiscoveryClient('synthetic-oauth-access').discover()
 
 
-def test_mcp_invalid_credential_and_deadline():
+def test_mcp_invalid_credential_and_deadline(tmp_path, monkeypatch):
     """MCP-006: invalid bearer/header injection and expired deadline stop before transport."""
     for token in ['', 'bad\r\nheader', 'not ascii ä']:
         with pytest.raises(GateDenied):DiscoveryClient(token)
-    client=DiscoveryClient('synthetic-oauth-access');client.deadline=0
+    keylog=tmp_path/'forbidden-keylog'
+    monkeypatch.setenv('SSLKEYLOGFILE',str(keylog))
+    client=DiscoveryClient('synthetic-oauth-access')
+    connection=client.connection()
+    assert connection._context.check_hostname and connection._context.verify_mode==ssl.CERT_REQUIRED
+    assert connection._context.keylog_filename is None and not keylog.exists()
+    connection.close()
+    client.deadline=0
     with pytest.raises(GateDenied):client.remaining()
 
 

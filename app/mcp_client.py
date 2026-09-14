@@ -31,7 +31,9 @@ class DiscoveryClient:
         self.deadline = time.monotonic() + 12
 
     def connection(self):
-        tls = ssl.create_default_context()
+        # Do not honor SSLKEYLOGFILE: authentication transport secrets must not be cached.
+        tls = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        tls.load_default_certs()
         tls.minimum_version = ssl.TLSVersion.TLSv1_2
         return http.client.HTTPSConnection(HOST, timeout=self.remaining(), context=tls)
 
@@ -48,6 +50,7 @@ class DiscoveryClient:
         if self.session:
             headers['Mcp-Session-Id'] = self.session
         conn = self.connection()
+        conn.set_debuglevel(0)  # Never emit Authorization/session headers through HTTP debug tracing.
         try:
             conn.request(method, PATH, body=json.dumps(message).encode() if message else None, headers=headers)
             response = conn.getresponse()
