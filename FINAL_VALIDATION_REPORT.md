@@ -13,7 +13,7 @@ Stand: Branch `arena/01a09e11-atze-plana`, Basis `f1ed5dd`. Fünf Punkte aus [TO
 | Dokumentation/OpenAPI | **PASS**: 4 generierte Produkte, formale OpenAPI-Gültigkeit, lokale Dateilinks, 9 Envvariablen |
 | Reality-Grenzgate | **PASS** (enges AST-/Smoke-Gate, kein semantischer Beweis) |
 | JS-Syntax | `node --check app/static/app.js` PASS |
-| Universe-Harness `--execute --scope core` | 5/5 Checks PASS (pytest, build, docs, reality, Smoke); Gesamtverdict **PARTIAL** by design; Lauf bei noch nicht committetem Baum (`working tree dirty: true`) |
+| Universe-Harness `--execute --scope core` | 5/5 Checks PASS (pytest 56,98 s, build 3,13 s, docs 1,37 s, reality 0,11 s, Smoke 3,32 s); Gesamtverdict **PARTIAL** by design. Erster Lauf während der Umsetzung bei nicht committetem Baum (`dirty: true`); abschließender Lauf auf Commit `ad00363` mit sauberem Baum (`dirty: false`). Beobachtete Artefakt-SHA256: sdist `758ea7edc40643c6…` (83 648 B), wheel `770c3c903e45242e…` (57 038 B) |
 | Browser-E2E (Chromium) | **NOT RUN** — in dieser Sandbox ist kein Chromium installiert; kein `--no-sandbox`-Fallback, keine erfundene Browserabnahme |
 | Dependency-Audit, Remote-CI, Modell-/Android-Pipeline, Last-/2-GB-Test | **NOT RUN** in diesem Schnitt |
 

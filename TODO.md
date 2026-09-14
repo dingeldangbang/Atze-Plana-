@@ -24,7 +24,7 @@ Nicht ausgeführt und deshalb hier ausdrücklich **nicht** als Ergebnis behaupte
 | `scripts/docs.py --check` | PASS |
 | `scripts/reality_check.py` | PASS |
 | `node --check app/static/app.js` | PASS |
-| `tests/universe_harness.py --execute --scope core` | 5/5 Checks PASS, Verdict PARTIAL (by design) |
+| `tests/universe_harness.py --execute --scope core` | 5/5 Checks PASS, Verdict PARTIAL (by design); abschließender Lauf auf Commit `ad00363`, Baum sauber |
 | OpenAPI-Vertragsabgleich | **0** Operationen ohne `x-role`/`x-side-effects` |
 | Browser-E2E, Dependency-Audit, Remote-CI, Modell-/Android-CI, Lasttest | **NOT RUN** — kein Chromium in dieser Sandbox; keine erfundene Abnahme |
 
