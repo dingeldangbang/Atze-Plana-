@@ -76,7 +76,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     await evaluate(`(()=>{const form=document.getElementById('project');form.querySelector('[name=name]').value=${JSON.stringify(createdProject)};form.querySelector('[name=description]').value='Created through the real dashboard form';form.requestSubmit()})()`);
     await wait(`document.getElementById('projects').textContent.includes(${JSON.stringify(createdProject)})`,'Project form did not refresh the real project list');
     assert((await api('/api/projects')).some(row=>row.name===createdProject),'Dashboard project form did not persist through API'); check('BROWSER-DASHBOARD-02-PROJECT-CREATE');
-    await evaluate(`(()=>{const row=[...document.querySelectorAll('#tasks li')].find(node=>node.textContent.includes(${JSON.stringify(task.id)}));if(!row)throw new Error('browser task missing');row.querySelector('button').click()})()`);
+    await evaluate(`(()=>{const row=[...document.querySelectorAll('#tasks li')].find(node=>node.textContent.includes(${JSON.stringify(task.title)}));if(!row)throw new Error('browser task missing');row.querySelector('button').click()})()`);
     await wait("document.getElementById('status').textContent.startsWith('blocked:')",'Triage UI did not report the actual blocked decision');
     const dashboardTriage=await api(`/api/tasks/${task.id}/triage`,'POST');
     assert(dashboardTriage.state==='blocked' && dashboardTriage.executed===false,'Triage UI path could imply execution'); check('BROWSER-DASHBOARD-03-TRIAGE-NO-EXECUTION');

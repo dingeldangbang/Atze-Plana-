@@ -207,5 +207,6 @@ def test_browser_dashboard_harness_declares_all_real_dom_gates():
     }
     assert source.count("check('") == len(expected)
     assert all(check in source for check in expected)
+    assert 'JSON.stringify(task.title)' in source  # Task rows intentionally render title/action, not an identifier.
     assert "--remote-debugging-pipe" in source and "'--no-sandbox'" not in source
     assert 'Fünfzehn Browserprüfungen' in (Path(__file__).parents[1] / 'docs/14-testing/testing-strategy.md').read_text()
