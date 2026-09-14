@@ -713,6 +713,50 @@ paths:
       x-side-effects: Explicit once-per-call external metadata consent; durable audit
         before HTTPS MCP handshake/list, no tool invocation; PUBLIC/project/region/Privacy/stop/PLAN
         gates; 200 envelope may be BLOCKED/UNAVAILABLE
+  /api/mcp/brightdata/call:
+    post:
+      tags:
+      - mcp
+      summary: Call
+      operationId: call_api_mcp_brightdata_call_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Call'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Call Api Mcp Brightdata Call Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: reviewer
+      x-side-effects: Explicit once-per-call external tool execution consent; durable
+        audit before bounded allowlisted tools/call over HTTPS; argument/result bounds;
+        PUBLIC/project/region/Privacy/stop/PLAN gates; 200 envelope may be BLOCKED/UNAVAILABLE;
+        results are EXTERNAL_SOURCE, never verified truth, never allowed for action
   /api/plans:
     post:
       tags:
@@ -3959,6 +4003,40 @@ components:
       - state
       - deleted
       title: CacheObject
+    Call:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        tool:
+          type: string
+          title: Tool
+        arguments:
+          additionalProperties: true
+          type: object
+          title: Arguments
+        allow_external_call:
+          type: boolean
+          title: Allow External Call
+          default: false
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+        plan_lock_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Plan Lock Id
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - tool
+      - arguments
+      - reason
+      title: Call
     ChallengeReport:
       properties:
         id:

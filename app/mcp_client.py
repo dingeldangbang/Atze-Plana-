@@ -1,4 +1,4 @@
-"""Bounded Bright Data MCP discovery transport; no tool execution or auth fallback."""
+"""Bounded Bright Data MCP transport: discovery plus allowlisted tools/call; no auth fallback."""
 import hashlib
 import http.client
 import json
@@ -11,6 +11,9 @@ PATH = '/mcp'
 VERSION = '2025-06-18'
 MAX_BYTES = 512 * 1024
 CANDIDATES = {'search_engine', 'scrape_as_markdown'}
+MAX_ARGUMENT_BYTES = 4096
+MAX_CONTENT_ITEMS = 64
+MAX_EXCERPT_CHARS = 16384
 
 
 def unique_object(pairs):
@@ -125,7 +128,44 @@ class DiscoveryClient:
                         raise GateDenied('MCP_DUPLICATE_TOOL')
                     names.append(tool['name'])
             return {'candidate_tools': sorted(names), 'catalog_sha256': hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest(),
-                    'source':'EXTERNAL_SOURCE', 'tool_execution':'NOT_IMPLEMENTED', 'allowed_for_action':False}
+                    'source':'EXTERNAL_SOURCE', 'tool_execution':'AVAILABLE_AS_SEPARATE_BOUNDED_ENDPOINT', 'allowed_for_action':False}
+        finally:
+            if self.session:
+                self.exchange('DELETE')
+
+    def call(self, tool, arguments):
+        # Bounded allowlisted tools/call only; arguments are caller-supplied, results EXTERNAL_SOURCE.
+        if tool not in CANDIDATES:
+            raise GateDenied('MCP_TOOL_NOT_ALLOWLISTED')
+        if not isinstance(arguments, dict):
+            raise GateDenied('MCP_INVALID_TOOL_ARGUMENTS')
+        encoded = json.dumps(arguments)
+        if len(encoded.encode()) > MAX_ARGUMENT_BYTES:
+            raise GateDenied('MCP_TOOL_ARGUMENTS_TOO_LARGE')
+        if self.token in encoded:
+            raise GateDenied('MCP_CREDENTIAL_IN_ARGUMENTS')
+        try:
+            initial = self.exchange('POST', {'jsonrpc':'2.0', 'id':1, 'method':'initialize', 'params':{
+                'protocolVersion':VERSION, 'capabilities':{}, 'clientInfo':{'name':'atze-tools-call-bounded', 'version':'0.4.0.dev0'}}})
+            if initial.get('protocolVersion') != VERSION or not isinstance(initial.get('capabilities', {}).get('tools'), dict):
+                raise GateDenied('MCP_PROTOCOL_OR_TOOLS_UNSUPPORTED')
+            self.exchange('POST', {'jsonrpc':'2.0', 'method':'notifications/initialized'}, notification=True)
+            result = self.exchange('POST', {'jsonrpc':'2.0', 'id':2, 'method':'tools/call',
+                                            'params':{'name':tool, 'arguments':arguments}})
+            content = result.get('content')
+            if not isinstance(content, list) or len(content) > MAX_CONTENT_ITEMS:
+                raise GateDenied('MCP_INVALID_TOOL_RESULT')
+            texts = []
+            for item in content:
+                if not isinstance(item, dict) or not isinstance(item.get('type'), str):
+                    raise GateDenied('MCP_INVALID_TOOL_CONTENT')
+                if item.get('type') == 'text' and isinstance(item.get('text'), str):
+                    texts.append(item['text'])
+            return {'tool': tool, 'is_error': bool(result.get('isError')), 'content_items': len(content),
+                    'excerpt': '\n'.join(texts)[:MAX_EXCERPT_CHARS],
+                    'result_sha256': hashlib.sha256(json.dumps(result, sort_keys=True).encode()).hexdigest(),
+                    'result_size_bytes': len(json.dumps(result).encode()),
+                    'source': 'EXTERNAL_SOURCE', 'allowed_for_action': False}
         finally:
             if self.session:
                 self.exchange('DELETE')

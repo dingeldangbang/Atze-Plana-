@@ -18,7 +18,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
-| Agenten, Vollsandbox, Hardware-Repair, 3D, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
+| Agenten, Vollsandbox, Hardware-Repair, 3D, Cloud | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
 
 ## Architektur
 Browser → FastAPI → SQLite (Metadaten, Memory, FTS) + externe Original-/Cacheblobs (Local, optional SD-Verzeichnis). [ADR-003](docs/adr/ADR-003-mobile-context-storage.md) definiert Mobile Project Server + MCP/RAG als Zielarchitektur; MCP, Remote-Tiers und Offline-Sync sind noch nicht implementiert. Operator erfasst Daten; Reviewer prüft Evidenz und genehmigt Aufgaben. Ein separater Challenge-Prozess prüft strukturierte Result-Pakete vor jeder freigabefähigen Taskentscheidung. Die Triage akzeptiert nur aktuelle Gegenprüfungen. Primärfreitext wird nicht automatisch als Fakt übernommen. **Freigabe ist keine Ausführung.** Es gibt keine Shell-, Flash-, Cloud- oder Geräteanbindung.
@@ -71,8 +71,8 @@ Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validati
 ## Telemetrie-Inkrement (Modul 1 der bestätigten Umsetzungsreihe)
 [Echter Ingest-Vertrag](docs/23-telemetry/telemetry.md): deklarative Device-/Sensor-Registry (Operator, +), HTTP-Ingestion mit getrenntem Device-Fleet-Token (leer = fail-closed 403), unveränderliche kanonische JSON-Batches mit sha256/Größenverifikation beim Lesen (Korruption → 503), Out-of-Range-/Suspect-Flagging gegen deklarierte (nicht kalibrierte) Ranges, reviewerbestätigte Einzel-Deaktivierung (−) ohne Datenlöschung, Stop-Integration. **WS/MQTT/Serial NOT IMPLEMENTED; keine physische ESP32-/Sensormessung validiert (NOT RUN); Werte sind eingereichte Device-Angaben, keine verifizierte physikalische Messung.**
 
-## Bright Data MCP: begrenzte Tool-Erkennung
-[OAuth-Bearer-Handshake und begrenzte MCP-Erkennung](docs/22-mcp/brightdata.md) implementiert; standardmäßig gesperrt. **Keine tools/call-Ausführung, keine Webabfrage oder Live-Bright-Data-Abnahme.** Ein isolierter TLS-Protokolltest ist kein Provider-Nachweis. Bestehende Tool-/Permission-Lease-/Sandbox-Gates bleiben offen.
+## Bright Data MCP: Discovery + begrenztes tools/call (Modul 4)
+[OAuth-Bearer-Handshake, begrenzte MCP-Erkennung und reviewerbestätigtes tools/call](docs/22-mcp/brightdata.md) für genau die zwei allowlisted Kandidaten (search_engine, scrape_as_markdown) implementiert; standardmäßig gesperrt, Einzelfreigabe je Aufruf, Argument-/Result-Grenzen, Argumente nur als Hash gespeichert. **Keine Live-Bright-Data-Abnahme (in dieser Umgebung NOT CONFIGURED — Provider-Hosts blockiert); kein Tool jenseits der Allowlist; Ergebnisse EXTERNAL_SOURCE, nie verifizierte Wahrheit.** Der isolierte TLS-Protokolltest ist Testinfrastruktur, kein Provider-Nachweis.
 
 ## Trend-Engine-Inkrement (Modul 2 der bestätigten Umsetzungsreihe)
 [Deterministischer Analyse-Vertrag](docs/24-trends/trends.md): fünf dokumentierte statistische Prüfarten (Drift, Level-Shift, Varianzänderung, Out-of-Range-Rate, Suspect-Rate) als reine Query über unveränderliche Telemetrie-Batches; Kriterien-Endpoint macht alle Schwellwerte sichtbar; Not-Stop blockt Lesezugriffe nicht. **CALCULATED aus SUBMITTED Samples — nie MEASURED, keine Prognose (prediction: NONE), kein ML, keine Lifecycle-/Proaktivitätsengine; keine Validierung an realer Hardware (NOT RUN).**

@@ -15,7 +15,7 @@
 - `app/context_api.py`: register_context_api
 - `app/context_models.py`: LinkedInput, ArchiveInput, Replica, Archive, ArchiveContent, MoveInput, MemoryInput, Memory, RetrievalQuery, EvidenceState, RetrievalHit, CacheInput, CacheObject, CleanupInput, CleanupResult, TierHealth, StorageHealth, ReindexInput, ReindexResult
 - `app/main.py`: create_app
-- `app/mcp_api.py`: Discover, gate, register_mcp_api
+- `app/mcp_api.py`: Discover, Call, gate, register_mcp_api
 - `app/mcp_client.py`: unique_object, DiscoveryClient
 - `app/models.py`: Input, ProjectInput, Project, Observation, EvidenceInput, Evidence, Review, Action, TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit
 - `app/plan_api.py`: register_plan_api

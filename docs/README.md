@@ -42,5 +42,5 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Resource-Manager
 [Versionierte Datei-Registry: Base64-Upload ≤4 MiB mit SHA-256/Tier-Speicherung, append-only Versionen, Referenz-Links auf Task/Projekt statt Kopien, Byte-Vergleich, reviewerbestätigte Deaktivierung ohne Löschung](25-resources/resources.md). Kein Virenscan (NOT IMPLEMENTED), keine Inhaltsinterpretation.
 
-## Bright Data MCP discovery
-[Enger Vertrag: Authentifizierung, API, Datenschutz und offene Live-Abnahme](22-mcp/brightdata.md). Kein allgemeiner Tool-Executor.
+## Bright Data MCP discovery + begrenztes tools/call
+[Enger Vertrag: Authentifizierung, API, Datenschutz, Allowlist-Ausführung und offene Live-Abnahme](22-mcp/brightdata.md). tools/call nur für die zwei allowlisted Kandidaten mit Reviewer-Einzelfreigabe; kein allgemeiner Tool-Executor, keine Live-Provider-Validierung.

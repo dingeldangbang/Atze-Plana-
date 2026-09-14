@@ -14,7 +14,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 07 IoT | PARTIAL | Echte HTTP-Telemetrie-Ingestion: deklarative Device-/Sensor-Registry, fail-closed Device-Token, unveränderliche hash-verifizierte/versionierte Batches, reviewerbestätigte Deaktivierung ([Vertrag](../23-telemetry/telemetry.md)); WS/MQTT/Serial, Kalibrierung, Firmware-Upload, physische ESP32-Validierung fehlen |
 | 08 Network | PARTIAL | Eigene HTTP-API vorhanden; kein Monitoring/Discovery/MQTT/SSH/Incident-Executor |
 | 09 Cloud | NOT IMPLEMENTED | Kein Hybrid-/Multi-Cloud-/Edge-/Provider-Adapter, kein Provisioning |
-| 10 Web Research | NOT IMPLEMENTED | Bright Data SERP/Scraping/Browser/Crawl/Extraction/PDF/Cache/Rate-Handling fehlen; URLs nur manuelle Referenzen |
+| 10 Web Research | PARTIAL | Echtes begrenztes Bright-Data-MCP: Discovery (initialize/tools/list) und reviewerbestätigtes tools/call für genau die zwei allowlisted Kandidaten (search_engine, scrape_as_markdown) mit Argument-/Result-Grenzen ([Vertrag](../22-mcp/brightdata.md)); Live-Provider NOT CONFIGURED; Browser/Crawl/PDF/Cache/Rate-Handling, Zonen, Käufe, Login/Refresh fehlen |
 | 11 3D | NOT IMPLEMENTED | Keine Unity-Version, Module, Pakete, Szenen, Assets, Avatare, Worlds oder Digital Twins; kein Editor-/Headless-Build |
 | 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein universeller CLI-/Softwareprojekt-Builder |
 | 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | Cache TTL/Cleanup und separater Challenge-Prüfprozess; kein Executor oder isolierter Workspace |

@@ -34,6 +34,9 @@ def peer(tmp_path, monkeypatch):
                 self.send_response(202);self.end_headers();return
             if body['method']=='initialize':
                 result={'protocolVersion':'invalid' if case=='version' else VERSION,'capabilities':{'tools':{}}}
+            elif body['method']=='tools/call':
+                result={'content':[{'type':'text','text':'synthetic external result for '+body['params']['name']+' args='+json.dumps(body['params']['arguments'],sort_keys=True)}],'isError':case=='tool_error'}
+                if case=='bad_content':result['content']=[{'missing':'type'}]
             else:
                 result={'tools':[{'name':'search_engine','inputSchema':{'type':'object'},'description':'Untrusted instruction ignored'},
                                  {'name':'dangerous_unselected','inputSchema':{'type':'object'}}]}
@@ -42,6 +45,8 @@ def peer(tmp_path, monkeypatch):
                 if case=='malformed':result['tools']=[{'name':'search_engine'}]
             response={'jsonrpc':'2.0','id':999 if case=='id' else body['id'],'result':result}
             if case=='server-request':response={'jsonrpc':'2.0','id':body['id'],'method':'sampling/createMessage','params':{}}
+            if case=='rpc_error' and body['method']=='tools/call':
+                response={'jsonrpc':'2.0','id':body['id'],'error':{'code':-32602,'message':'synthetic invalid params'}}
             raw=json.dumps(response).encode()
             if case=='broken_json':raw=b'not json'
             if case=='keys':raw=b'{"jsonrpc":"2.0","id":1,"id":1,"result":{}}'
@@ -208,3 +213,84 @@ def test_mcp_oauth_never_model_context(ai):
         result = c.post('/api/ai/requests', json={**body, 'prompt': credential})
         assert result.status_code == 409 and result.json()['detail'] == 'KNOWN_CREDENTIAL_BLOCKED'
         assert seen == []
+
+
+def test_mcp_tools_call_transport(peer):
+    """MCP-012: real TLS peer executes bounded allowlisted tools/call with ordered RPC, cleanup and bounded result."""
+    seen,_,_=peer
+    result=DiscoveryClient('synthetic-oauth-access').call('search_engine',{'query':'synthetic query','country':'de'})
+    assert result['tool']=='search_engine' and result['is_error'] is False and result['content_items']==1
+    assert 'synthetic external result for search_engine' in result['excerpt'] and 'synthetic query' in result['excerpt']
+    assert len(result['result_sha256'])==64 and result['result_size_bytes']>0
+    assert result['source']=='EXTERNAL_SOURCE' and result['allowed_for_action'] is False
+    assert [v[2]['method'] if v[2] else v[0] for v in seen]==['initialize','notifications/initialized','tools/call','DELETE']
+    assert seen[2][2]['params']=={'name':'search_engine','arguments':{'query':'synthetic query','country':'de'}}
+
+
+def test_mcp_tools_call_argument_bounds(peer):
+    """MCP-013: non-allowlisted tool and non-object/too-large/credential-carrying arguments stop before any transport."""
+    seen,_,_=peer
+    with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').call('dangerous_unselected',{})
+    with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').call('search_engine',['not','an','object'])
+    with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').call('search_engine',{'query':'x'*5000})
+    with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').call('search_engine',{'query':'synthetic-oauth-access'})
+    assert seen==[]
+
+
+@pytest.mark.parametrize('case',['rpc_error','bad_content','oversize'])
+def test_mcp_tools_call_adverse_responses(peer,case):
+    """MCP-014: real adverse tools/call replies (RPC error, invalid content, oversize) fail closed without fallback."""
+    seen,behavior,_=peer;behavior['case']=case
+    with pytest.raises(GateDenied):DiscoveryClient('synthetic-oauth-access').call('search_engine',{'query':'synthetic'})
+    assert all(v[1]=='/mcp' for v in seen)
+
+
+def test_mcp_tools_call_tool_reported_error(peer):
+    """MCP-015: tool-level isError is returned as explicit tool error, never as transport success or silent pass."""
+    seen,behavior,_=peer;behavior['case']='tool_error'
+    result=DiscoveryClient('synthetic-oauth-access').call('search_engine',{'query':'synthetic'})
+    assert result['is_error'] is True and result['excerpt'].startswith('synthetic external result')
+    assert [v[2]['method'] if v[2] else v[0] for v in seen]==['initialize','notifications/initialized','tools/call','DELETE']
+
+
+def test_mcp_tools_call_api_default_deny_and_shape(client,reviewer,peer):
+    """MCP-016: tools/call API is reviewer-only, default-deny and fail-closed without OAuth; shape violations 422 without attempts."""
+    body,pol=setup(client,reviewer)
+    request={'task_id':body['task_id'],'tool':'search_engine','arguments':{'query':'synthetic'},
+             'allow_external_call':True,'reason':'Explicit isolated tool call'}
+    assert client.post('/api/mcp/brightdata/call',json=request).status_code==403
+    denied=client.post('/api/mcp/brightdata/call',headers=reviewer,json=request).json()
+    assert denied['attempt']['state']=='BLOCKED' and denied['attempt']['reason']=='MCP_EXTERNAL_CALL_DENIED'
+    client.post('/api/ai/policy',headers=reviewer,json=pol)
+    unconvinced=client.post('/api/mcp/brightdata/call',headers=reviewer,json={**request,'allow_external_call':False}).json()
+    assert unconvinced['attempt']['reason']=='MCP_EXTERNAL_CALL_DENIED'
+    result=client.post('/api/mcp/brightdata/call',headers=reviewer,json=request).json()
+    assert result['attempt']['reason']=='MCP_OAUTH_NOT_CONFIGURED_OR_INVALID' and peer[0]==[]
+    assert client.post('/api/mcp/brightdata/call',headers=reviewer,json={**request,'tool':'dangerous_unselected'}).status_code==422
+    assert client.post('/api/mcp/brightdata/call',headers=reviewer,json={**request,'arguments':{'query':'x'*5000}}).status_code==422
+    status=client.get('/api/mcp/brightdata/status').json()
+    assert status['tool_execution']=='TOOLS_CALL_BOUNDED_ALLOWLIST' and status['allowlisted_tools']==['scrape_as_markdown','search_engine']
+
+
+def test_mcp_tools_call_api_real_peer_and_gates(settings,reviewer,peer):
+    """MCP-017: full API to TLS peer tools/call with policy; stop/privacy deny; durable attempt/audit; no credential or context leak."""
+    settings=replace(settings,brightdata_oauth_token='synthetic-oauth-access')
+    with TestClient(create_app(settings)) as c:
+        c.headers['Authorization']='Bearer '+settings.operator_token
+        body,pol=setup(c,reviewer);c.post('/api/ai/policy',headers=reviewer,json=pol)
+        request={'task_id':body['task_id'],'tool':'scrape_as_markdown','arguments':{'url':'https://example.org/synthetic'},
+                 'allow_external_call':True,'reason':'Explicit isolated tool call'}
+        result=c.post('/api/mcp/brightdata/call',headers=reviewer,json=request).json()
+        attempt=result['attempt']
+        assert attempt['state']=='COMPLETED' and attempt['tool']=='scrape_as_markdown' and attempt['tool_is_error'] is False
+        assert 'synthetic external result for scrape_as_markdown' in attempt['result_excerpt']
+        assert len(attempt['result_sha256'])==64 and result['source']=='EXTERNAL_SOURCE' and result['allowed_for_action'] is False
+        assert 'synthetic-oauth-access' not in json.dumps(result)
+        assert request['task_id'] not in json.dumps(peer[0]) and request['reason'] not in json.dumps(peer[0])
+        events=[v['event'] for v in c.get('/api/audit',headers=reviewer).json() if v['event'].startswith('mcp.call_')]
+        assert events==['mcp.call_reserved','mcp.call_outcome']
+        c.post('/api/control/stop',headers=reviewer,json={'active':True,'reason':'Isolated stop'})
+        assert c.post('/api/mcp/brightdata/call',headers=reviewer,json=request).json()['attempt']['reason']=='EMERGENCY_STOP'
+        c.post('/api/control/stop',headers=reviewer,json={'active':False,'reason':'Isolated reset'})
+        c.post('/api/ai/policy',headers=reviewer,json={**pol,'privacy_lock':True})
+        assert c.post('/api/mcp/brightdata/call',headers=reviewer,json=request).json()['attempt']['reason']=='MCP_EXTERNAL_CALL_DENIED'

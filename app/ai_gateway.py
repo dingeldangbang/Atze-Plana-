@@ -56,6 +56,11 @@ class ExternalDataGateway:
         from app.mcp_client import DiscoveryClient
         return DiscoveryClient(oauth_token).discover()
 
+    def call_brightdata(self, oauth_token, tool, arguments):
+        """Called only after MCP consent/policy/audit gates; bounded allowlisted tools/call."""
+        from app.mcp_client import DiscoveryClient
+        return DiscoveryClient(oauth_token).call(tool, arguments)
+
     def provider(self, provider_id):
         if provider_id not in self.providers:
             raise GateDenied('PROVIDER_NOT_CONFIGURED')
