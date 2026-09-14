@@ -118,6 +118,23 @@ class UniverseTests(unittest.TestCase):
             write_report(self.root, 'hardlink.md', 'replacement')
         self.assertEqual(target.read_text(), 'untouched')
 
+    def test_token_aware_markers_and_inherited_hooks(self):
+        """UNI-009: Python strings and inherited no-op callbacks stay REAL; actual markers and unimplemented bodies stay visible."""
+        callback = 'class Callback(Base):\n    def log_message(self, *args):\n        pass\n'
+        self.assertEqual(findings('example = "# TODO fixture text"\n', '.py'), [])
+        self.assertEqual(findings(callback, '.py'), [])
+        self.assertIn((1, 'TODO'), findings('# TODO real source marker\n', '.py'))
+        self.assertIn((1, 'REVIEW_LITERAL'), findings('assert True\n', '.py'))
+        self.assertIn((2, 'STUB_CANDIDATE'), findings('def missing():\n    raise NotImplementedError("not implemented")\n', '.py'))
+
+        (self.root / 'callback.py').write_text(callback)
+        (self.root / 'marker.py').write_text('# TODO real source marker\n')
+        (self.root / 'missing.py').write_text('def missing():\n    raise NotImplementedError("not implemented")\n')
+        rows = {row['path']: row for row in inventory(self.root)['files']}
+        self.assertEqual(rows['callback.py']['status'], 'REAL')
+        self.assertEqual(rows['marker.py']['status'], 'TODO')
+        self.assertEqual(rows['missing.py']['status'], 'STUB')
+
 
 if __name__ == '__main__':
     unittest.main()

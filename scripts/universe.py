@@ -4,16 +4,20 @@ import argparse
 import ast
 from datetime import datetime, timezone
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import re
-import subprocess
 import stat
+import subprocess
+import tokenize
 
 EXTENSIONS = {'.py', '.js', '.jsx', '.ts', '.tsx', '.rs', '.kt', '.kts', '.java', '.c', '.h', '.cpp', '.hpp', '.swift', '.go', '.rb', '.php', '.dart', '.sh', '.html', '.css', '.cs', '.vue', '.svelte'}
 MANIFESTS = {'package.json', 'Cargo.toml', 'build.gradle', 'build.gradle.kts', 'settings.gradle', 'go.mod', 'pyproject.toml', 'composer.json', 'Gemfile', 'Podfile', 'pubspec.yaml', 'CMakeLists.txt', 'Makefile', 'AndroidManifest.xml'}
 EXCLUDED = {'.git', '.venv', 'node_modules', 'backups', 'reports', 'data', 'build', 'dist', 'target', '.cache', '__pycache__'}
+MARKER = re.compile(r'^\s*(?:\*+\s*)?(TODO|FIXME|MOCK|SHIM|STUB|PLACEHOLDER|HACK)\b', re.I)
+STATUS_PRIORITY = ('MOCK', 'STUB', 'FIXME', 'TODO', 'PLACEHOLDER')
 
 
 def safe_source(path):
@@ -47,37 +51,128 @@ def read_source(root, relative):
         return raw
 
 
+def _comment_marker(line, text, result):
+    """Add only a marker that starts an actual comment, never text inside a string."""
+    match = MARKER.match(text)
+    if match:
+        result.append((line, match[1].upper()))
+
+
+def _body_without_docstring(node):
+    body = list(node.body)
+    if (body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)):
+        return body[1:]
+    return body
+
+
+def _empty_implementation(body):
+    """Return whether an ordinary function body is only a common placeholder value."""
+    if len(body) != 1:
+        return False
+    statement = body[0]
+    if isinstance(statement, ast.Pass):
+        return True
+    if not isinstance(statement, ast.Return):
+        return False
+    value = statement.value
+    if value is None:
+        return True
+    if isinstance(value, ast.Constant) and value.value in (None, 0, False):
+        return True
+    if isinstance(value, ast.Dict):
+        return not value.keys
+    if isinstance(value, ast.List):
+        return not value.elts
+    return False
+
+
+def _decorator_name(decorator):
+    value = decorator.func if isinstance(decorator, ast.Call) else decorator
+    if isinstance(value, ast.Name):
+        return value.id
+    if isinstance(value, ast.Attribute):
+        return value.attr
+    return ''
+
+
+def _declares_interface(node):
+    return any(_decorator_name(value) in {'abstractmethod', 'overload'} for value in node.decorator_list)
+
+
+def _raised_name(node):
+    value = node.exc
+    if isinstance(value, ast.Call):
+        value = value.func
+    if isinstance(value, ast.Name):
+        return value.id
+    if isinstance(value, ast.Attribute):
+        return value.attr
+    return ''
+
+
+def _python_findings(text):
+    result = []
+    try:
+        tokens = tokenize.generate_tokens(io.StringIO(text).readline)
+        for token in tokens:
+            if token.type == tokenize.COMMENT:
+                _comment_marker(token.start[0], token.string[1:], result)
+    except (tokenize.TokenError, IndentationError):
+        # ast.parse below records a stable syntax signal without source excerpts.
+        pass
+    try:
+        tree = ast.parse(text)
+    except SyntaxError as error:
+        result.append((error.lineno or 0, 'SYNTAX_ERROR'))
+        return sorted(set(result))
+
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assert) and isinstance(node.test, ast.Constant) and node.test.value is True:
+            result.append((node.lineno, 'REVIEW_LITERAL'))
+        elif isinstance(node, ast.Raise) and _raised_name(node) == 'NotImplementedError':
+            result.append((node.lineno, 'STUB_CANDIDATE'))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            parent = parents.get(node)
+            # A no-op hook in a subclass can intentionally suppress a framework callback
+            # (for example BaseHTTPRequestHandler.log_message). It is not a missing body.
+            inherited_hook = isinstance(parent, ast.ClassDef) and bool(parent.bases)
+            if not inherited_hook and not _declares_interface(node) and _empty_implementation(_body_without_docstring(node)):
+                result.append((node.lineno, 'STUB_CANDIDATE'))
+    return sorted(set(result))
+
 
 def findings(text, suffix):
+    if suffix == '.py':
+        return _python_findings(text)
+
     result = []
     for n, line in enumerate(text.splitlines(), 1):
-        match = re.search(r'(?:#|//|/\*|<!--)\s*(TODO|FIXME|MOCK|SHIM|STUB|PLACEHOLDER|HACK)\b', line)
+        # This deliberately requires the comment opener to start a token, reducing
+        # false positives from most quoted URLs and examples in non-Python sources.
+        match = re.search(r'(?:^|(?<=\s))(?:#|//|/\*|<!--)\s*(TODO|FIXME|MOCK|SHIM|STUB|PLACEHOLDER|HACK)\b', line, re.I)
         if match:
-            result.append((n, match[1]))
-        if suffix != '.py' and re.search(r'\{\s*return\s+(?:false|0|null|\{\})\s*;?\s*\}', line):
-            result.append((n, 'EMPTY_RETURN_REVIEW'))
-        if re.search(r'(?:assert\s+True\b|assert\s*\(\s*true\s*\)|not implemented)', line, re.I):
+            result.append((n, match[1].upper()))
+        if re.search(r'\{\s*return\s+(?:false|0|null|\{\})\s*;?\s*\}', line, re.I):
+            result.append((n, 'STUB_CANDIDATE'))
+        if re.search(r"\bthrow\s+new\s+Error\s*\(\s*['\"]\s*not\s+implemented\b", line, re.I):
+            result.append((n, 'STUB_CANDIDATE'))
+        if re.search(r'\bassert\s*(?:\(\s*)?true\b', line, re.I):
             result.append((n, 'REVIEW_LITERAL'))
-    if suffix == '.py':
-        try:
-            tree = ast.parse(text)
-        except SyntaxError as error:
-            result.append((error.lineno or 0, 'SYNTAX_ERROR'))
-        else:
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    body = list(node.body)
-                    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and isinstance(body[0].value.value, str):
-                        body = body[1:]
-                    if len(body) == 1 and (isinstance(body[0], ast.Pass) or
-                        isinstance(body[0], ast.Return) and (body[0].value is None or
-                        isinstance(body[0].value, ast.Constant) and body[0].value.value in (None, 0, False))):
-                        result.append((node.lineno, 'STUB_CANDIDATE'))
-                    elif len(body) == 1 and isinstance(body[0], ast.Return) and isinstance(body[0].value, (ast.Dict, ast.List)):
-                        value = body[0].value
-                        if not (value.keys if isinstance(value, ast.Dict) else value.elts):
-                            result.append((node.lineno, 'EMPTY_RETURN_REVIEW'))
     return sorted(set(result))
+
+
+def status_for(signals):
+    """Map evidence to the requested coarse status without inventing DEAD or DUAL."""
+    codes = {code for _, code in signals}
+    for status in STATUS_PRIORITY:
+        if status in codes:
+            return status
+    if 'STUB_CANDIDATE' in codes:
+        return 'STUB'
+    # Syntax, assertions, SHIM and HACK need human work but are not a proof of DEAD code.
+    return 'TODO' if codes else 'REAL'
 
 
 def inventory(root):
@@ -92,9 +187,7 @@ def inventory(root):
             raw = read_source(root, path)
             signals = findings(raw.decode('utf-8'), path.suffix)
             row.update(sha256=hashlib.sha256(raw).hexdigest(), signals=signals)
-            if signals:
-                code = signals[0][1]
-                row['status'] = code if code in {'TODO', 'FIXME', 'MOCK', 'STUB', 'PLACEHOLDER'} else 'STUB' if code == 'STUB_CANDIDATE' else 'TODO'
+            row['status'] = status_for(signals)
         except (OSError, ValueError, UnicodeError):
             row.update(status='TODO', signals=[(0, 'UNREADABLE_OR_UNSAFE')])
         rows.append(row)
@@ -124,7 +217,7 @@ def audit(root):
     result = inventory(root)
     lines = ['# Universe Inventory', '', result['time'], '',
              'Heuristische Hinweise, keine automatische Reparatur. REAL = kein erkanntes Signal, nicht funktional validiert.',
-             'DEAD/DUAL, fehlende Imports, Frameworks, UI-Erreichbarkeit und Spezifikationsabdeckung benötigen gesonderte Analyse.',
+             'Python-Kommentartokens werden getrennt von Strings ausgewertet; DEAD/DUAL, fehlende Imports, Frameworks, UI-Erreichbarkeit und Spezifikationsabdeckung benötigen gesonderte Analyse.',
              'Ohne Secrets, ignorierte Daten und Quelltextauszüge. Keine Trefferbegrenzung; unsichere/große Dateien werden markiert.',
              '', '## Erkannte Manifestdateien', *['- ' + p for p in result['manifests']], '',
              '## Quelldateien', '| Datei | Git | Status (heuristisch) | Signale (Zeile:Code) | SHA256 |', '|---|---|---|---|---|']
