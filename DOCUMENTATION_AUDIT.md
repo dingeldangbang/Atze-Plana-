@@ -1,3 +1,11 @@
+## Universe tooling addendum — 2026-09-14
+
+Actual source inventory, agent instruction profile, opt-in multi-stack command harness and push/PR workflow added; [contract and limitations](docs/14-testing/universe.md). No automatic stub replacement, silent fallback, port scanning or deployment. **146 local tests PASS /98.04% app coverage**,2 known warnings; tooling uses8 real isolated Git/file/process tests. Real selected Core harness execution PASS for each command, overall **PARTIAL**, not universal READY. New wheel/sdist hashes and revision/dirty-state/inventory digest in reports/universe-2026-09-14.json; inventory reports contain no source excerpts. Existing application functions unchanged.
+
+Initial Universe workflows on7b988d4 actually passed: [PR34798607416](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34798607416) and [push34798605327](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34798605327). Follow-up adds FIFO/hardlink safety and revision binding, executed locally; final remote results recorded in PR. Full platform/production remains BLOCKED. Git metadata recovered from the existing remote with working-file hashes preserved; no force push.
+
+---
+
 # Dokumentationsaudit — PLAN / Context Lock
 
 ## Abschließender CI-Nachweis69e6676

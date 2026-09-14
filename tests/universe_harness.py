@@ -115,6 +115,8 @@ def main(argv=None):
     date = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     report = {'started_at': datetime.now(timezone.utc).isoformat(), 'scope': args.scope,
               'status': 'BLOCKED', 'checks': [], 'mocks_removed': 0, 'artifacts': [],
+              'revision': subprocess.check_output(['git', '-C', str(root), 'rev-parse', '--verify', 'HEAD'], stderr=subprocess.DEVNULL, text=True).strip() if subprocess.run(['git', '-C', str(root), 'rev-parse', '--verify', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0 else 'UNBORN',
+              'working_tree_dirty': bool(subprocess.check_output(['git', '-C', str(root), 'status', '--porcelain'])),
               'limitations': ['No automatic repairs, port scans, hardware or deployment',
                               'No complete UI/endpoint/OOM/disconnect/semantic/secret audit',
                               'Runner is not an OS sandbox; repository commands can execute arbitrary code']}
@@ -122,6 +124,7 @@ def main(argv=None):
     write_report(root, target, json.dumps(report, indent=2))
     try:
         audit(root)
+        report['inventory_sha256'] = hashlib.sha256((root / 'reports/inventory.json').read_bytes()).hexdigest()
         stacks, commands, blockers = plan(root, args.scope)
         report.update(stacks=stacks, blockers=blockers, planned=[{'name': n, 'argv': a} for n, a in commands])
         if args.execute:
@@ -146,7 +149,8 @@ def main(argv=None):
         report['finished_at'] = datetime.now(timezone.utc).isoformat()
         write_report(root, target, json.dumps(report, indent=2) + '\n')
         lines = ['# Universe validation — ' + date, '', 'Conclusion: **' + report['status'] + '**',
-                 'Scope: ' + args.scope, 'Mocks removed: 0 (no automatic source edits)', '',
+                 'Scope: ' + args.scope, 'Revision: ' + report['revision'],
+                 'Working tree dirty: ' + str(report['working_tree_dirty']), 'Mocks removed: 0 (no automatic source edits)', '',
                  '| Check | Status | Actual exit code | Seconds |', '|---|---|---|---|']
         for row in report['checks']:
             lines.append(f"| {row['name']} | {row['status']} | {row['exit_code']} | {row.get('seconds', '—')} |")

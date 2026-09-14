@@ -36,9 +36,16 @@ def read_source(root, relative):
     path = root / relative
     if any(p.is_symlink() for p in [path, *path.parents] if p != root and root in p.parents) or not path.resolve().is_relative_to(root.resolve()):
         raise ValueError('Symlink or outside-root source refused')
-    if path.stat().st_size > 2 * 1024 * 1024:
-        raise ValueError('Source exceeds 2MiB audit bound')
-    return path.read_bytes()
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, 'rb') as source:
+        info = os.fstat(source.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_size > 2 * 1024 * 1024:
+            raise ValueError('Only regular source files within 2MiB allowed')
+        raw = source.read(2 * 1024 * 1024 + 1)
+        if len(raw) > 2 * 1024 * 1024:
+            raise ValueError('Source grew beyond audit bound')
+        return raw
+
 
 
 def findings(text, suffix):
@@ -143,14 +150,14 @@ def backup(root, relative):
     try:
         fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     except FileExistsError:
-        if destination.is_symlink() or hashlib.sha256(destination.read_bytes()).hexdigest() != sha:
+        if destination.is_symlink() or hashlib.sha256(read_source(root, destination.relative_to(root))).hexdigest() != sha:
             raise ValueError('Existing backup failed integrity verification')
     else:
         with os.fdopen(fd, 'wb') as output:
             output.write(raw)
             output.flush()
             os.fsync(output.fileno())
-    if hashlib.sha256(destination.read_bytes()).hexdigest() != sha:
+    if hashlib.sha256(read_source(root, destination.relative_to(root))).hexdigest() != sha:
         raise ValueError('Backup integrity mismatch')
     return destination
 

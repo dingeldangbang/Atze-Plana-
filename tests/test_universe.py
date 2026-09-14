@@ -2,6 +2,7 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -10,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from universe import audit, backup, findings, inventory, write_report
+from universe import audit, backup, findings, inventory, write_report, read_source
 spec = importlib.util.spec_from_file_location('universe_harness', ROOT / 'tests/universe_harness.py')
 harness = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(harness)
@@ -103,6 +104,19 @@ class UniverseTests(unittest.TestCase):
         report = json.loads(next((self.root / 'reports').glob('universe-*.json')).read_text())
         self.assertEqual(report['checks'], [])
         self.assertEqual(report['status'], 'BLOCKED')
+
+    def test_nonregular_and_hardlinked_output(self):
+        """UNI-008: FIFO source cannot hang scanner; hardlinked report cannot truncate data."""
+        os.mkfifo(self.root / 'blocked.py')
+        with self.assertRaises(ValueError):
+            read_source(self.root, Path('blocked.py'))
+        (self.root / 'reports').mkdir()
+        target = self.root / 'retained.txt'
+        target.write_text('untouched')
+        os.link(target, self.root / 'reports/hardlink.md')
+        with self.assertRaises(ValueError):
+            write_report(self.root, 'hardlink.md', 'replacement')
+        self.assertEqual(target.read_text(), 'untouched')
 
 
 if __name__ == '__main__':

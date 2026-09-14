@@ -123,3 +123,4 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | UNI-005: multiple stacks, actual commands without collect/dry-run; unknown blocked. | [test_universe.py: test_multi_stack_and_unknown](../../tests/test_universe.py) |
 | UNI-006: real failing/successful/timeout processes, no shell; no stdout leak. | [test_universe.py: test_actual_process_exit_and_timeout](../../tests/test_universe.py) |
 | UNI-007: no --execute means no code runs, saved report BLOCKED, nonzero exit. | [test_universe.py: test_plan_only_fails_closed](../../tests/test_universe.py) |
+| UNI-008: FIFO source cannot hang scanner; hardlinked report cannot truncate data. | [test_universe.py: test_nonregular_and_hardlinked_output](../../tests/test_universe.py) |
