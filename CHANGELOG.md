@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased — Privacy-first model boundary, partial integration
+- Abgleich der vollständigen ChatGPT-Masterkonversation (Reality First/No Fiction Data, Triage/Challenge, PLAN/Context Lock, APK-Auslieferungspflicht, 2-GB-Korrektur) gegen den tatsächlichen Repositorysstand: [MASTER_ABGLEICH](MASTER_ABGLEICH.md). Am 2026-09-14 tatsächlich ausgeführt: 169 lokale Tests PASS, docs.py --check PASS, reality_check.py PASS. Deltas (u. a. 2-GB-Neuinterpretation, Statusvokabular, Workflow-Editor, Auslieferungsformate) dokumentiert; kein Produkt-/Testcode geändert.
 - Fixed actual SQLite/FastAPI sync dependency thread-handoff error observed in live preview; one connection per unit of work remains, real two-thread commit/rollback regression added.
 - Provider-neutral contracts and real OpenAI-compatible text transport through an explicit model data gate. LOCAL/SELF_HOSTED/PRIVATE_ENDPOINT/EXTERNAL_PROVIDER policy categories, empty defaults.
 - Reviewer-only metadata/policy/exact-context consent, local-only lock, allowlists, selected same-project/task context, conservative classification and secret-pattern rejection, durable unknown-outcome audit, no automatic fallback/tool execution/adoption.
