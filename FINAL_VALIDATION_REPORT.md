@@ -39,6 +39,9 @@ SDK-Emulator ist kein physisches Gerät. Die native App bleibt read-only Statusc
 
 Weitere Arbeit: echte zielgebundene, widerruf-/ablaufbare Permission-Leases und isolierter Executor als nächster kleiner Schnitt. Hardware-/Providerabnahmen benötigen konkrete autorisierte Ressourcen. Kein Full-Platform-Release aus einem grünen Teiltest ableiten.
 
+### Abschlusslauf25b3512 / Download-Grenze
+Core-/Browser-CI34793906467 PASS mit erweiterten Tests. Modell-CI34793906490 scheiterte **vor Inferenz** beim Staging öffentlicher gepinnter Dateien; genauer Transportfehler aus hier nicht abrufbaren Bloblogs nicht behauptet. GitHub lehnte direkte Wiederholung ab („workflow file may be broken“), kein Authentifizierungsfehler und kein Beweis eines YAML-Fehlers. Downloadstufe daher um begrenzte native Curl-Transient-Retries und strukturierte Exit-/HTTP-Annotationen ergänzt, mit unveränderten HTTPS-/TLS-/Hashvorgaben. Neuer identischer Inferenztest folgt im CI des Fixcommits; endgültiger Laufstatus wird im PR nachgetragen. Vorheriger realer Inferenznachweis1a919db bleibt getrennt bestehen.
+
 ---
 
 ## Historische Nachweise früherer Inkremente (nicht aktuelle Abnahme)

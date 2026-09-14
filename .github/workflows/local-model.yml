@@ -33,7 +33,11 @@ jobs:
               for key in ['runtime','model']:
                   spec=lock[key]
                   destination=Path(os.environ['RUNNER_TEMP'])/'atze-model-artifacts'/spec['filename']
-                  subprocess.run(['curl','--fail','--location','--proto','=https','--proto-redir','=https','--tlsv1.2','--connect-timeout','20','--max-time','300','--silent','--show-error',spec['url'],'--output',str(destination)],check=True)
+                  result['current_artifact']=key
+                  transfer=subprocess.run(['curl','--fail','--location','--proto','=https','--proto-redir','=https','--tlsv1.2','--connect-timeout','20','--max-time','300','--retry','2','--retry-delay','2','--retry-max-time','60','--silent','--show-error','--write-out','%{http_code}',spec['url'],'--output',str(destination)],capture_output=True,text=True)
+                  result['transport']={'curl_exit_code':transfer.returncode,'http_status':transfer.stdout.strip() if transfer.stdout.strip().isdigit() else 'UNKNOWN','max_transient_retries':2}
+                  if transfer.returncode:
+                      raise RuntimeError('Verified HTTPS artifact staging failed; no inference, no TLS/hash fallback')
                   from scripts.validate_local_model import verify
                   verify(destination,spec)
                   result['downloaded'].append({'kind':key,'sha256':spec['sha256'],'size':spec['size']})
@@ -56,6 +60,10 @@ jobs:
           python - <<'PYCODE'
           import json
           from pathlib import Path
+          download=Path('reports/local-model-download.json')
+          if download.exists():
+              text=json.dumps(json.loads(download.read_text()),ensure_ascii=True)
+              print('::notice title=MODEL_DOWNLOAD_EVIDENCE::'+text.replace('%','%25').replace('\n','%0A').replace('\r','%0D'))
           path=Path('reports/local-model.json')
           if path.exists():
               data=json.loads(path.read_text())

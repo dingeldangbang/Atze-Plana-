@@ -26,6 +26,9 @@ Erstes zusätzliches Secret-Test-Expect verwendete falschen Namen; tatsächliche
 ## Nicht abgenommen
 Physische Hardware/Honeywell/ESP32, echte BrightData-/Cloud-/Payment-Provider, vollständige Agent/MCP-/Tool-/Sandboxescape-Architektur, Universal-3D/PDF/CAD, Last/2GB, verschlüsselte Bestandsdaten, umfassende Accessibility, physische APK-/Live-Core-Session und AAB: BLOCKED/NOT IMPLEMENTED/NOT RUN. Nur Teilarchitektur getestet, keine Vollplattform-Freigabe.
 
+### Abschlusslauf25b3512 / Download-Grenze
+Core-/Browser-CI34793906467 PASS mit erweiterten Tests. Modell-CI34793906490 scheiterte **vor Inferenz** beim Staging öffentlicher gepinnter Dateien; genauer Transportfehler aus hier nicht abrufbaren Bloblogs nicht behauptet. GitHub lehnte direkte Wiederholung ab („workflow file may be broken“), kein Authentifizierungsfehler und kein Beweis eines YAML-Fehlers. Downloadstufe daher um begrenzte native Curl-Transient-Retries und strukturierte Exit-/HTTP-Annotationen ergänzt, mit unveränderten HTTPS-/TLS-/Hashvorgaben. Neuer identischer Inferenztest folgt im CI des Fixcommits; endgültiger Laufstatus wird im PR nachgetragen. Vorheriger realer Inferenznachweis1a919db bleibt getrennt bestehen.
+
 ---
 
 ## Historische Nachweise früherer Inkremente (nicht aktuelle Abnahme)
