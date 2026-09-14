@@ -1,14 +1,24 @@
-# Documentation audit — current PLAN increment (candidate)
+# Dokumentationsaudit — PLAN / Context Lock
 
-Stand 2026-09-14. Baseline05ea6d5 inspected:120 tests/97.78%, build/docs PASS before changes. Current bounded [PLAN implementation](docs/21-plan/context-lock.md) adds actual immutable references, context locks and downstream invalidation, not the full platform.
+2026-09-14. **PASS für ausgeführte Konsistenzprüfungen; keine Vollständigkeits-/Produktionsbehauptung.** ADR-007 vor Code angelegt, Core-/Storage-/Challenge-/AI-/UI-Einbindung vor Änderungen analysiert,120-Test-Baseline gebaut. Während Implementierung OpenAPI/Inventar/API/Testkatalog synchron generiert.
 
-**Candidate validation in progress:** final local suite135 tests PASS/97.93% (2 known warnings,28.06s); actual Python wheel/sdist build, docs/OpenAPI/reality/JS/shell/diff checks PASS. Actual normal/-O HTTP smoke41 responses/4 independent worker invocations PASS (`reports/plan-smoke*.json`). Local Chromium execution BLOCKED (binary absent, explicitly attempted), not browser PASS. New real CI browser and pinned-model PLAN paths require executed remote results; prior model/Android results below belong to prior commits. No release/tag/deployment.
+## Aktualisierte Verträge
+- [PLAN](docs/21-plan/context-lock.md): Purpose, Inputs, Outputs, Dependencies, Configuration, Permissions, Failure Modes, Validation, Tests, Security, Examples, Known Limitations; APIs/Version/Lock/Widerruf, Quelle/Hash/Abhängigkeiten, Byte-/Referenzlimits, Statussemantik.
+- Challenge-Policy-Migration, AI-Pflichtbindung/Secret-/Integritätsprüfung, RAG-Staleness, atomare Versionskonflikte und nicht atomare Filesystemgrenze ausdrücklich beschrieben.
+- Browserquelle/Listenbegrenzung/Beziehungsbearbeitung, Session-/Logoutverhalten; echte Chromium-CI und Fehlerrückmeldungen, keine Demo-/DOM-Ersetzung.
+- README/Modulmatrix/Reality-Audit/Releaseplan korrigieren alte Aussagen „kein Android“/„keine Modellinferenz“: tatsächlicher enger CI-/Client-Scope getrennt von fehlenden operativen Integrationen.
+- Vier Rootreports mit konkreten ausgeführten Test-/CI-/Artefaktdaten und explizit getrennten historischen Nachweisen. Ausgewähltes Debug-APK mit Source-/PR-Merge-Revision und echten Hashes, keine neue Native-PLAN-/Repairfähigkeit.
 
-Documentation/OpenAPI regenerated continuously, new ADR/contract covers purpose/inputs/outputs/config/roles/errors/security/tests/examples/limits. Policy `challenge-2-context` requires re-challenge of older reports. PLAN does not encrypt legacy storage, grant tools, provide permission leases/MCP/physical devices or certify semantic truth. Full-platform/production **BLOCKED**.
+`python scripts/docs.py --check`: vier generierte Produkte/OpenAPI/lokale Dateilinks/acht feste Envvariablen PASS. Reality/JS/Shell/diff ebenfalls PASS.138 lokale pytest-Fälle;135 im verlinkten1a919db-CI-Stand plus echter Browser. Abschließender Test-/Dokumentationscommit ergänzt drei tatsächlich lokal ausgeführte Fälle und unterliegt erneut CI. Externe Links/Anker/semantische Vollständigkeit nicht vollständig maschinell bewiesen.
+
+## Wahrheits- und Sicherheitsdisziplin
+Ein manifestgebundener Inhalt bleibt UNKNOWN hinsichtlich Wahrheit, auch bei VERIFIED Byteintegrität. CURRENT erlaubt keine Aktion. REVIEWER ist ein gemeinsamer Rollencredential, keine biometrisch bewiesene menschliche Anwesenheit. Kontextlabel Device/Repair ist kein angeschlossenes Gerät. Lokaler Transporttest ist kein Modell; nur tatsächlicher gepinnter Inferenzlauf wird als Modellnachweis gezählt. Emulator ist keine physische Hardware.
+
+MCP, Permission-Leases, Executor, universelle Verschlüsselung/Egress-Durchsetzung, semantische Forschung/Qualität, Hardware/2GB/Restore/Production bleiben offene Gates. Altbinaries kennen PLAN nicht: alte Dienste stoppen, keinen gemischten Versionsbetrieb oder stillen post-PLAN-Downgrade behaupten. Nicht kopierte Quellentexte im Manifest bedeuten nicht, dass Titel/URL-Metadaten geheimnisfrei oder SQLite verschlüsselt wären.
 
 ---
 
-## Historical validation — prior increment (not current HEAD evidence)
+## Historische Nachweise früherer Inkremente (nicht aktuelle Abnahme)
 
 # Documentation Audit — verified worker/Android increment
 

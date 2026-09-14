@@ -93,6 +93,8 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | PLAN-011 | isolated SQLite corruption | alter saved context after consent hash | no real HTTP transport. | [test_plan.py: test_ai_plan_request_integrity_fault](../../tests/test_plan.py) |
 | PLAN-012 | isolated persisted-record faults | corrupt source/hash/dependency scope | real SQLite/API | 503/422 and no partial PLAN. | [test_plan.py: test_plan_integrity_dependency_faults](../../tests/test_plan.py) |
 | PLAN-013 | actual UTF-8 archive blobs | 9 x128KiB | 1MiB source cap blocks without truncation. | [test_plan.py: test_plan_byte_budget](../../tests/test_plan.py) |
+| PLAN-014 | actual Evidence/Memory/archive API records | 65 dependencies or >1MiB combined | fail413, no truncation/partial PLAN. | [test_plan.py: test_plan_dependency_budgets](../../tests/test_plan.py) |
+| PLAN-015 | real concurrent API/SQLite transactions | two writers same expected version | exactly one201/one409, no lost update. | [test_plan.py: test_plan_concurrent_optimistic_append](../../tests/test_plan.py) |
 | REAL-001: a new operational database/UI has no seeded projects, telemetry, tasks or results; mode is explicit. | [test_reality.py: test_operational_start_has_no_seeded_data](../../tests/test_reality.py) |
 | REAL-002: persistent test DB marker rejects switching to operational mode without changing/deleting data. | [test_reality.py: test_test_database_cannot_be_opened_operational](../../tests/test_reality.py) |
 | REAL-003: an operational database cannot be switched to test mode even if currently empty. | [test_reality.py: test_operational_database_cannot_be_used_as_test](../../tests/test_reality.py) |

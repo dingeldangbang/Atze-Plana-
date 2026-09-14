@@ -1,14 +1,34 @@
-# Executed tests — current PLAN increment (candidate)
+# Testbericht — PLAN-Inkrement, tatsächlich ausgeführt
 
-Stand 2026-09-14. Baseline05ea6d5 inspected:120 tests/97.78%, build/docs PASS before changes. Current bounded [PLAN implementation](docs/21-plan/context-lock.md) adds actual immutable references, context locks and downstream invalidation, not the full platform.
+2026-09-14. **138 lokale pytest-Fälle PASS /98.04% Core-Coverage**,29.09s,2 bekannte Starlette/AnyIO-Deprecationwarnungen. Baseline120 vor Änderung; PLAN ergänzt18 konkrete Fälle (PLAN-001–015, parametrisiert). [Testkatalog mit ID/Zweck/Erwartung](docs/14-testing/test-catalog.md), tatsächliche Einzelfälle in JUnit (`reports/junit.xml`), Coverage und `reports/plan-final-tests.log`.
 
-**Candidate validation in progress:** final local suite135 tests PASS/97.93% (2 known warnings,28.06s); actual Python wheel/sdist build, docs/OpenAPI/reality/JS/shell/diff checks PASS. Actual normal/-O HTTP smoke41 responses/4 independent worker invocations PASS (`reports/plan-smoke*.json`). Local Chromium execution BLOCKED (binary absent, explicitly attempted), not browser PASS. 8125e85 Core CI34793035316: all non-browser steps PASS, real browser step FAIL (real browser harness clicked the existing heading rather than login form and expected the wrong status; corrected selectors/status plus graceful Browser.close/profile cleanup, retest pending; sandbox never disabled). Pinned model CI34793035329 PASS including actual locked-archive inference and revoked queued request; prior model/Android results below belong to prior commits. No release/tag/deployment.
+## Abnahme und Evidence
+| ID/Gruppe | Preconditions / Aktionen / Erwartung | Actual / Status |
+|---|---|---|
+| PLAN-001–004 | echte temporäre Quellen/SQLite, Rollen, Sperre, neue Version, Stop/Reset/Widerruf, Fremdscope | PASS, keine Wahrheit/Ausführung,409/403/422/404 statt Fallback |
+| PLAN-005–008 | reale Archivkorruption, Reviewänderung, Challenge/Approval/Adoption/RAG, Audittriggerfehler | PASS, Staleness/Block/Rollback statt alter Freigabe |
+| PLAN-009–013 | echter lokaler HTTP-Empfänger (kein Modell), gesperrtes Archiv, Queue-Widerruf, Secretmuster, SQLite-Kontextfehler, >1MiB | PASS; kein weiterer Transport bei Abweisung; volle gewählte Texte bei erlaubtem Transport |
+| PLAN-014–015 |65 echte Evidence-Abhängigkeiten, kombinierte Byteobergrenze, zwei gleichzeitige API-Schreibversuche | PASS,413 ohne Trunkierung; genau201/409, kein verlorenes Update |
+| HTTP/Worker-Smoke | eigene temporäre Coreinstanz; reale Workerprozesse, normale/-O Ausführung |41 Antworten/4 Worker je Lauf PASS; `reports/plan-smoke*.json` |
+| BROWSER-PLAN-01–07 | echtes Chromium + HTTP-Core; anlegen, XSS-Text, Operator-DENY, Reviewer-Lock, revoke, revision, logout |7 PASS, Chrome152.0.7977.82, beendet/Profil entfernt; [CI34793544467](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544467) |
+| LM-LOAD/LM-INFER/LM-PLAN-CONTEXT | echte gepinnte Gewichte/Runtime; Local DENY→explizite Policy/Consent; Archiv-Lock; Warteschlange widerrufen |PASS, reale Ausgaben READY, widerrufen BLOCKED; [CI34793544446](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544446) |
+| Android | offizieller SDK-Build/Debugsignatur, realer Emulator install/start/instrumentation |PASS; [CI34793544458](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544458), [APK-Bericht](APK_RELEASE_REPORT.md) |
+| Package/docs/security tooling | real build, pip-audit/pip check, Docs/OpenAPI/Reality/JS/Shell/diff |PASS, keine bekannten Dependencytreffer beim konkreten Lauf |
 
-Documentation/OpenAPI regenerated continuously, new ADR/contract covers purpose/inputs/outputs/config/roles/errors/security/tests/examples/limits. Policy `challenge-2-context` requires re-challenge of older reports. PLAN does not encrypt legacy storage, grant tools, provide permission leases/MCP/physical devices or certify semantic truth. Full-platform/production **BLOCKED**.
+CI auf1a919db führte135 damalige Fälle plus Browser/Modell/APK tatsächlich aus; die abschließende lokale Suite enthält zusätzlich drei Budget-/Concurrencyfälle. Der neue Bericht-/Testcommit wird zusätzlich durch unveränderte verpflichtende CI geprüft. Keine lokalen Browser-/SDK-Werkzeuge vorhanden; CI nicht als lokale Ausführung ausgegeben.
+
+## Präziser Modellnachweis
+Qwen-Revision9217f5db79a29953eb74d5343926648285ec7e67, Gewichte SHA25674a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db; Runtime b10948 SHA256bcbf6a304f85dd5acceee4afde432d4d183120a32dccad9ca8dcb05687575d40. PLAN-Manifest7fa5b25bf2da6107eb50760e8b358654d377f3646c9114a3213e0b06a22bebf7, Inferenzversuch75f95e88-bcc0-43f6-9c22-3a8b1005e06f, Ausgabe READY. UID1001/LOOPBACK_ONLY_NO_EXTERNAL_ROUTE/children_stopped=true. Alle Eingaben explizit synthetisch; kein operativer Modellworker oder Leistungs-/Wahrheitsbeweis.
+
+## Fehlerbehandlung, keine geschönten Resultate
+Erstes zusätzliches Secret-Test-Expect verwendete falschen Namen; tatsächlicher Guard verweigerte korrekt SECRET_PATTERN_BLOCKED, Assertion korrigiert. Browserpipeline zunächst FAIL: Harness klickte die Überschrift statt Login, erwartete unzutreffenden Statustext; abruptes Beenden verursachte Profil-ENOTEMPTY. Begrenzte Annotationen statt nicht abrufbarer Bloblogs ergänzt, reale Formselektoren/Browser.close genutzt. UI zeigt während Neuverbindung keinen alten Erfolg und leert auch einen noch nicht abgeschickten Token beim Logout. Danach7 echte Browserprüfungen PASS; kein Sandboxabschalten, kein Testersatz. Fehlgeschlagene CI-Läufe bleiben in GitHub sichtbar.
+
+## Nicht abgenommen
+Physische Hardware/Honeywell/ESP32, echte BrightData-/Cloud-/Payment-Provider, vollständige Agent/MCP-/Tool-/Sandboxescape-Architektur, Universal-3D/PDF/CAD, Last/2GB, verschlüsselte Bestandsdaten, umfassende Accessibility, physische APK-/Live-Core-Session und AAB: BLOCKED/NOT IMPLEMENTED/NOT RUN. Nur Teilarchitektur getestet, keine Vollplattform-Freigabe.
 
 ---
 
-## Historical validation — prior increment (not current HEAD evidence)
+## Historische Nachweise früherer Inkremente (nicht aktuelle Abnahme)
 
 # Test Report — executed master increment
 

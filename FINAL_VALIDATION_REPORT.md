@@ -1,14 +1,47 @@
-# Final validation — current PLAN increment (candidate)
+# Abschlussvalidierung — PLAN / Context Lock
 
-Stand 2026-09-14. Baseline05ea6d5 inspected:120 tests/97.78%, build/docs PASS before changes. Current bounded [PLAN implementation](docs/21-plan/context-lock.md) adds actual immutable references, context locks and downstream invalidation, not the full platform.
+Stand 2026-09-14. **Reales, begrenztes Inkrement umgesetzt und getestet. Gesamtplattform / Produktionsrelease weiterhin BLOCKED.** Kein Merge, Tag, Release oder Produktionsdeploy.
 
-**Candidate validation in progress:** final local suite135 tests PASS/97.93% (2 known warnings,28.06s); actual Python wheel/sdist build, docs/OpenAPI/reality/JS/shell/diff checks PASS. Actual normal/-O HTTP smoke41 responses/4 independent worker invocations PASS (`reports/plan-smoke*.json`). Local Chromium execution BLOCKED (binary absent, explicitly attempted), not browser PASS. New real CI browser and pinned-model PLAN paths require executed remote results; prior model/Android results below belong to prior commits. No release/tag/deployment.
+## Implementiert
+- Ein taskgebundener PLAN mit unveränderlichen Versionen und1–16 tatsächlichen Evidence-/Memory-/Text-Archivquellen; keine vorgefüllten Quellen oder simulierten Geräte.
+- SHA-256-/Metadaten-/Abhängigkeitsmanifest, maximale Byte-/Referenzbudgets, optimistische Versionsprüfung, Reviewer-Lock und append-only Widerruf.
+- Veraltete Quellen, Versionen, Locks oder Stop-Revisionen blockieren Challenge/Triage/Freigabe/Adoption und Decision-Memory. AI benötigt den aktuellen Lock, ohne Umgehung durch zusätzliche manuelle Quellen.
+- Reale API und Browserbedienung; bekannte Secretmuster und gespeicherte Kontextkorruption werden vor Modelltransport abgewiesen. Kein Tool-/Executorzugriff.
+- **CURRENT bestätigt die gebundene Fassung, niemals Wahrheit oder Aktionsberechtigung.** [Vollständiger Vertrag](docs/21-plan/context-lock.md).
 
-Documentation/OpenAPI regenerated continuously, new ADR/contract covers purpose/inputs/outputs/config/roles/errors/security/tests/examples/limits. Policy `challenge-2-context` requires re-challenge of older reports. PLAN does not encrypt legacy storage, grant tools, provide permission leases/MCP/physical devices or certify semantic truth. Full-platform/production **BLOCKED**.
+## Tatsächlich ausgeführte Gates
+| Gate | Ergebnis / konkreter Nachweis |
+|---|---|
+| Voranalyse/Baseline | 05ea6d5:120 Tests,97.78%, Build/Docs PASS vor Änderungen |
+| Abschließende lokale Unit/API/Integration/Security/PLAN-Regressionssuite | **138 PASS,98.04%**,2 bekannte Warnungen,29.09s; `reports/plan-final-tests.log`, JUnit/Coverage |
+| Echter HTTP-/Worker-E2E, normal und python -O | **41 Responses +4 separate Worker je Lauf PASS**; darunter PLAN BLOCK und erneute Freigabeprüfung |
+| Core CI inkl. Build/Audit/Docs/Browser | [34793544467](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544467) und [34793540906](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793540906) PASS auf1a919db; drei zusätzliche lokale Budget/Concurrencyfälle anschließend ergänzt |
+| Echter Chromium-Browser | **7 Prüfungen PASS**, Google Chrome152.0.7977.82, beendet und Profil entfernt; kein --no-sandbox |
+| Echtes gepinntes lokales Modell mit PLAN | [34793544446](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544446) PASS: tatsächlich geladene Gewichte, Antwort READY auch aus gesperrtem Archivkontext; widerrufene Warteschlangenanfrage BLOCKED |
+| Android compile/sign/install/start/instrumentation | [34793544458](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544458) PASS; [aktuelles ausgewähltes APK](APK_RELEASE_REPORT.md) |
+| Lokaler Paketbuild / Dependency-Audit / pip check / JS / Shell / Reality Gate | PASS; kein bekannter Treffer im ausgeführten Dependency-Audit; kein hermetischer/bit-identischer Buildanspruch |
+| Dokumentation / OpenAPI | PASS; vier generierte Produkte, lokale Dateilinks, acht feste Envvariablen; neue ADR/Verträge/Migration synchron |
+| Lokale Vorschau | Alte Core-/Workerprozesse gestoppt, neue gestartet; registrierte PLAN-API200, ausgeliefertes JS per SHA mit aktuellem Code identisch; Worker meldet NO_PENDING_JOB |
+
+Implementierung `8125e85e72ad4639d551e0a81cefcf9084b676b4`, Browser-/Sessionkorrekturen und validierter Code `1a919db830d18d38b59b3e08314d148107bb9d23`; GitHub baut PR-Merge `01fcd2d98f0120bcfb3f499a5d5bb0988451ebae`. Anschließender Dokumentations-/Testcommit ergänzt Nachweise und drei Budget/Concurrencyfälle; dessen eigener CI-Lauf wird zusätzlich im PR dokumentiert. [Review-PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1).
+
+## Modell-/Browser-/APK-Grenzen
+Qwen0.5B Q4_K_M und llama.cpp b10948 real gehasht/geladen, UID1001 im Namespace ohne externe Route, Prozesse beendet. Das beweist konkrete Textinferenz, keine Modellqualität oder komplette Agentensandbox. Browserdaten ausschließlich synthetisch in eigener Testinstanz, keine Produktfixtures. Anfangs falsche Harness-Loginselektoren/Statusannahme und ENOTEMPTY beim abrupten Browserende: diagnostiziert, korrigiert, echter Wiederholungslauf PASS. Auch veraltete Verbindungsanzeige und Eingabefeld nach Logout korrigiert. Keine Tests entfernt oder Sandbox deaktiviert.
+
+SDK-Emulator ist kein physisches Gerät. Die native App bleibt read-only Statusclient, ohne PLAN-Editor, Honeywell/EDL/Repair oder geprüfte Live-Core-TLS-Session. Kein lokaler APK-Download behauptet: Blobtransport scheitert hier, originale GitHub-Artefakte/Hashes und Check-Annotationen sind geprüft. Debug-Schlüssel ephemer; kein AAB/stabil signiertes Release.
+
+## Kritische offene Gates / nächste Schritte
+- Volle Permission-Leases/HITL Once/Task/Workflow/Temporary, Executor-/Filesystem-/Syscall-Sandbox und Escape-Abnahme vor allgemeinen Tools/MCP.
+- Universal-PLAN mit PDF/CAD/3D/Device-/Research-/Repair-Engines, Agent Builder, echte Bridge-/ESP32-/Honeywell-/Trend-/Unity-/Cloud-/Bright-Data-Adapter fehlen; keine erfundenen Hardware-/Providerresultate.
+- Universelles authentifiziertes TLS-/Egress-Gateway, verschlüsselte Bestandsdaten/Secretcache, individuelles Rollenmodell, unabhängiger Privacy-/Security-Audit, Last-/2GB-/Restore-Abnahme fehlen.
+- Byteintegrität ist keine semantische Wahrheit; Originalprosa/Messungen werden nicht durch deterministische Regeln zertifiziert. Quelle exakt wiederhergestellt kann live wieder passen; Widerruf/Stoprevision werden nicht wiederbelebt. Keine Beobachtung unbeobachteter Hoständerungen/in-flight-Rückholung.
+- **Upgrade:** alle alten Core/Worker stoppen, Policy challenge-2-context erfordert neue Gegenprüfungen. Kein Mischbetrieb oder stiller Downgrade mit post-PLAN-Daten.
+
+Weitere Arbeit: echte zielgebundene, widerruf-/ablaufbare Permission-Leases und isolierter Executor als nächster kleiner Schnitt. Hardware-/Providerabnahmen benötigen konkrete autorisierte Ressourcen. Kein Full-Platform-Release aus einem grünen Teiltest ableiten.
 
 ---
 
-## Historical validation — prior increment (not current HEAD evidence)
+## Historische Nachweise früherer Inkremente (nicht aktuelle Abnahme)
 
 # Final Validation Report — real model worker + Android prototype
 

@@ -1,8 +1,29 @@
-# APK — PLAN candidate addendum
+# APK-Nachweis — aktuell ausgewähltes Debug-Artefakt
 
-2026-09-14: PLAN changes are in Core/API/browser; native Android source unchanged, still read-only Core status (no PLAN editor/device bridge). New current-branch Android regression CI pending. The selected APK and its exact prior-source hashes below remain historical real evidence, not a newly built local APK or release. No JDK/SDK/ADB in this sandbox; no physical install/live-Core TLS/AAB acceptance added. Full-platform release BLOCKED.
+2026-09-14. **Tatsächlich gebaut, signaturgeprüft, im SDK-Emulator installiert, gestartet und getestet.** Kein Produktionsrelease; nativer read-only HTTPS-Core-Statusclient, kein PLAN-Editor/Device Bridge/Honeywell Repair.
+
+## Download / Provenance
+- [Aktuelles Originalarchiv mit App und Testnachweisen](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544458/artifacts/10329016310), GitHub-Anmeldung ggf. erforderlich.
+- [Erfolgreicher Android-CI-Lauf34793544458](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34793544458).
+- Branch-Source **1a919db830d18d38b59b3e08314d148107bb9d23**; gebauter PR-Merge **01fcd2d98f0120bcfb3f499a5d5bb0988451ebae**.
+- Archiv `android-debug-01fcd2d98f0120bcfb3f499a5d5bb0988451ebae`,21241Bytes, GitHub-Digest `sha256:58fb6ae2ab0d92b7d0c625ba55ecda499485c6e424abe749fb05a39fb7827a22`.
+- GitHub-Metadaten geprüft: nicht abgelaufen, vorgesehenes Ende **2026-09-28T00:45:20Z**;14Tage Retention, kein dauerhaftes Release-Asset.
+
+| Datei | Bytes | SHA-256 |
+|---|---:|---|
+| **atze-app-debug.apk** — eigentliche App |16811|`fdd741d91a2eec50d6af07caaf13bee0df0eaa8c7819df5a8c19a8e071bf613a`|
+| atze-test-debug.apk — nur Instrumentation |12715|`8f2aba3d0ec6d1386ef03518a32e94c0f77205c6c7048838f156d5dc16d08828`|
+
+Originale Check-Annotation: `EMULATOR_INSTALL_START_TEST_PASS`, `atze_result=PASS`, `INSTRUMENTATION_CODE: -1`. Der frühere Build-Zwischenstatus INSTALL_NOT_RUN ist durch den späteren tatsächlichen Emulatortest ersetzt. Tests: installierter Appstart, Empty State, Klartext-/unsichere Origin-Ablehnung, Tokenleeren; keine Live-Core-Verbindung/physische Bridge getestet.
+
+## Nutzung / offene Gates
+Archiv aus GitHub laden, entpacken, **App-APK** anhand obigem Hash prüfen; Test-APK ist keine Benutzerapp. Auf eigenem autorisierten Gerät ist eine gesonderte Installation/Freigabe nötig. Hier keine lokale APK-Kopie behauptet: Blobdownload aus dieser Sandbox scheitert, GitHub-Metadaten/Annotationen sind tatsächlich gelesen. Kein JDK/SDK/ADB hier; reale Androidausführung fand in CI statt.
+
+Ephemerer Debugschlüssel wurde nicht hochgeladen und zerstört; spätere Builds haben andere Signatur/Hashes. Kein garantierter Same-Key-Updatepfad; ggf. separat autorisierte Neuinstallation mit Datenverlust-Risiko, keine automatische Geräteaktion. AAB, stabile Produktionssignatur, physisches Honeywell, reale Core-TLS-Session, Security-/Store-/Lizenzabnahme weiterhin BLOCKED/NOT RUN. Folgende Dokumentations-/Testcommits ändern keine Native-Android-Quellen; das **hier ausgewählte Artefakt bleibt ausdrücklich dieser Lauf**, nicht der jeweils neueste ephemeral signierte Build.
 
 ---
+
+## Historisches, inzwischen ersetztes ausgewähltes Artefakt
 
 # APK Release Report — actual development APK, full release BLOCKED
 

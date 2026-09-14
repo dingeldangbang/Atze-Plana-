@@ -245,3 +245,41 @@ def test_plan_byte_budget(client,reviewer):
         refs.append({'kind':'archive','id':a['id']})
     assert client.post('/api/plans',json={'task_id':tid,'title':'Bounded source test','resources':refs}).status_code==413
     assert client.get('/api/plans').json()==[]
+
+
+@pytest.mark.parametrize('boundary',['count','combined_bytes'])
+def test_plan_dependency_budgets(client,reviewer,boundary):
+    """PLAN-014 | actual Evidence/Memory/archive API records | 65 dependencies or >1MiB combined | fail413, no truncation/partial PLAN."""
+    p,e=seed(client,reviewer);tid=task(client,p,e)
+    ids=[]
+    for i in range(65 if boundary=='count' else 7):
+        body={k:e[k] for k in ['project_id','claim','source_url','observed_at','source_type','provider','extraction_method','confidence']}
+        body['content']=f'Synthetic dependency {i}' if boundary=='count' else 'x'*20000
+        response=client.post('/api/evidence',json=body)
+        assert response.status_code==201
+        ids.append(response.json()['id'])
+    refs=[]
+    for start in range(0,len(ids),50):
+        m=client.post('/api/memory',json={'project_id':p['id'],'category':'inference','content':'Synthetic dependency budget','evidence_ids':ids[start:start+50]}).json()
+        refs.append({'kind':'memory','id':m['id']})
+    if boundary=='combined_bytes':
+        for i in range(7):
+            a=client.post('/api/archive',json={'project_id':p['id'],'relative_path':f'dependency-budget-{i}.txt','content':'ä'*65536}).json()
+            refs.append({'kind':'archive','id':a['id']})
+    response=client.post('/api/plans',json={'task_id':tid,'title':'Bounded dependency test','resources':refs})
+    assert response.status_code==413
+    assert ('dependencies exceed' if boundary=='count' else 'content and dependencies exceed') in response.json()['detail']
+    assert client.get('/api/plans').json()==[]
+
+
+def test_plan_concurrent_optimistic_append(client,reviewer):
+    """PLAN-015 | real concurrent API/SQLite transactions | two writers same expected version | exactly one201/one409, no lost update."""
+    from concurrent.futures import ThreadPoolExecutor
+    plan,v,body=make(client,reviewer)
+    revision={k:value for k,value in body.items() if k!='task_id'}
+    revision['expected_version_id']=v['id']
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        responses=list(pool.map(lambda _:client.post(f"/api/plans/{plan['id']}/versions",json=revision),range(2)))
+    assert sorted(r.status_code for r in responses)==[201,409]
+    versions=client.get(f"/api/plans/{plan['id']}/versions").json()
+    assert [version['version'] for version in versions]==[2,1]
