@@ -118,8 +118,8 @@ def test_smoke_real_isolated_process_ignores_operational_paths(tmp_path, monkeyp
     monkeypatch.setenv('ATZE_MODE', 'operational')
     monkeypatch.setenv('ATZE_OPERATOR_TOKEN', 'invalid-inherited-token')
     result = smoke.run(tmp_path / 'real-smoke.json', allow_fixtures=True)
-    assert result['status'] == 'PASS' and len(result['checks']) == 29
-    assert len(result['worker_processes']) == 2
+    assert result['status'] == 'PASS' and len(result['checks']) == 41
+    assert len(result['worker_processes']) == 4
     assert all(p['exit_code'] == 0 for p in result['worker_processes'])
     assert result['checks'][0]['body']['mode'] == 'test'
     assert sentinel.read_bytes() == b'unchanged operational sentinel'

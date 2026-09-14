@@ -1,3 +1,15 @@
+# Final validation — current PLAN increment (candidate)
+
+Stand 2026-09-14. Baseline05ea6d5 inspected:120 tests/97.78%, build/docs PASS before changes. Current bounded [PLAN implementation](docs/21-plan/context-lock.md) adds actual immutable references, context locks and downstream invalidation, not the full platform.
+
+**Candidate validation in progress:** final local suite135 tests PASS/97.93% (2 known warnings,28.06s); actual Python wheel/sdist build, docs/OpenAPI/reality/JS/shell/diff checks PASS. Actual normal/-O HTTP smoke41 responses/4 independent worker invocations PASS (`reports/plan-smoke*.json`). Local Chromium execution BLOCKED (binary absent, explicitly attempted), not browser PASS. New real CI browser and pinned-model PLAN paths require executed remote results; prior model/Android results below belong to prior commits. No release/tag/deployment.
+
+Documentation/OpenAPI regenerated continuously, new ADR/contract covers purpose/inputs/outputs/config/roles/errors/security/tests/examples/limits. Policy `challenge-2-context` requires re-challenge of older reports. PLAN does not encrypt legacy storage, grant tools, provide permission leases/MCP/physical devices or certify semantic truth. Full-platform/production **BLOCKED**.
+
+---
+
+## Historical validation — prior increment (not current HEAD evidence)
+
 # Final Validation Report — real model worker + Android prototype
 
 Stand 2026-09-14. **FUNCTIONAL PROTOTYPE / CONDITIONAL**, vollständige Plattform und Production Release **BLOCKED**. Implementierungsbasis fbf4be9; Android-Pfadkorrektur und geprüfter Branchstand `b7912227f2a021cc3664b27e5984312369b1328e`. Keine erfundenen Dienste, Geräte, Modelloutputs oder APKs. Kein Merge/Release/Produktionsdeploy.

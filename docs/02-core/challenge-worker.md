@@ -114,3 +114,6 @@ Worker benutzt urllib, 20s HTTP-Timeouts, 2s Pollintervall, keine Proxyübernahm
 CH-001..017 und angepasste bisherige Regressionsfälle: Pflichtgate, Rollen, gefälschter PASS, Lease/Replay, neue Evidenz/Result/Challenge, Stop/Reset, Varianten/Einheiten/Bedingungen, unbekannte Messungen, alternative Quellen, Kausalität, Scopegrenzen, Adoption/Audit/RAG-Staleness. Tatsächliche Ergebnisse im [Validierungsbericht](../../FINAL_VALIDATION_REPORT.md).
 
 Keine unabhängige Webrecherche, Source-Organisation-Validierung, automatische Relevanz-/Semantikerkennung, freie Mathematik, kontrollierte Kausalexperimentprüfung, reale Geräteidentität oder allgemeine Tool-Execution. Human-reviewed Quellen können falsch sein. Unterschiedliche URLs sind kein Unabhängigkeitsbeweis; wichtige Liveentscheidungen bleiben deshalb eingeschränkt. Keine vollständig automatisierte Browser-E2E-/Produktions-/Multi-Host-/Last-/OS-Isolationsabnahme.
+
+## PLAN policy migration
+Current policy `challenge-2-context` adds independent `PLAN_CONTEXT_NOT_CURRENT` blocking finding. Pre-upgrade reports stale intentionally; update worker/Core together and request fresh challenge. Live PLAN gate joins snapshots; source/stop/version/lock changes invalidate approvals/adoption/decision-memory. [Actual contract and semantic limits](../21-plan/context-lock.md).

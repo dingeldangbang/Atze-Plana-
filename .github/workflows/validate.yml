@@ -33,6 +33,8 @@ jobs:
         run: |
           python -O scripts/smoke.py --allow-fixtures --report reports/smoke-optimized.json
           node --check app/static/app.js
+      - name: Real sandboxed Chromium PLAN UI
+        run: python scripts/smoke.py --allow-fixtures --browser --report reports/browser-plan.json
       - name: Upload real validation artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

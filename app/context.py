@@ -44,7 +44,7 @@ def create_memory(db, body, who):
     return value
 
 
-def retrieve(db, body):
+def retrieve(db, body, storage=None):
     get(db, 'project', body.project_id)
     terms = re.findall(r'\w+', body.query, re.UNICODE)[:16]
     if not terms:
@@ -63,7 +63,7 @@ def retrieve(db, body):
         decision_status = 'BLOCK' if value.get('category') in {'fact', 'decision'} else None
         if value.get('decision_result_id'):
             from app.challenge_service import decide_task
-            current = decide_task(db, value['task_id'])
+            current = decide_task(db, value['task_id'], storage)
             if current.challenge_id == value['decision_challenge_id'] and current.fingerprint == value['decision_fingerprint']:
                 decision_status = current.validation_status
         hits.append(dict(decision_result_id=value.get('decision_result_id'), decision_challenge_id=value.get('decision_challenge_id'), decision_status=decision_status, source_id=key, source_type=kind, category=value.get('category', 'archive'),

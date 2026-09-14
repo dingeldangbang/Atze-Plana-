@@ -6,7 +6,7 @@ import hashlib
 from decimal import Decimal, InvalidOperation
 from app.challenge_models import Analysis
 
-POLICY_VERSION = 'challenge-1'
+POLICY_VERSION = 'challenge-2-context'
 MAX_PROJECT_EVIDENCE = 500
 MAX_SNAPSHOT_EVIDENCE_BYTES = 4 * 1024 * 1024
 MAX_FINDINGS = 500
@@ -41,6 +41,8 @@ def analyze(snapshot):
         findings.append(dict(check=check, severity=severity, code=code, message=message,
                              evidence_ids=list(ids), next_validation=next_validation))
 
+    if snapshot.get('plan_context') and snapshot['plan_context']['state'] != 'CURRENT':
+        add('evidence', 'block', 'PLAN_CONTEXT_NOT_CURRENT', 'Task PLAN lacks a current verified context binding; no permission or truth inferred')
     if snapshot.get('truncated'):
         add('evidence', 'block', 'SCOPE_LIMIT', 'Project evidence exceeds bounded challenge scope; no partial PASS')
     referenced = set(task['evidence_ids'])

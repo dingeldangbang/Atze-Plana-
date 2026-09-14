@@ -14,6 +14,7 @@ from app.context_api import register_context_api
 from app.models import (ProjectInput, Project, EvidenceInput, Evidence, Review,
                         TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit)
 from app.store import Store, get, put, listing, audit, stopped, identity, now
+from app.plan_api import register_plan_api
 from app.ai_api import register_ai_api
 from app.challenge_api import register_challenge_api
 from app.challenge_service import decide_task
@@ -141,13 +142,13 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
 
     @app.post('/api/tasks/{task_id}/triage', response_model=Decision, tags=['tasks'])
     def triage(task_id: str, who=Depends(actor), db=DB):
-        decision = decide_task(db, task_id)
+        decision = decide_task(db, task_id, storage)
         audit(db, who, 'task.triaged', task_id, decision.model_dump())
         return decision
 
     @app.post('/api/tasks/{task_id}/approve', response_model=Approval, status_code=201, tags=['tasks'])
     def approve(task_id: str, body: ApprovalInput, who=Depends(reviewer), db=DB):
-        decision = decide_task(db, task_id)
+        decision = decide_task(db, task_id, storage)
         if decision.state != 'approval_required':
             raise HTTPException(409, 'Task is not awaiting approval; run triage')
         value = put(db, 'approval', dict(id=identity(), task_id=task_id, created_at=now(), actor=who, reason=body.reason, result_id=decision.result_id, challenge_id=decision.challenge_id, fingerprint=decision.fingerprint))
@@ -168,8 +169,9 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     def audit_log(limit: int = Query(100, ge=1, le=100), offset: int = Query(0, ge=0), who=Depends(reviewer), db=DB):
         return listing(db, 'audit', limit, offset)
 
-    register_ai_api(app, settings, actor, operator, reviewer, connection, store)
-    register_challenge_api(app, settings, actor, operator, reviewer, connection)
+    register_plan_api(app, storage, actor, operator, reviewer, connection)
+    register_ai_api(app, settings, actor, operator, reviewer, connection, store, storage)
+    register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)
 
     @app.get('/', include_in_schema=False)

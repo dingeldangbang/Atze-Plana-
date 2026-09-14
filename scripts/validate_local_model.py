@@ -154,7 +154,7 @@ def run(model_path, runtime_archive, report_path, *, allow_fixtures=False):
                         denied=infer()
                         require(denied['attempt']['state']=='BLOCKED' and denied['output'] is None,'Default DENY failed')
                         call('POST','/api/ai/policy',{'providers':['pinned-local'],'models':[metadata['id']],'projects':[project['id']],
-                            'tasks':['analysis'],'data_classes':['PUBLIC'],'regions':['local-test'],'max_output_tokens':32},role='reviewer',expected=201)
+                            'tasks':['analysis'],'data_classes':['PUBLIC','CONFIDENTIAL'],'regions':['local-test'],'max_output_tokens':32},role='reviewer',expected=201)
                         started=time.monotonic(); answer=infer(); elapsed=time.monotonic()-started
                         require(answer['attempt']['state']=='DRAFT_UNCHALLENGED','Real inference did not produce draft')
                         report['actual_output']=answer['output']  # explicitly synthetic prompt/output, never operational input
@@ -166,6 +166,28 @@ def run(model_path, runtime_archive, report_path, *, allow_fixtures=False):
                         require(call('GET','/api/ai/status')['policy']['external_ai'] is False,'External AI enabled')
                         report['checks'].append({'id':'LM-INFER','status':'PASS','seconds':round(elapsed,3),'attempt_id':answer['attempt']['id'],
                                                 'meaning':'real pinned inference through consent/gateway, default deny and no action/adoption bypass'})
+                        archive=call('POST','/api/archive',{'project_id':project['id'],'relative_path':'model-context.txt',
+                                     'content':'Explicitly synthetic context. No measured hardware or external knowledge.'},expected=201)
+                        plan=call('POST','/api/plans',{'task_id':task['id'],'title':'Pinned-model context validation',
+                                  'resources':[{'kind':'archive','id':archive['id']}]},expected=201)
+                        version=call('GET',f"/api/plans/{plan['id']}/versions")[0]
+                        lock=call('POST',f"/api/plans/{plan['id']}/locks",{'version_id':version['id'],'manifest_hash':version['manifest_hash'],
+                                  'reason':'Explicit synthetic archive review'},role='reviewer',expected=201)
+                        body['plan_lock_id']=lock['id']
+                        bound=infer()
+                        report['plan_actual_output']=bound['output']  # isolated synthetic context only
+                        require(bound['attempt']['state']=='DRAFT_UNCHALLENGED' and bound['output'].strip().rstrip('.!').upper()=='READY',
+                                'Pinned inference with real locked archive failed')
+                        queued=call('POST','/api/ai/requests',body,expected=201)
+                        require(queued['effective_classification']=='CONFIDENTIAL','Locked sources silently downgraded')
+                        call('POST',f"/api/plan-locks/{lock['id']}/revoke",{'reason':'Invalidate queued model context'},role='reviewer')
+                        stale=call('POST',f"/api/ai/requests/{queued['id']}/run",{'context_hash':queued['context_hash'],
+                                   'reason':'Must fail after revocation'},role='reviewer')
+                        require(stale['attempt']['state']=='BLOCKED' and stale['attempt']['reason']=='PLAN_CONTEXT_NOT_CURRENT' and stale['output'] is None,
+                                'Revoked PLAN reached inference')
+                        report['checks'].append({'id':'LM-PLAN-CONTEXT','status':'PASS','actual_output':bound['output'],
+                                                'manifest_hash':version['manifest_hash'],'attempt_id':bound['attempt']['id'],
+                                                'meaning':'actual pinned inference from locked archive; queued revoked context blocked; draft only'})
                 finally:
                     if core is not None: stop(core)
                     stop(model)

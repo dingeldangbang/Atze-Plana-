@@ -82,7 +82,7 @@ def register_context_api(app, store, storage, actor, operator, reviewer, connect
     @app.post('/api/context/query', response_model=list[RetrievalHit], tags=['context'],
               openapi_extra=contract('both', 'Read-only lexical FTS retrieval within project; source/hash/offsets/live evidence; no execution authorization'))
     def query(body: RetrievalQuery, who=Depends(actor), db=db_dependency):
-        return retrieve(db, body)
+        return retrieve(db, body, storage)
 
     @app.post('/api/context/reindex', response_model=ReindexResult, tags=['context'],
               openapi_extra=contract('reviewer', 'Rebuild one page of derived FTS chunks from hash-verified archive originals or memory; audit; stop blocks; failure rolls back page'))

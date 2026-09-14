@@ -28,4 +28,7 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 [ADR-004](adr/ADR-004-challenge-before-decision.md) · [Challenge Worker, fünf Prüfarten, API, Grenzen und Recovery](02-core/challenge-worker.md) · [aktuelle Triage](02-core/triage.md). Primary-Text bleibt unvalidiert; akzeptierte strukturierte Decision-Snapshots benötigen Gegenprüfung und explizite Übernahme. Kein allgemeiner Agent-/Webresearch-/Executor-Anspruch.
 
 ## Privacy-first Modellgrenze (experimenteller Teilschritt)
-[Model Gateway](02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
+[Model Gateway](02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein operativ installiertes HF-Modell (separate gepinnte Modell-CI ist real ausgeführt), keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
+
+## PLAN / Context Lock
+[Vertrag, UI/API, Sicherheit, Migration und Grenzen](21-plan/context-lock.md) · [ADR-007](adr/ADR-007-plan-context-lock.md). Gebundene echte Quellen, keine Wahrheit/Toolberechtigung.

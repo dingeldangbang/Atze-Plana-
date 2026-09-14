@@ -16,6 +16,9 @@
 - `app/context_models.py`: LinkedInput, ArchiveInput, Replica, Archive, ArchiveContent, MoveInput, MemoryInput, Memory, RetrievalQuery, EvidenceState, RetrievalHit, CacheInput, CacheObject, CleanupInput, CleanupResult, TierHealth, StorageHealth, ReindexInput, ReindexResult
 - `app/main.py`: create_app
 - `app/models.py`: Input, ProjectInput, Project, Observation, EvidenceInput, Evidence, Review, Action, TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit
+- `app/plan_api.py`: register_plan_api
+- `app/plan_models.py`: PlanResource, PlanContent, PlanCreate, PlanRevise, PlanLockInput, PlanRevoke, Plan, PlanVersion, PlanLock, PlanStatus
+- `app/plan_service.py`: digest, latest, task_plan, guard, manifest, append_version, create_plan, revise_plan, create_lock, revoke_lock, status, task_gate, locked_context
 - `app/storage.py`: guard, Storage
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
 - `app/triage.py`: evaluate

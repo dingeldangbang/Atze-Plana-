@@ -3,6 +3,9 @@ let token = '';
 let session = 0;
 let refreshRequest = 0;
 let detailRequest = 0;
+let planRequest = 0;
+let planSources = [];
+let planTasks = [];
 const el = id => document.getElementById(id);
 function status(message) { el('status').textContent = message; }
 async function api(path, method = 'GET', body) {
@@ -17,11 +20,13 @@ function list(id, rows, render) {
   rows.forEach(row => { const item = document.createElement('li'); if (row) render(item, row); else item.textContent = 'Keine Einträge vorhanden.'; el(id).append(item); });
 }
 function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
-  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers'].forEach(id => {
+  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers', 'plans'].forEach(id => {
     const item = document.createElement('li'); item.textContent = message; el(id).replaceChildren(item);
   });
   const option = document.createElement('option'); option.value = ''; option.textContent = message;
   el('context-project').replaceChildren(option);
+  planRequest++; planSources = []; planTasks = []; resetPlanEditor();
+  el('plan-task').replaceChildren(); el('plan-resources').replaceChildren(); el('plan-detail').replaceChildren();
   el('cache-summary').textContent = 'Keine aktuellen Speicherwerte verfügbar.';
   el('ai-policy-state').textContent = 'KI-Policy nicht bestätigt.';
   el('stop').textContent = 'Unbekannt — Status nicht bestätigt.';
@@ -33,7 +38,7 @@ async function refresh() {
   const current = session;
   const request = ++refreshRequest;
   try {
-    const [projects, evidence, tasks, stop, storage, runtime, results, ai] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status'].map(path => api(path)));
+    const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory'].map(path => api(path)));
     if (current !== session || request !== refreshRequest) return;
     if (!['test', 'operational'].includes(runtime.mode)) throw new Error('Instanzmodus unbekannt; Daten nicht als Betrieb bestätigt.');
     list('projects', projects, (node, row) => { node.textContent = `${row.name} — ${row.description || 'Ohne Beschreibung'} · ${row.id}`; });
@@ -50,6 +55,12 @@ async function refresh() {
     el('challenge-worker-state').textContent = `Challenge Worker: ${runtime.challenge_worker}`;
     detailRequest++; el('challenge-detail').replaceChildren();
     list('results', results, renderResult);
+    planRequest++; el('plan-detail').replaceChildren();
+    planTasks = tasks; planSources = [...evidence.map(v => ({kind:'evidence', ...v})), ...archives.map(v => ({kind:'archive', ...v})), ...memories.map(v => ({kind:'memory', ...v}))];
+    const selectedTask = el('plan-task').value; el('plan-task').replaceChildren();
+    tasks.forEach(task => { const option = document.createElement('option'); option.value = task.id; option.textContent = `${task.title} · ${task.id}`; el('plan-task').append(option); });
+    if (tasks.some(t => t.id === selectedTask)) el('plan-task').value = selectedTask;
+    resetPlanEditor(); list('plans', plans, renderPlan);
     el('ai-policy-state').textContent = `KI Privacy Lock: ${ai.policy.privacy_lock ? 'AN' : 'AUS'} · Local-only: ${ai.policy.local_only ? 'JA' : 'NEIN'} · External AI: ${ai.policy.external_ai ? 'ALLOW (weitere Gates erforderlich)' : 'DENY'} · Modellvalidierung: ${ai.model_inference}`;
     list('ai-providers', ai.providers, (node, row) => { node.textContent = `${row.id} · ${row.mode} · Region (konfiguriert): ${row.region} · ${row.status}`; });
     status('Verbunden. Daten aus dem aktuellen Workspace geladen.');
@@ -132,5 +143,80 @@ el('ai-lock').onclick = async () => {
     if (current !== session) return;
     await refresh();
     if (current === session) status('KI gesperrt: Local-only, External DENY, alle Allowlists geleert. Bereits laufende Übertragung nicht rückrufbar.');
+  } catch (error) { if (current === session) status(error.message); }
+};
+
+function resetPlanEditor() {
+  el('plan-editor').reset(); el('plan-id').value = ''; el('plan-version-id').value = ''; el('plan-task').disabled = false;
+  fillPlanSources();
+}
+function fillPlanSources(selected = []) {
+  const task = planTasks.find(t => t.id === el('plan-task').value);
+  el('plan-resources').replaceChildren();
+  if (!task) return;
+  planSources.filter(s => s.project_id === task.project_id && (s.kind !== 'memory' || !s.task_id || s.task_id === task.id)).forEach(source => {
+    const option = document.createElement('option'); option.value = JSON.stringify({kind:source.kind,id:source.id});
+    option.textContent = `${source.kind} · ${source.logical_path || source.claim || source.category} · ${source.id}`;
+    option.selected = selected.some(s => s.kind === source.kind && s.id === source.id); el('plan-resources').append(option);
+  });
+}
+function planLine(text) { const node = document.createElement('p'); node.textContent = text; el('plan-detail').append(node); }
+async function showPlan(plan, edit = false) {
+  const current = session, request = ++planRequest; el('plan-detail').replaceChildren();
+  try {
+    const [versions, state] = await Promise.all([api(`plans/${plan.id}/versions?limit=1`), api(`plans/${plan.id}/status`)]);
+    if (current !== session || request !== planRequest) return;
+    const version = versions[0];
+    planLine(`${state.state}: ${state.reason} · PLAN ${plan.id} · Version ${version.version} · ${version.title}`);
+    planLine(`Manifest SHA-256 ${version.manifest_hash} · Lock ${state.lock_id || 'keiner'} · Keine Aktionsberechtigung.`);
+    version.manifest.resources.forEach(r => planLine(`${r.kind} ${r.id} · Beziehung (angegeben): ${r.relationship} · ${r.size_bytes} Bytes · SHA-256 ${r.sha256} · Byteintegrität bei Erfassung: ${r.content_integrity} · Wahrheitsstatus: ${r.truth_status} · Review: ${r.review_state || 'kein Review'} · Quelle: ${r.source_url || r.logical_path || 'Memory-Referenz'}`));
+    if (edit && version.resources.some(r => !planSources.some(s => s.kind === r.kind && s.id === r.id))) throw new Error('Nicht alle gewählten Quellen sind in den ersten 100 Einträgen verfügbar. Version über die API bearbeiten; keine Quelle wird still entfernt.');
+    if (edit && version.resources.some(r => r.relationship !== 'input')) throw new Error('Beziehungen außer input bitte über die API bearbeiten; Oberfläche überschreibt sie nicht.');
+    if (edit) {
+      el('plan-id').value = plan.id; el('plan-version-id').value = version.id;
+      el('plan-task').value = plan.task_id; el('plan-task').disabled = true;
+      el('plan-title').value = version.title; el('plan-type').value = version.context_type;
+      fillPlanSources(version.resources);
+    }
+    const form = document.createElement('form'); const label = document.createElement('label'); label.textContent = 'Expliziter Prüf-/Widerrufsgrund (Reviewer)';
+    const reason = document.createElement('input'); reason.required = true; reason.maxLength = 2000; label.append(reason);
+    const lock = document.createElement('button'); lock.textContent = 'Diese Version neu sperren'; lock.type = 'submit'; form.append(label, lock);
+    form.onsubmit = async event => {
+      event.preventDefault(); lock.disabled = true;
+      try { await api(`plans/${plan.id}/locks`, 'POST', {version_id:version.id,manifest_hash:version.manifest_hash,reason:reason.value}); if (current === session) await showPlan(plan); }
+      catch (error) { if (current === session) status(error.message); }
+      finally { lock.disabled = false; }
+    };
+    if (state.lock_id && state.state !== 'REVOKED') {
+      const revoke = document.createElement('button'); revoke.type = 'button'; revoke.textContent = 'Context Lock widerrufen';
+      revoke.onclick = async () => {
+        if (!form.reportValidity()) return; revoke.disabled = true;
+        try { await api(`plan-locks/${state.lock_id}/revoke`, 'POST', {reason:reason.value}); if (current === session) await showPlan(plan); }
+        catch (error) { if (current === session) status(error.message); }
+        finally { revoke.disabled = false; }
+      }; form.append(revoke);
+    }
+    el('plan-detail').append(form);
+  } catch (error) { if (current === session && request === planRequest) { el('plan-detail').replaceChildren(); planLine(`PLAN nicht als aktuell bestätigt: ${error.message}`); } }
+}
+function renderPlan(node, plan) {
+  node.textContent = `PLAN ${plan.id} · Task ${plan.task_id} `;
+  const details = document.createElement('button'); details.textContent = 'Kontext & Lock prüfen'; details.onclick = () => showPlan(plan);
+  const edit = document.createElement('button'); edit.textContent = 'Neue Version vorbereiten'; edit.onclick = () => showPlan(plan, true);
+  node.append(details, edit);
+}
+el('plan-reset').onclick = resetPlanEditor;
+el('plan-task').onchange = () => fillPlanSources();
+el('plan-editor').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  try {
+    const resources = [...el('plan-resources').selectedOptions].map(o => JSON.parse(o.value));
+    if (!resources.length || resources.length > 16) throw new Error('1 bis 16 vorhandene Quellen auswählen.');
+    const body = {title:el('plan-title').value,context_type:el('plan-type').value,resources};
+    const plan = el('plan-id').value;
+    if (plan) await api(`plans/${plan}/versions`, 'POST', {...body,expected_version_id:el('plan-version-id').value});
+    else await api('plans', 'POST', {...body,task_id:el('plan-task').value});
+    if (current !== session) return;
+    resetPlanEditor(); await refresh();
   } catch (error) { if (current === session) status(error.message); }
 };

@@ -635,6 +635,343 @@ paths:
           description: Invalid input
         '503':
           description: Storage unavailable
+  /api/plans:
+    post:
+      tags:
+      - plan
+      summary: Create
+      operationId: create_api_plans_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Create one task-bound PLAN + first immutable version + source
+        hash checks + audit; no permissions/truth
+    get:
+      tags:
+      - plan
+      summary: Plans
+      operationId: plans_api_plans_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+                title: Response Plans Api Plans Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read-only PLAN identities; no fake resources
+  /api/plans/{plan_id}/versions:
+    get:
+      tags:
+      - plan
+      summary: Versions
+      operationId: versions_api_plans__plan_id__versions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: plan_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Plan Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanVersion'
+                title: Response Versions Api Plans  Plan Id  Versions Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Read immutable stored manifests, not current validation; newest
+        first
+    post:
+      tags:
+      - plan
+      summary: Revise
+      operationId: revise_api_plans__plan_id__versions_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: plan_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Plan Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRevise'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanVersion'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append immutable version with optimistic expected_version_id;
+        invalidate old lock/challenge/approvals; stop blocks
+  /api/plans/{plan_id}/locks:
+    post:
+      tags:
+      - plan
+      summary: Lock
+      operationId: lock_api_plans__plan_id__locks_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: plan_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Plan Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanLockInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanLock'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Lock current exact manifest after fresh source checks; latest
+        lock supersedes prior consent; no action authority; stop blocks
+  /api/plan-locks/{lock_id}/revoke:
+    post:
+      tags:
+      - plan
+      summary: Revoke
+      operationId: revoke_api_plan_locks__lock_id__revoke_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: lock_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Lock Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRevoke'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Revoke Api Plan Locks  Lock Id  Revoke Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Append revocation and audit; immediately blocks new PLAN-bound
+        uses; allowed during stop, cannot recall in-flight data
+  /api/plans/{plan_id}/status:
+    get:
+      tags:
+      - plan
+      summary: Current
+      operationId: current_api_plans__plan_id__status_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: plan_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Plan Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanStatus'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: Live source/file integrity and revision/lock/stop checks; CURRENT
+        means context binding only, never truth/permission
   /api/ai/status:
     get:
       tags:
@@ -1962,6 +2299,11 @@ components:
       title: AIPolicy
     AIRequest:
       properties:
+        plan_lock_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Plan Lock Id
         task_id:
           type: string
           title: Task Id
@@ -3125,6 +3467,305 @@ components:
       - conditions
       - basis
       title: Observation
+    Plan:
+      properties:
+        id:
+          type: string
+          title: Id
+        task_id:
+          type: string
+          title: Task Id
+        project_id:
+          type: string
+          title: Project Id
+        created_at:
+          type: string
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - task_id
+      - project_id
+      - created_at
+      title: Plan
+    PlanCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Title
+        context_type:
+          type: string
+          enum:
+          - project
+          - task
+          - object
+          - device
+          - test
+          - research
+          - software
+          - repair
+          title: Context Type
+          default: task
+        resources:
+          items:
+            $ref: '#/components/schemas/PlanResource'
+          type: array
+          maxItems: 16
+          minItems: 1
+          title: Resources
+        task_id:
+          type: string
+          title: Task Id
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      - resources
+      - task_id
+      title: PlanCreate
+    PlanLock:
+      properties:
+        id:
+          type: string
+          title: Id
+        plan_id:
+          type: string
+          title: Plan Id
+        version_id:
+          type: string
+          title: Version Id
+        manifest_hash:
+          type: string
+          title: Manifest Hash
+        created_at:
+          type: string
+          title: Created At
+        actor:
+          type: string
+          const: reviewer
+          title: Actor
+        reason_hash:
+          type: string
+          title: Reason Hash
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - plan_id
+      - version_id
+      - manifest_hash
+      - created_at
+      - actor
+      - reason_hash
+      title: PlanLock
+    PlanLockInput:
+      properties:
+        version_id:
+          type: string
+          title: Version Id
+        manifest_hash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+          title: Manifest Hash
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - version_id
+      - manifest_hash
+      - reason
+      title: PlanLockInput
+    PlanResource:
+      properties:
+        kind:
+          type: string
+          enum:
+          - evidence
+          - memory
+          - archive
+          title: Kind
+        id:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Id
+        relationship:
+          type: string
+          enum:
+          - input
+          - reference
+          - supports
+          - contradicts
+          title: Relationship
+          default: input
+      additionalProperties: false
+      type: object
+      required:
+      - kind
+      - id
+      title: PlanResource
+    PlanRevise:
+      properties:
+        title:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Title
+        context_type:
+          type: string
+          enum:
+          - project
+          - task
+          - object
+          - device
+          - test
+          - research
+          - software
+          - repair
+          title: Context Type
+          default: task
+        resources:
+          items:
+            $ref: '#/components/schemas/PlanResource'
+          type: array
+          maxItems: 16
+          minItems: 1
+          title: Resources
+        expected_version_id:
+          type: string
+          title: Expected Version Id
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      - resources
+      - expected_version_id
+      title: PlanRevise
+    PlanRevoke:
+      properties:
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - reason
+      title: PlanRevoke
+    PlanStatus:
+      properties:
+        plan_id:
+          type: string
+          title: Plan Id
+        version_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Version Id
+        lock_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Lock Id
+        state:
+          type: string
+          enum:
+          - CURRENT
+          - UNLOCKED
+          - SUPERSEDED
+          - REVOKED
+          - STALE
+          - BLOCKED
+          title: State
+        reason:
+          type: string
+          title: Reason
+        manifest_hash:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Manifest Hash
+        allowed_for_action:
+          type: boolean
+          const: false
+          title: Allowed For Action
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - plan_id
+      - version_id
+      - lock_id
+      - state
+      - reason
+      - manifest_hash
+      title: PlanStatus
+    PlanVersion:
+      properties:
+        title:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Title
+        context_type:
+          type: string
+          enum:
+          - project
+          - task
+          - object
+          - device
+          - test
+          - research
+          - software
+          - repair
+          title: Context Type
+          default: task
+        resources:
+          items:
+            $ref: '#/components/schemas/PlanResource'
+          type: array
+          maxItems: 16
+          minItems: 1
+          title: Resources
+        id:
+          type: string
+          title: Id
+        plan_id:
+          type: string
+          title: Plan Id
+        version:
+          type: integer
+          title: Version
+        created_at:
+          type: string
+          title: Created At
+        manifest:
+          additionalProperties: true
+          type: object
+          title: Manifest
+        manifest_hash:
+          type: string
+          title: Manifest Hash
+      additionalProperties: false
+      type: object
+      required:
+      - title
+      - resources
+      - id
+      - plan_id
+      - version
+      - created_at
+      - manifest
+      - manifest_hash
+      title: PlanVersion
     Project:
       properties:
         name:

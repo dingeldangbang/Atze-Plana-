@@ -44,3 +44,6 @@ Actual pinned local HF model + runtime, model catalogue/revision/license/hardwar
 
 ## External documentation inspected during design (2026-09-14)
 [HF Inference Providers security](https://huggingface.co/docs/inference-providers/security): transport TLS, underlying provider policies still relevant. [HF Agents](https://huggingface.co/docs/hub/agents): local tooling, MCP and independent agent ecosystem. These are documentation references, NOT evidence that a provider/MCP integration ran here.
+
+## Task PLAN integration
+A task PLAN makes `plan_lock_id` mandatory and excludes legacy evidence_ids/memory_ids. Full selected locked text (including checked UTF-8 archive) is used, at least CONFIDENTIAL,≤8 sources; all existing secret/context/consent/policy gates remain. Current binding and saved context SHA are rechecked before transport. See [complete PLAN contract](../21-plan/context-lock.md). No model output becomes a fact or tool permission.

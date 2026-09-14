@@ -107,3 +107,6 @@ Siehe [Final Validation Report](FINAL_VALIDATION_REPORT.md). Keine Hardware- ode
 - Native Java Android read-only HTTPS Core client, TLS1.2/1.3-only sockets, no token persistence/cleartext/redirect fallback, no device/repair buttons pretending integration.
 - Official SDK build/sign/verify/checksum and emulator installation/start/instrumentation pipeline; local SDK preflight fails explicitly, CI outcomes recorded separately.
 - Added APK_RELEASE_REPORT, TEST_REPORT and master acceptance matrix. No overall platform/production release declared.
+
+## 2026-09-14 — bounded PLAN increment (unreleased)
+Append-only task contexts, actual source/dependency hashes, reviewer lock/revoke, mandatory Challenge/Triage/AI binding, API/UI and real browser pipeline. Challenge policy migration requires new reports. Saved AI context SHA verified before transport. No full-platform/production release or added device execution. Validation evidence maintained in root reports.

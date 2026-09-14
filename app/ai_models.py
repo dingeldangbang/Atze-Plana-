@@ -48,6 +48,7 @@ class ModelRegistration(Input):
 
 
 class AIRequest(Input):
+    plan_lock_id: str | None = None
     task_id: str
     model_id: str
     purpose: Literal['analysis', 'plan', 'code']

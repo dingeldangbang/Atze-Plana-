@@ -7,7 +7,7 @@ from app.ai_service import policy, prepare, execute
 from app.store import put, get, listing, audit, identity, now
 
 
-def register_ai_api(app, settings, actor, operator, reviewer, connection, store):
+def register_ai_api(app, settings, actor, operator, reviewer, connection, store, storage=None):
     gateway = ExternalDataGateway(settings.ai_config_path if settings else None,
                                   (settings.operator_token, settings.reviewer_token, settings.challenge_token) if settings else ())
     DB = Depends(connection, scope='function')
@@ -43,7 +43,7 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store)
     @app.post('/api/ai/requests', tags=['ai'], status_code=201, openapi_extra=contract('operator', 'Prepare bounded same-project/task context; scan and classify; persist local context for reviewer; NO network'))
     def request(body: AIRequest, who=Depends(operator), db=DB) -> dict:
         try:
-            return prepare(db, body, who, gateway)
+            return prepare(db, body, who, gateway, storage)
         except GateDenied as error:
             audit(db, who, 'ai.prepare_denied', identity(), {'reason': str(error)})
             return JSONResponse(status_code=409, content={'detail': str(error), 'state': 'BLOCKED'})
@@ -54,7 +54,7 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store)
 
     @app.post('/api/ai/requests/{request_id}/run', tags=['ai'], openapi_extra=contract('reviewer', 'Exact context hash + explicit remote consent; recheck policy/stop; authenticated bounded transport through gateway; durable audit; output unchallenged and not stored; NO tools/adoption/fallback'))
     def run(request_id: str, body: AIConsent, who=Depends(reviewer)) -> dict:
-        return execute(store, request_id, body, gateway, who)
+        return execute(store, request_id, body, gateway, who, storage)
 
     @app.get('/api/ai/attempts/{attempt_id}', tags=['ai'], openapi_extra=contract('both', 'Read audit metadata only; pending outcome is unknown, never automatic retry'))
     def attempt(attempt_id: str, who=Depends(actor), db=DB) -> dict:

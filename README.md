@@ -10,11 +10,12 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Memory / Archive / Cache / lokale FTS-Suche | IMPLEMENTED / TESTED | [Neue Context-/Storage-Architektur](docs/20-context-storage/architecture.md); kein MCP-/Cloud-/Offline-Sync-Adapter |
 | Challenge Worker / Result Packages | IMPLEMENTED / begrenzt | [Eigener Prozess, Token, fünf Checks, Staleness-/Adopt-Gate](docs/02-core/challenge-worker.md); keine unabhängige Online-Recherche |
 | Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; separate reale HF-Modell-CI; kein operativer Modellworker, MCP oder Agentensandbox |
-| Dashboard | IMPLEMENTED | Projektanlage, Listen, Triage, Storage/Context, Warum?/Herausfordern/Quellen; Browser-E2E noch offen |
+| PLAN / Context Lock | IMPLEMENTED / API-getestet | [Versionen, echte Quellen, Lock/Widerruf, Challenge-/Triage-/AI-Bindung](docs/21-plan/context-lock.md); keine Wahrheit oder Ausführungsrechte |
+| Dashboard | IMPLEMENTED | Reale PLAN-Bedienung ergänzt; Browser-CI-Gate und Resultate im Testbericht |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
-| Agenten, Sandbox, Hardware, 3D, Android, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
+| Agenten, Vollsandbox, Hardware-Repair, 3D, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
 
 ## Architektur
 Browser → FastAPI → SQLite (Metadaten, Memory, FTS) + externe Original-/Cacheblobs (Local, optional SD-Verzeichnis). [ADR-003](docs/adr/ADR-003-mobile-context-storage.md) definiert Mobile Project Server + MCP/RAG als Zielarchitektur; MCP, Remote-Tiers und Offline-Sync sind noch nicht implementiert. Operator erfasst Daten; Reviewer prüft Evidenz und genehmigt Aufgaben. Ein separater Challenge-Prozess prüft strukturierte Result-Pakete vor jeder freigabefähigen Taskentscheidung. Die Triage akzeptiert nur aktuelle Gegenprüfungen. Primärfreitext wird nicht automatisch als Fakt übernommen. **Freigabe ist keine Ausführung.** Es gibt keine Shell-, Flash-, Cloud- oder Geräteanbindung.
@@ -53,10 +54,13 @@ Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit
 [ADR-004](docs/adr/ADR-004-challenge-before-decision.md). Ohne konfigurierten und separat laufenden Worker bleiben Tasks blockiert. Worker separat mit nur seinem Service-Token starten: `python -m app.challenge_worker --url http://127.0.0.1:8000`. [Scope, Limits und Betriebsanleitung](docs/02-core/challenge-worker.md). ACCEPT gilt nur für eingereichte strukturierte Claims, nicht für unvalidierte Primärtexte, Geräte-/Kausalitäts-/Produktionsaussagen.
 
 ## Privacy-first Modellgrenze (experimenteller Teilschritt)
-[Model Gateway](docs/02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein installiertes HF-Modell, keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
+[Model Gateway](docs/02-core/model-gateway.md) ergänzt explizite lokale/Remote-Policy, manuelles Modellregister, ausgewählten Kontext und Reviewer-Freigabe vor echtem Text-HTTP-Transport. Default: Local-only, External DENY, keine Provider. Kein operativ installiertes HF-Modell (separate gepinnte Modell-CI ist real ausgeführt), keine smolagents-/MCP-/Sandboxintegration und kein universeller OS-Egress-Lock. Diese vollständigen Integrations-/Release-Gates bleiben BLOCKED. Vorhandene Challenge/Triage bleibt unverändert zwingend.
 
 ## Master-Anforderung: nächste reale Abnahme
 Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validation.md) mit gepinnten Gewichten/Runtime und ein [nativer Android-Core-Client](android/README.md) mit echter Build-/Emulator-Pipeline. Diese Pipelines sind keine Erfolgsmeldung: [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [Finale Validierung](FINAL_VALIDATION_REPORT.md) nennen nur ausgeführte Ergebnisse. Keine Dummy-Verzeichnisse für fehlende Geräte-/Unity-/MCP-/Cloudmodule. Gesamtplattform bleibt bis zur vollständigen Abnahme BLOCKED.
 
 ### Tatsächlich geprüfte neue Deliverables
 [Lokaler Modell-CI-Nachweis](TEST_REPORT.md): gepinnte Qwen-Inferenz, keine externe Inferenz, nicht-root/Loopback-only. [Android-Debug-APK und SHA256](APK_RELEASE_REPORT.md): echt gebaut/signiert, installiert/gestartet/getestet im SDK-Emulator. Native App ist ein kleiner Read-only-Core-Statusclient, keine volle Device-/Repair-/Agentplattform. Gesamtfreigabe bleibt BLOCKED.
+
+## PLAN-Inkrement
+[Context-Lock-Vertrag](docs/21-plan/context-lock.md): genau ein PLAN je Task, unveränderliche Quellenfassungen, Reviewer-Sperre/Widerruf. Neue Challenge-Policy `challenge-2-context` erfordert erneute Gegenprüfung vorhandener Results. Kein universeller Object Workspace/Executor. Aktuelle tatsächlich ausgeführte Gates im [Testbericht](TEST_REPORT.md).

@@ -1,3 +1,9 @@
+# APK — PLAN candidate addendum
+
+2026-09-14: PLAN changes are in Core/API/browser; native Android source unchanged, still read-only Core status (no PLAN editor/device bridge). New current-branch Android regression CI pending. The selected APK and its exact prior-source hashes below remain historical real evidence, not a newly built local APK or release. No JDK/SDK/ADB in this sandbox; no physical install/live-Core TLS/AAB acceptance added. Full-platform release BLOCKED.
+
+---
+
 # APK Release Report — actual development APK, full release BLOCKED
 
 Stand 2026-09-14. **Debug-APK tatsächlich gebaut, signaturgeprüft, im SDK-Emulator installiert, gestartet und getestet.** Begrenzter nativer Read-only-Core-Statusclient, kein Android Repair-/Device-/Agent Builder.
