@@ -110,7 +110,10 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     }
     report.browser_stopped=!chrome || chrome.exitCode!==null || chrome.signalCode!==null;
     if(!report.browser_stopped){report.status='FAIL';process.exitCode=1;}
-    if(profile)fs.rmSync(profile,{recursive:true,force:true});
+    if(profile){
+      try {fs.rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
+      catch(error){report.cleanup_error=error.code || 'PROFILE_CLEANUP_FAILED';report.status='FAIL';process.exitCode=1;}
+    }
     report.finished_at=new Date().toISOString(); process.stdout.write(JSON.stringify(report)+'\n');
   }
 })();

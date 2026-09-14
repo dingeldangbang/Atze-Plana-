@@ -43,7 +43,10 @@ jobs:
           from pathlib import Path
           path=Path('reports/browser-plan.json')
           if path.exists():
-              value=json.loads(path.read_text()).get('browser', {'status':'NOT RUN'})
+              result=json.loads(path.read_text())
+              value=result.get('browser', {'status':'NOT RUN'})
+              value['harness_error']=result.get('error')
+              value['driver_diagnostic']=result.get('driver_diagnostic')
               text=json.dumps(value,ensure_ascii=True).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
               print('::notice title=Browser PLAN evidence::'+text)
           PYTHON

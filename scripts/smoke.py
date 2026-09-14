@@ -150,7 +150,9 @@ def run(report_path=Path('reports/smoke.json'), *, allow_fixtures=False, browser
                         driver = subprocess.Popen(['node', str(ROOT / 'scripts/browser_plan.cjs')], cwd=ROOT,
                                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
                         try:
-                            output, _ = driver.communicate(json.dumps({'url':address, 'operator':operator, 'reviewer':reviewer}), timeout=120)
+                            output, diagnostic = driver.communicate(json.dumps({'url':address, 'operator':operator, 'reviewer':reviewer}), timeout=120)
+                            report['driver_diagnostic'] = {'exit_code':driver.returncode, 'stdout_present':bool(output),
+                                  'error_types':[value for value in ['SyntaxError','ReferenceError','TypeError','ENOENT','ENOTEMPTY','EACCES'] if value in diagnostic]}
                             report['browser'] = json.loads(output)
                             _require(driver.returncode == 0 and report['browser']['status'] == 'PASS', 'Real browser gate failed; inspect structured browser report')
                         finally:
