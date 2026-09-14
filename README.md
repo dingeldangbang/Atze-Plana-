@@ -14,6 +14,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Dashboard | IMPLEMENTED | Reale PLAN-Bedienung ergänzt; 7 echte Chromium-PLAN-Prüfungen PASS; Resultate im Testbericht |
 | Telemetrie (IoT-Ingest) | IMPLEMENTED / TESTED | [Device-/Sensor-Registry, fail-closed Device-Token, unveränderliche hash-verifizierte Batches](docs/23-telemetry/telemetry.md); kein WS/MQTT/Serial, keine physische ESP32-Validierung |
 | Trend-Analyse (Telemetrie) | IMPLEMENTED / TESTED | [Deterministische Query-Checks mit dokumentierten Kriterien](docs/24-trends/trends.md); CALCULATED, kein ML, keine Prognose |
+| Resource-Manager | IMPLEMENTED / TESTED | [Versionierte Datei-Registry mit SHA-256, Referenz-Links, Byte-Vergleich](docs/25-resources/resources.md); kein Virenscan, keine Inhaltsinterpretation |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
@@ -75,3 +76,6 @@ Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validati
 
 ## Trend-Engine-Inkrement (Modul 2 der bestätigten Umsetzungsreihe)
 [Deterministischer Analyse-Vertrag](docs/24-trends/trends.md): fünf dokumentierte statistische Prüfarten (Drift, Level-Shift, Varianzänderung, Out-of-Range-Rate, Suspect-Rate) als reine Query über unveränderliche Telemetrie-Batches; Kriterien-Endpoint macht alle Schwellwerte sichtbar; Not-Stop blockt Lesezugriffe nicht. **CALCULATED aus SUBMITTED Samples — nie MEASURED, keine Prognose (prediction: NONE), kein ML, keine Lifecycle-/Proaktivitätsengine; keine Validierung an realer Hardware (NOT RUN).**
+
+## Resource-Manager-Inkrement (Modul 3 der bestätigten Umsetzungsreihe)
+[Vertrag](docs/25-resources/resources.md): Base64-Upload (≤4 MiB, dokumentierte Grenze) mit SHA-256/Tier-Speicherung und Hash-Verifikation beim Lesen (Korruption → 503); append-only Versionierung mit Predecessor-Kette (identischer Content → 409); Referenz-Links auf existierende Tasks/Projekte statt Dateikopien (Unlink append-only mit Historie); Byte-Vergleich mit gemeinsamen Prä-/Suffixbytes; reviewerbestätigte familienweite Deaktivierung (confirm+reason) ohne Datenlöschung; Not-Stop-Integration; vollständige Audit-Kette. **Kein Viren-/Safety-Scan (NOT IMPLEMENTED, Betreiberverantwortung), keine PDF-/CAD-/Metadaten-Interpretation, kein Workflow-Attach, keine Herkunftsverifikation deklarierter Quellen.**

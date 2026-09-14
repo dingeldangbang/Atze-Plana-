@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Resource manager increment (module 3)
+- Reale versionierte Resource-Registry (Backend-Pfad zur PLAN-UI-Spezifikation Abschnitt 17–19): Operator-Upload als Base64 (≤4 MiB dokumentierte Grenze) mit SHA-256/Größe/Tier-Speicherung und Hash-Verifikation beim Lesen; append-only Versionierung mit family_id/predecessor_id (identischer Content 409); Referenz-Links auf existierende Tasks/Projekte statt Kopien, Unlink append-only mit Historie; Byte-Vergleich (IDENTICAL/DIFFERENT mit gemeinsamen Prä-/Suffixbytes); Suchfilter (Name-Teilstring, SHA-256-Präfix, kind/state); reviewerbestätigte familienweite Deaktivierung ohne Datenlöschung; Not-Stop blockt Mutationen, nicht Reads; Audit-Kette resource.*. 16 neue Tests (RES-001..016), 216 PASS. Kein Viren-/Safety-Scan und keine Inhaltsinterpretation (NOT IMPLEMENTED); Herkunft deklariert, nicht verifiziert.
+
+
 ## Unreleased — Trend engine increment (module 2)
 - Reale Trend-Engine als deterministische Query (CQRS, lesend, ohne Nebenwirkungen/Audit, bei jedem Aufruf aus unveränderlichen Batches neu berechnet): fünf dokumentierte statistische Prüfarten (Drift mit Steigung/SNR, Level-Shift, Varianzänderung, Out-of-Range-Rate, Suspect-Rate) über hash-verifizierte Telemetrie-Batches eines Sensors, optional pro Session; Kriterien-Endpoint mit exakten Schwellen; VERIFIED TREND vs. INSUFFICIENT EVIDENCE mit expliziten failed_criteria; Arbeitsgrenzen 200 Batches/200.000 Samples (422); Blob-Korruption fail-closed 503; Not-Stop blockt Leseanalyse nicht. 17 neue Tests (TRD-001..017), 200 PASS. CALCULATED, nie MEASURED; kein ML, keine Prognose; keine Validierung an realer Hardware (NOT RUN).
 

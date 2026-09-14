@@ -2785,6 +2785,584 @@ paths:
       - HTTPBearer: []
       x-role: both
       x-side-effects: None; static criteria catalog
+  /api/resources:
+    post:
+      tags:
+      - resources
+      summary: Upload
+      operationId: upload_api_resources_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUploadInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append immutable content blob + registry record + audit; hash/size
+        verified on read; content safety/virus scan NOT IMPLEMENTED (operator responsibility);
+        stop blocks
+    get:
+      tags:
+      - resources
+      summary: Resources
+      operationId: resources_api_resources_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: query
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          description: Name substring or sha256 prefix (>=8 chars)
+          title: Query
+        description: Name substring or sha256 prefix (>=8 chars)
+      - name: kind
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - file
+            - image
+            - pdf
+            - cad
+            - measurement
+            - dataset
+            - database_result
+            - query
+            - software
+            - configuration
+            - log
+            type: string
+          - type: 'null'
+          title: Kind
+      - name: state
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - active
+            - deactivated
+            type: string
+          - type: 'null'
+          title: State
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+                title: Response Resources Api Resources Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; registry metadata only, no content safety or availability
+        claims
+  /api/resources/{resource_id}:
+    get:
+      tags:
+      - resources
+      summary: Resource Detail
+      operationId: resource_detail_api_resources__resource_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; registry metadata only
+  /api/resources/{resource_id}/content:
+    get:
+      tags:
+      - resources
+      summary: Resource Content
+      operationId: resource_content_api_resources__resource_id__content_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; hash/size verified blob read; corrupt or unavailable returns
+        503; raw submitted bytes, not verified content safety
+  /api/resources/{resource_id}/preview:
+    get:
+      tags:
+      - resources
+      summary: Resource Preview
+      operationId: resource_preview_api_resources__resource_id__preview_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewResult'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; hash-verified read; UTF-8 preview or explicit BINARY marker,
+        never interpreted content claims
+  /api/resources/{resource_id}/versions:
+    get:
+      tags:
+      - resources
+      summary: Resource Versions
+      operationId: resource_versions_api_resources__resource_id__versions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+                title: Response Resource Versions Api Resources  Resource Id  Versions
+                  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; immutable family version history
+    post:
+      tags:
+      - resources
+      summary: New Version
+      operationId: new_version_api_resources__resource_id__versions_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewVersionInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append new immutable version blob + record + audit; identical
+        content rejected; deactivated family blocks; stop blocks
+  /api/resources/{resource_id}/links:
+    post:
+      tags:
+      - resources
+      summary: Link Resource
+      operationId: link_resource_api_resources__resource_id__links_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceLink'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append reference link + audit; no file copy; existing task/project
+        target required; stop blocks
+    get:
+      tags:
+      - resources
+      summary: Resource Links
+      operationId: resource_links_api_resources__resource_id__links_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceLink'
+                title: Response Resource Links Api Resources  Resource Id  Links Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; reference list including unlinked history
+  /api/resources/{resource_id}/unlink:
+    post:
+      tags:
+      - resources
+      summary: Unlink Resource
+      operationId: unlink_resource_api_resources__resource_id__unlink_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlinkInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceLink'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Mark link unlinked + audit; reference removed, content and history
+        retained; stop blocks
+  /api/resources/{resource_id}/compare/{other_id}:
+    get:
+      tags:
+      - resources
+      summary: Compare Resources
+      operationId: compare_resources_api_resources__resource_id__compare__other_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      - name: other_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Other Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompareResult'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; hash-verified byte comparison of two uploaded resources,
+        no interpretation
+  /api/resources/{resource_id}/deactivate:
+    post:
+      tags:
+      - resources
+      summary: Deactivate Resource
+      operationId: deactivate_resource_api_resources__resource_id__deactivate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceDeactivateInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed family-wide deactivation + audit; retains all versions
+        and content (never deletes); blocks new versions/links
 components:
   schemas:
     AIConsent:
@@ -3619,6 +4197,51 @@ components:
       required:
       - deleted_ids
       title: CleanupResult
+    CompareResult:
+      properties:
+        left_id:
+          type: string
+          title: Left Id
+        right_id:
+          type: string
+          title: Right Id
+        relation:
+          type: string
+          enum:
+          - IDENTICAL
+          - DIFFERENT
+          title: Relation
+        left_sha256:
+          type: string
+          title: Left Sha256
+        right_sha256:
+          type: string
+          title: Right Sha256
+        left_size_bytes:
+          type: integer
+          title: Left Size Bytes
+        right_size_bytes:
+          type: integer
+          title: Right Size Bytes
+        common_prefix_bytes:
+          type: integer
+          title: Common Prefix Bytes
+        common_suffix_bytes:
+          type: integer
+          title: Common Suffix Bytes
+      additionalProperties: false
+      type: object
+      required:
+      - left_id
+      - right_id
+      - relation
+      - left_sha256
+      - right_sha256
+      - left_size_bytes
+      - right_size_bytes
+      - common_prefix_bytes
+      - common_suffix_bytes
+      title: CompareResult
     Completion:
       properties:
         lease:
@@ -4108,6 +4731,23 @@ components:
       - created_at
       - reason
       title: JobStatus
+    LinkInput:
+      properties:
+        target_kind:
+          type: string
+          enum:
+          - task
+          - project
+          title: Target Kind
+        target_id:
+          type: string
+          title: Target Id
+      additionalProperties: false
+      type: object
+      required:
+      - target_kind
+      - target_id
+      title: LinkInput
     Memory:
       properties:
         project_id:
@@ -4327,6 +4967,23 @@ components:
       - target
       - reason
       title: MoveInput
+    NewVersionInput:
+      properties:
+        content_base64:
+          type: string
+          maxLength: 6000000
+          minLength: 1
+          title: Content Base64
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - content_base64
+      title: NewVersionInput
     Observation:
       properties:
         subject:
@@ -4682,6 +5339,35 @@ components:
       - manifest
       - manifest_hash
       title: PlanVersion
+    PreviewResult:
+      properties:
+        encoding:
+          type: string
+          enum:
+          - TEXT
+          - BINARY
+          title: Encoding
+        text_preview:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Text Preview
+        char_count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Char Count
+        size_bytes:
+          type: integer
+          title: Size Bytes
+      additionalProperties: false
+      type: object
+      required:
+      - encoding
+      - text_preview
+      - char_count
+      - size_bytes
+      title: PreviewResult
     Project:
       properties:
         name:
@@ -4781,6 +5467,209 @@ components:
       - tier
       - key
       title: Replica
+    Resource:
+      properties:
+        id:
+          type: string
+          title: Id
+        family_id:
+          type: string
+          title: Family Id
+        version:
+          type: integer
+          minimum: 1.0
+          title: Version
+        predecessor_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Predecessor Id
+        name:
+          type: string
+          title: Name
+        kind:
+          type: string
+          enum:
+          - file
+          - image
+          - pdf
+          - cad
+          - measurement
+          - dataset
+          - database_result
+          - query
+          - software
+          - configuration
+          - log
+          title: Kind
+        source:
+          type: string
+          title: Source
+        description:
+          type: string
+          title: Description
+        version_note:
+          type: string
+          title: Version Note
+        sha256:
+          type: string
+          title: Sha256
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        tier:
+          type: string
+          enum:
+          - local
+          - sd
+          title: Tier
+        key:
+          type: string
+          title: Key
+        state:
+          type: string
+          enum:
+          - active
+          - deactivated
+          title: State
+        created_by:
+          type: string
+          title: Created By
+        created_at:
+          type: string
+          title: Created At
+        deactivated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deactivated At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - family_id
+      - version
+      - predecessor_id
+      - name
+      - kind
+      - source
+      - description
+      - version_note
+      - sha256
+      - size_bytes
+      - tier
+      - key
+      - state
+      - created_by
+      - created_at
+      title: Resource
+    ResourceDeactivateInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: ResourceDeactivateInput
+    ResourceLink:
+      properties:
+        id:
+          type: string
+          title: Id
+        resource_id:
+          type: string
+          title: Resource Id
+        target_kind:
+          type: string
+          enum:
+          - task
+          - project
+          title: Target Kind
+        target_id:
+          type: string
+          title: Target Id
+        state:
+          type: string
+          enum:
+          - active
+          - unlinked
+          title: State
+        created_by:
+          type: string
+          title: Created By
+        created_at:
+          type: string
+          title: Created At
+        unlinked_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Unlinked At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - resource_id
+      - target_kind
+      - target_id
+      - state
+      - created_by
+      - created_at
+      title: ResourceLink
+    ResourceUploadInput:
+      properties:
+        content_base64:
+          type: string
+          maxLength: 6000000
+          minLength: 1
+          title: Content Base64
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        kind:
+          type: string
+          enum:
+          - file
+          - image
+          - pdf
+          - cad
+          - measurement
+          - dataset
+          - database_result
+          - query
+          - software
+          - configuration
+          - log
+          title: Kind
+        source:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Source
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - content_base64
+      - name
+      - kind
+      - source
+      title: ResourceUploadInput
     Result:
       properties:
         task_id:
@@ -5487,6 +6376,16 @@ components:
       - result_class
       - prediction
       title: TrendReport
+    UnlinkInput:
+      properties:
+        link_id:
+          type: string
+          title: Link Id
+      additionalProperties: false
+      type: object
+      required:
+      - link_id
+      title: UnlinkInput
     Why:
       properties:
         result:

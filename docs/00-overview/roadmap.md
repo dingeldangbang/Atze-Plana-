@@ -7,7 +7,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 00 Overview | IMPLEMENTED | Dokumentierte Grenzen und Begriffe |
 | 01 Architecture | IMPLEMENTED Kern | Kein verteiltes System |
 | 02 Core | PARTIAL | Result Packages, separater Challenge Worker, Triage/Approval/Adoption plus bisheriger Kern; echte getrennte lokale Modell-CI, kein operativer Orchestrator/Action-Executor |
-| 03 Plan | PARTIAL | Task-PLAN-Versionen, echte Archive-/Memory-/Evidence-Referenzen, Context Lock/Widerruf und Gateintegration; kein universeller Workflow-/Query-/Binary-Builder |
+| 03 Plan | PARTIAL | Task-PLAN-Versionen, echte Archive-/Memory-/Evidence-Referenzen, Context Lock/Widerruf und Gateintegration; versionierte Resource-Registry (Upload mit SHA-256, Referenz-Links auf Task/Projekt, Byte-Vergleich, bestätigte Deaktivierung, [Vertrag](../25-resources/resources.md)); kein universeller Workflow-/Query-/Binary-Builder, kein Virenscan |
 | 04 Agents | NOT IMPLEMENTED | Kein Agent Builder, Runtime, Tools, Lifecycle; vor Implementierung Tool→Permission→Task→Triage→Execution-Vertrag und isolierte Negativtests |
 | 05 Devices | NOT IMPLEMENTED | USB, WiFi, BLE, Serial, Discovery, Device Bridge fehlen; reale Testgeräte und Adaptermodell nötig |
 | 06 Android | PARTIAL | Nativer read-only HTTPS-Statusclient, echtes SDK-/Debug-APK-/Emulatortest-CI; keine physische Honeywell/Repair-/Fastboot-/EDL-/Firmwarevalidierung |

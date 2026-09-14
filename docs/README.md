@@ -39,5 +39,8 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Trend-Analyse
 [Deterministische Query-Engine über ingestierte Messreihen: fünf dokumentierte Checks (Drift, Level-Shift, Varianzänderung, Out-of-Range-/Suspect-Rate) mit exakten Kriterien, VERIFIED TREND vs. INSUFFICIENT EVIDENCE](24-trends/trends.md). CALCULATED, nie MEASURED; kein ML, keine Prognose.
 
+## Resource-Manager
+[Versionierte Datei-Registry: Base64-Upload ≤4 MiB mit SHA-256/Tier-Speicherung, append-only Versionen, Referenz-Links auf Task/Projekt statt Kopien, Byte-Vergleich, reviewerbestätigte Deaktivierung ohne Löschung](25-resources/resources.md). Kein Virenscan (NOT IMPLEMENTED), keine Inhaltsinterpretation.
+
 ## Bright Data MCP discovery
 [Enger Vertrag: Authentifizierung, API, Datenschutz und offene Live-Abnahme](22-mcp/brightdata.md). Kein allgemeiner Tool-Executor.
