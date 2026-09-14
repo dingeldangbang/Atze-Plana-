@@ -27,13 +27,13 @@ Stand 2026-09-14, Ausgangscommit `f4fedc0`. Verbindliche [Reality Policy](../../
 | Storage Local | YES | Standardroot oder explizit | reale Dateisystemmessung | Messung nur für aktuelle Instanz | NO — keine allgemeine Hostabnahme |
 | Storage SD-Pfad | YES als Dateisystemadapter | optional; sonst NOT_CONFIGURED | zweites temporäres Testverzeichnis | KEIN SD-Hardware-/Hotplugnachweis | NO |
 | RAM-/Server-/Cloud-Storage | NO | keine Adapterkonfiguration | NOT RUN | BLOCKED | NO |
-| Dashboard | YES, echte API-Daten/Empty States | vorhandene Server-URL | HTTP/Syntax; Browser-E2E NOT RUN | CONDITIONAL | NO |
+| Dashboard | YES, echte API-Daten/Empty States | vorhandene Server-URL | HTTP/Syntax; realer PLAN-Browserlauf, tatsächlicher Status in TEST_REPORT | CONDITIONAL | NO |
 | Runtime GitHub-Connector | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 | Entwicklungsagent: Git/GitHub | reale git/gh-Werkzeuge genutzt | Repositoryzugriff vorhanden | Commit/Push/PR/CI tatsächlich ausgeführt | nur verlinkte konkrete Operationen | kein Runtimefeature / kein Release |
 | USB Discovery | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 | WiFi-Geräte / BLE / Serial | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 | ESP32 / Telemetrie | NO | NOT CONFIGURED | NOT RUN | BLOCKED; keine Live-Messwerte | NO |
-| Android / Honeywell | NO | NOT CONFIGURED | NOT RUN | BLOCKED; APK NOT VERIFIED | NO |
+| Android Statusclient / Honeywell Repair | Client YES, Repair NO | SDK nur CI, physisch NOT CONFIGURED | Echter Debugbuild/Emulator; APK_RELEASE_REPORT | Debug-APK begrenzt geprüft; Repair BLOCKED | NO |
 | ADB / Fastboot / EDL / Repair | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 | Unity / 3D Build | NO | NOT CONFIGURED | NOT RUN | BLOCKED; kein Buildartefakt | NO |
 | Bright Data / externe Recherche | NO | NOT CONFIGURED | NOT RUN | BLOCKED; keine Providerantwort | NO |
@@ -76,3 +76,6 @@ Kein statisches „Bist du sicher?“ ersetzt Gegenprüfung. Reportresultate sta
 | Universal Egress/OS-Sandbox/verschlüsselter Secretcache | NO | NOT CONFIGURED | NOT RUN | BLOCKED | NO |
 
 Alle neuen Tests verwenden isolierte synthetische Daten. Der Testreceiver ist explizit kein Modell und liefert nur einen Hash-Transportbeleg; niemals als Providerintegration oder Modellqualität ausgegeben. [Vollständiger begrenzter Vertrag](../02-core/model-gateway.md).
+
+## PLAN-Inkrement
+Tatsächliche SQLite/File/API-Tests, manifestgebundene Gegenprüfung/Freigabe/Inferenz und Browserpipeline. [Grenzen](../21-plan/context-lock.md): Byteprüfung ist keine Wahrheit, Lock kein Lease/Executor. Alte Core-Prozesse vor Upgrade stoppen, keine gemischten Versionen am gleichen Datenbestand.

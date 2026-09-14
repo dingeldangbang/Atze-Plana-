@@ -1,24 +1,24 @@
 # Roadmap und vollständige Modulabgrenzung
 
-Stand 2026-09-13. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführbarer Adapter/Workflow. Keine Liefertermine oder Performancezusagen.
+Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführbarer Adapter/Workflow. Keine Liefertermine oder Performancezusagen.
 
 | Master-Bereich | Status | Fehlender Nachweis / nächster Schritt |
 |---|---|---|
 | 00 Overview | IMPLEMENTED | Dokumentierte Grenzen und Begriffe |
 | 01 Architecture | IMPLEMENTED Kern | Kein verteiltes System |
-| 02 Core | PARTIAL | Result Packages, separater Challenge Worker, Triage/Approval/Adoption plus bisheriger Kern; kein Orchestrator/Primary-LLM/Action-Executor |
-| 03 Plan | PARTIAL | Projektmetadaten, bounded Archive-/Memory-Erfassung und Textsuche; kein Plan-/Workflow-/Query-Builder |
+| 02 Core | PARTIAL | Result Packages, separater Challenge Worker, Triage/Approval/Adoption plus bisheriger Kern; echte getrennte lokale Modell-CI, kein operativer Orchestrator/Action-Executor |
+| 03 Plan | PARTIAL | Task-PLAN-Versionen, echte Archive-/Memory-/Evidence-Referenzen, Context Lock/Widerruf und Gateintegration; kein universeller Workflow-/Query-/Binary-Builder |
 | 04 Agents | NOT IMPLEMENTED | Kein Agent Builder, Runtime, Tools, Lifecycle; vor Implementierung Tool→Permission→Task→Triage→Execution-Vertrag und isolierte Negativtests |
 | 05 Devices | NOT IMPLEMENTED | USB, WiFi, BLE, Serial, Discovery, Device Bridge fehlen; reale Testgeräte und Adaptermodell nötig |
-| 06 Android | NOT IMPLEMENTED | Keine App/SDK/ADB/Fastboot/EDL/Repair-Server/Honeywell CT45p Integration oder Firmwarevalidierung |
+| 06 Android | PARTIAL | Nativer read-only HTTPS-Statusclient, echtes SDK-/Debug-APK-/Emulatortest-CI; keine physische Honeywell/Repair-/Fastboot-/EDL-/Firmwarevalidierung |
 | 07 IoT | NOT IMPLEMENTED | ESP32, Sensoren, Telemetrie, Kalibrierung, Echtzeit nicht angeschlossen |
 | 08 Network | PARTIAL | Eigene HTTP-API vorhanden; kein Monitoring/Discovery/MQTT/SSH/Incident-Executor |
 | 09 Cloud | NOT IMPLEMENTED | Kein Hybrid-/Multi-Cloud-/Edge-/Provider-Adapter, kein Provisioning |
 | 10 Web Research | NOT IMPLEMENTED | Bright Data SERP/Scraping/Browser/Crawl/Extraction/PDF/Cache/Rate-Handling fehlen; URLs nur manuelle Referenzen |
 | 11 3D | NOT IMPLEMENTED | Keine Unity-Version, Module, Pakete, Szenen, Assets, Avatare, Worlds oder Digital Twins; kein Editor-/Headless-Build |
-| 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein Android-/CLI-/Softwareprojekt-Builder |
+| 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein universeller CLI-/Softwareprojekt-Builder |
 | 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | Cache TTL/Cleanup und separater Challenge-Prüfprozess; kein Executor oder isolierter Workspace |
-| 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; Browser-E2E, Geräte, Agenten, Lasttest fehlen |
+| 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; echter PLAN-Browserlauf ergänzt (Resultate in TEST_REPORT), Geräte/Agenten/Lasttest fehlen |
 | 15 Trends | NOT IMPLEMENTED | Keine Anomalie-, Lifecycle- oder Proaktivitätsengine |
 | 16 Evidence | PARTIAL | Manuelle Provenance, Hash, Review; keine Quellenrangfolge, automatische Wahrheit/Aktualität oder Widerspruchserkennung |
 | 17 Security | PARTIAL | Rollen, Fail-closed, Stop; keine individuelle Benutzerverwaltung, MFA, manipulationssicherer Audit |

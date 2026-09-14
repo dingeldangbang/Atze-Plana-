@@ -10,7 +10,7 @@ const assert = (value, name) => { if (!value) throw new Error(name); };
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 (async () => {
   const report = {kind:'REAL CHROMIUM / SYNTHETIC TEST INPUTS',status:'FAIL',checks:[],started_at:new Date().toISOString()};
-  let chrome, profile;
+  let chrome, profile, closeBrowser;
   try {
     const config = JSON.parse(fs.readFileSync(0,'utf8'));
     assert(/^http:\/\/127\.0\.0\.1:\d+$/.test(config.url), 'Only disposable loopback test Core accepted');
@@ -50,6 +50,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
       const id=++next; const timer=setTimeout(()=>{pending.delete(id);reject(new Error('Chromium protocol timeout'));},15000);
       pending.set(id,{resolve,reject,timer}); chrome.stdio[3].write(JSON.stringify({id,method,params,...(sid?{sessionId:sid}:{})})+'\0');
     });
+    closeBrowser=()=>cdp('Browser.close',{},null);
     const target=await cdp('Target.createTarget',{url:config.url});
     session=(await cdp('Target.attachToTarget',{targetId:target.targetId,flatten:true})).sessionId;
     const evaluate=async expression=>{
@@ -64,8 +65,8 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     const task=await api('/api/tasks','POST',{project_id:p.id,title:'Browser test task',action:'read',evidence_ids:[e.id],preconditions_met:true});
     await api('/api/archive','POST',{project_id:p.id,relative_path:'browser-input.txt',content:'Selected synthetic browser archive'});
     const login=async token=>{
-      await evaluate(`document.getElementById('token').value=${JSON.stringify(token)}; document.getElementById('connect').click()`);
-      await wait("document.getElementById('status').textContent==='Aktualisiert.'",'Authenticated refresh failed');
+      await evaluate(`document.getElementById('token').value=${JSON.stringify(token)}; document.getElementById('login').requestSubmit()`);
+      await wait("document.getElementById('status').textContent.startsWith('Verbunden.')",'Authenticated refresh failed');
     };
     await login(config.operator);
     await evaluate(`document.getElementById('plan-task').value=${JSON.stringify(task.id)}; document.getElementById('plan-task').dispatchEvent(new Event('change'))`);
@@ -98,13 +99,16 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     await evaluate("document.getElementById('plan-title').value='Actual second browser version'; document.getElementById('plan-editor').requestSubmit()");
     await wait("document.getElementById('plan-version-id').value===''",'Revision did not finish');
     assert((await api(`/api/plans/${plan.id}/versions`))[0].version===2,'Browser revision not append-only'); check('BROWSER-PLAN-06-IMMUTABLE-REVISION');
-    await evaluate("document.getElementById('forget').click()");
+    await evaluate("document.getElementById('logout').click()");
     assert(await evaluate("document.getElementById('token').value==='' && document.getElementById('plan-detail').textContent==='' && !document.getElementById('plan-resources').options.length"),'Logout retained PLAN source UI'); check('BROWSER-PLAN-07-LOGOUT-CLEAR');
     report.status='PASS';
   } catch(error){report.error=error.message; process.exitCode=1;}
   finally {
     if(chrome && chrome.exitCode===null && chrome.signalCode===null){
-      const exited=new Promise(resolve=>chrome.once('exit',resolve)); chrome.kill('SIGTERM');
+      const exited=new Promise(resolve=>chrome.once('exit',resolve));
+      if(closeBrowser){try{await closeBrowser();}catch(error){report.close_protocol='UNAVAILABLE_SIGNAL_CLEANUP_REQUIRED';}}
+      await Promise.race([exited,pause(1000)]);
+      if(chrome.exitCode===null && chrome.signalCode===null) chrome.kill('SIGTERM');
       await Promise.race([exited,pause(3000)]);
       if(chrome.exitCode===null && chrome.signalCode===null){chrome.kill('SIGKILL');await Promise.race([exited,pause(3000)]);}
     }
