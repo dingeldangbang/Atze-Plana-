@@ -1444,6 +1444,564 @@ paths:
       x-role: both
       x-side-effects: Read audit metadata only; pending outcome is unknown, never
         automatic retry
+  /api/agents:
+    post:
+      tags:
+      - agents
+      summary: Create
+      operationId: create_api_agents_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append declared agent configuration + audit; requires registered
+        model; allowed_tools is a declared bound, never autonomous tool authority;
+        stop blocks
+    get:
+      tags:
+      - agents
+      summary: Agents
+      operationId: agents_api_agents_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+                title: Response Agents Api Agents Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; declared registry only, no autonomy or availability claims
+  /api/agents/{agent_id}:
+    get:
+      tags:
+      - agents
+      summary: Agent Detail
+      operationId: agent_detail_api_agents__agent_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; declared registry only
+  /api/agents/{agent_id}/versions:
+    get:
+      tags:
+      - agents
+      summary: Agent Versions
+      operationId: agent_versions_api_agents__agent_id__versions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+                title: Response Agent Versions Api Agents  Agent Id  Versions Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; immutable configuration history
+  /api/agents/{agent_id}/configure:
+    post:
+      tags:
+      - agents
+      summary: Configure
+      operationId: configure_api_agents__agent_id__configure_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append new immutable configuration version + audit; identical
+        configuration rejected; deactivated family blocks; stop blocks
+  /api/agents/{agent_id}/assignments:
+    post:
+      tags:
+      - agents
+      summary: Assign
+      operationId: assign_api_agents__agent_id__assignments_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentAssignment'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append reference assignment + audit; no autonomy granted; existing
+        task/project target required; stop blocks
+    get:
+      tags:
+      - agents
+      summary: Agent Assignments
+      operationId: agent_assignments_api_agents__agent_id__assignments_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentAssignment'
+                title: Response Agent Assignments Api Agents  Agent Id  Assignments
+                  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; reference list including unlinked history
+  /api/agents/{agent_id}/unlink:
+    post:
+      tags:
+      - agents
+      summary: Unlink
+      operationId: unlink_api_agents__agent_id__unlink_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/app__agent_models__UnlinkInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentAssignment'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Mark assignment unlinked + audit; reference removed, history
+        retained; stop blocks
+  /api/agents/{agent_id}/runs:
+    post:
+      tags:
+      - agents
+      summary: Create Run
+      operationId: create_run_api_agents__agent_id__runs_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRunInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentRun'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Prepare bounded run through the full AI prepare gates (registered
+        model, capability, classification, context scan, size, PLAN binding); active
+        task/project assignment required; NO network; reviewer consent required before
+        execution
+    get:
+      tags:
+      - agents
+      summary: Agent Runs
+      operationId: agent_runs_api_agents__agent_id__runs_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentRun'
+                title: Response Agent Runs Api Agents  Agent Id  Runs Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; immutable run history with attempt states; outputs are
+        never stored
+  /api/agents/{agent_id}/runs/{run_id}/consent:
+    post:
+      tags:
+      - agents
+      summary: Consent Run
+      operationId: consent_run_api_agents__agent_id__runs__run_id__consent_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      - name: run_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Run Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIConsent'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Consent Run Api Agents  Agent Id  Runs  Run Id  Consent
+                  Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Explicit once-per-run execution consent; reuses the full AI
+        execute gates (exact context hash, policy/config currency, allowlists, privacy/remote,
+        stop, PLAN binding); bounded authenticated transport; output DRAFT_UNCHALLENGED,
+        never stored or adopted; no tool execution
+  /api/agents/{agent_id}/deactivate:
+    post:
+      tags:
+      - agents
+      summary: Deactivate
+      operationId: deactivate_api_agents__agent_id__deactivate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentDeactivateInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed family-wide deactivation + audit; retains configuration,
+        assignments and run history; blocks new runs/assignments/versions
   /api/results:
     post:
       tags:
@@ -3286,7 +3844,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UnlinkInput'
+              $ref: '#/components/schemas/app__resource_models__UnlinkInput'
       responses:
         '200':
           description: Successful Response
@@ -3581,6 +4139,283 @@ components:
       - production_deploy
       - payment
       title: Action
+    Agent:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+        model_id:
+          type: string
+          title: Model Id
+        purpose:
+          type: string
+          enum:
+          - analysis
+          - plan
+          - code
+          title: Purpose
+        instruction:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Instruction
+        allowed_tools:
+          items:
+            type: string
+          type: array
+          maxItems: 8
+          title: Allowed Tools
+        id:
+          type: string
+          title: Id
+        family_id:
+          type: string
+          title: Family Id
+        version:
+          type: integer
+          minimum: 1.0
+          title: Version
+        predecessor_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Predecessor Id
+        state:
+          type: string
+          enum:
+          - active
+          - deactivated
+          title: State
+        created_by:
+          type: string
+          title: Created By
+        created_at:
+          type: string
+          title: Created At
+        deactivated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deactivated At
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - model_id
+      - purpose
+      - instruction
+      - id
+      - family_id
+      - version
+      - predecessor_id
+      - state
+      - created_by
+      - created_at
+      title: Agent
+    AgentAssignment:
+      properties:
+        id:
+          type: string
+          title: Id
+        agent_id:
+          type: string
+          title: Agent Id
+        target_kind:
+          type: string
+          enum:
+          - task
+          - project
+          title: Target Kind
+        target_id:
+          type: string
+          title: Target Id
+        state:
+          type: string
+          enum:
+          - active
+          - unlinked
+          title: State
+        created_by:
+          type: string
+          title: Created By
+        created_at:
+          type: string
+          title: Created At
+        unlinked_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Unlinked At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - agent_id
+      - target_kind
+      - target_id
+      - state
+      - created_by
+      - created_at
+      title: AgentAssignment
+    AgentDeactivateInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: AgentDeactivateInput
+    AgentInput:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+        model_id:
+          type: string
+          title: Model Id
+        purpose:
+          type: string
+          enum:
+          - analysis
+          - plan
+          - code
+          title: Purpose
+        instruction:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Instruction
+        allowed_tools:
+          items:
+            type: string
+          type: array
+          maxItems: 8
+          title: Allowed Tools
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - model_id
+      - purpose
+      - instruction
+      title: AgentInput
+    AgentRun:
+      properties:
+        id:
+          type: string
+          title: Id
+        agent_id:
+          type: string
+          title: Agent Id
+        agent_version:
+          type: integer
+          minimum: 1.0
+          title: Agent Version
+        task_id:
+          type: string
+          title: Task Id
+        request_id:
+          type: string
+          title: Request Id
+        context_hash:
+          type: string
+          title: Context Hash
+        state:
+          type: string
+          enum:
+          - AWAITING_CONSENT
+          - BLOCKED
+          - DRAFT_UNCHALLENGED
+          - UNAVAILABLE
+          title: State
+        attempt_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Attempt Id
+        blocked_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Blocked Reason
+        created_by:
+          type: string
+          title: Created By
+        created_at:
+          type: string
+          title: Created At
+        outcome_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Outcome At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - agent_id
+      - agent_version
+      - task_id
+      - request_id
+      - context_hash
+      - state
+      - attempt_id
+      - blocked_reason
+      - created_by
+      - created_at
+      title: AgentRun
+    AgentRunInput:
+      properties:
+        task_id:
+          type: string
+          title: Task Id
+        prompt:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Prompt
+        classification:
+          type: string
+          enum:
+          - PUBLIC
+          - INTERNAL
+          - PROJECT
+          - DEVICE
+          - PERSONAL
+          - CONFIDENTIAL
+          - SECRET
+          - CREDENTIAL
+          title: Classification
+          default: CONFIDENTIAL
+      additionalProperties: false
+      type: object
+      required:
+      - task_id
+      - prompt
+      title: AgentRunInput
     Alternative:
       properties:
         subject:
@@ -3802,6 +4637,23 @@ components:
       - relative_path
       - content
       title: ArchiveInput
+    AssignmentInput:
+      properties:
+        target_kind:
+          type: string
+          enum:
+          - task
+          - project
+          title: Target Kind
+        target_id:
+          type: string
+          title: Target Id
+      additionalProperties: false
+      type: object
+      required:
+      - target_kind
+      - target_id
+      title: AssignmentInput
     Audit:
       properties:
         id:
@@ -6454,16 +7306,6 @@ components:
       - result_class
       - prediction
       title: TrendReport
-    UnlinkInput:
-      properties:
-        link_id:
-          type: string
-          title: Link Id
-      additionalProperties: false
-      type: object
-      required:
-      - link_id
-      title: UnlinkInput
     Why:
       properties:
         result:
@@ -6515,6 +7357,26 @@ components:
       - fingerprint
       - snapshot
       title: WorkItem
+    app__agent_models__UnlinkInput:
+      properties:
+        assignment_id:
+          type: string
+          title: Assignment Id
+      additionalProperties: false
+      type: object
+      required:
+      - assignment_id
+      title: UnlinkInput
+    app__resource_models__UnlinkInput:
+      properties:
+        link_id:
+          type: string
+          title: Link Id
+      additionalProperties: false
+      type: object
+      required:
+      - link_id
+      title: UnlinkInput
   securitySchemes:
     HTTPBearer:
       type: http

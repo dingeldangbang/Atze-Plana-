@@ -42,5 +42,8 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Resource-Manager
 [Versionierte Datei-Registry: Base64-Upload ≤4 MiB mit SHA-256/Tier-Speicherung, append-only Versionen, Referenz-Links auf Task/Projekt statt Kopien, Byte-Vergleich, reviewerbestätigte Deaktivierung ohne Löschung](25-resources/resources.md). Kein Virenscan (NOT IMPLEMENTED), keine Inhaltsinterpretation.
 
+## Agent Builder v1
+[Deklarative Agenten-Registry mit versionierter Konfiguration, Referenz-Zuweisungen und gebundenen Einzel-Runs durch die vollständige AI-Consent-Kette](26-agents/agents.md). Keine autonome Tool-Ausführung; Outputs DRAFT_UNCHALLENGED, nie gespeichert oder adoptiert.
+
 ## Bright Data MCP discovery + begrenztes tools/call
 [Enger Vertrag: Authentifizierung, API, Datenschutz, Allowlist-Ausführung und offene Live-Abnahme](22-mcp/brightdata.md). tools/call nur für die zwei allowlisted Kandidaten mit Reviewer-Einzelfreigabe; kein allgemeiner Tool-Executor, keine Live-Provider-Validierung.

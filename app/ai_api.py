@@ -19,8 +19,8 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store,
     def status(who=Depends(actor), db=DB) -> dict:
         return {'policy': policy(db), 'providers': [{'id': p.id, 'mode': p.mode, 'region': p.region,
                  'status': 'CONFIGURED_NOT_VALIDATED'} for p in gateway.providers.values()],
-                'model_inference': 'NOT_VALIDATED', 'mcp': 'DISCOVERY_ONLY_NO_TOOL_EXECUTION', 'tool_execution': 'BLOCKED',
-                'model_discovery': 'NOT_IMPLEMENTED', 'agent_runtime': 'TEXT_REQUESTS_ONLY', 'production_ready': False}
+                'model_inference': 'NOT_VALIDATED', 'mcp': 'DISCOVERY_AND_BOUNDED_TOOLS_CALL', 'tool_execution': 'REVIEWER_GATED_ALLOWLIST_ONLY',
+                'model_discovery': 'NOT_IMPLEMENTED', 'agent_runtime': 'REGISTRY_AND_BOUNDED_SINGLE_RUNS', 'production_ready': False}
 
     @app.post('/api/ai/policy', tags=['ai'], status_code=201, openapi_extra=contract('reviewer', 'Append policy and audit; invalidates pending requests; no network'))
     def set_policy(body: AIPolicy, who=Depends(reviewer), db=DB) -> dict:
@@ -63,3 +63,5 @@ def register_ai_api(app, settings, actor, operator, reviewer, connection, store,
     @app.exception_handler(GateDenied)
     async def denied(request, error):
         return JSONResponse(status_code=409, content={'detail': str(error), 'state': 'BLOCKED'})
+
+    return gateway

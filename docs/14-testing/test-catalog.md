@@ -14,6 +14,18 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 
 | Test ID / purpose / expected result | Executable case |
 |---|---|
+| AGT-001: agent declaration validates unique name, registered model, capability purpose, allowlisted tools, operator role. | [test_agents.py: test_agent_declaration_validation](../../tests/test_agents.py) |
+| AGT-002: configure appends immutable versions with predecessor chain; identical configuration rejected 409. | [test_agents.py: test_agent_configuration_versioning](../../tests/test_agents.py) |
+| AGT-003: assignments attach agents by reference to existing tasks/projects; duplicates 409; unlink keeps history. | [test_agents.py: test_agent_assignments_are_references](../../tests/test_agents.py) |
+| AGT-004: run preparation requires an active task or project assignment; prepared run awaits reviewer consent. | [test_agents.py: test_agent_run_requires_active_assignment](../../tests/test_agents.py) |
+| AGT-005: prepare-level denials (secret classification) return 409 BLOCKED with audit and no run record. | [test_agents.py: test_agent_run_prepare_denial_is_durable](../../tests/test_agents.py) |
+| AGT-006: consent under default-deny policy blocks with durable attempt and zero network traffic. | [test_agents.py: test_agent_run_default_deny_blocks_before_transport](../../tests/test_agents.py) |
+| AGT-007: full chain prepare→reviewer consent→real loopback transport; instruction and request transmitted; output unchallenged. | [test_agents.py: test_agent_run_full_consent_chain_real_transport](../../tests/test_agents.py) |
+| AGT-008: wrong context hash blocks; a consumed run cannot be consented again. | [test_agents.py: test_agent_consent_hash_and_replay_protection](../../tests/test_agents.py) |
+| AGT-009: operator prepares runs and cannot consent; reviewer consents and cannot declare/prepare. | [test_agents.py: test_agent_roles_for_prepare_and_consent](../../tests/test_agents.py) |
+| AGT-010: emergency stop blocks registry mutations and consent execution; reads stay available. | [test_agents.py: test_agent_run_emergency_stop](../../tests/test_agents.py) |
+| AGT-011: reviewer confirm+reason deactivates the family; blocks runs/assignments/versions; history stays readable. | [test_agents.py: test_agent_deactivation_reviewer_confirmed_and_retained](../../tests/test_agents.py) |
+| AGT-012: audit covers creation, versioning, assignment, run preparation, outcome and confirmed deactivation. | [test_agents.py: test_agent_audit_chain](../../tests/test_agents.py) |
 | AI-001 | Defaults/roles | isolated DB | prepare/run without policy | BLOCK, zero sockets | response/count asserted. | [test_ai_privacy.py: test_ai_default_and_roles](../../tests/test_ai_privacy.py) |
 | AI-002 | Real HTTP transport | explicit policy/consent | send once | untrusted receipt, no result/memory, replay blocked | asserted. | [test_ai_privacy.py: test_ai_actual_transport_and_no_adoption](../../tests/test_ai_privacy.py) |
 | AI-003 | Recognized secrets | isolated request | submit patterns | 409 before persistence/egress | response/socket count asserted. | [test_ai_privacy.py: test_ai_secret_rejection](../../tests/test_ai_privacy.py) |

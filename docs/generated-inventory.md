@@ -1,6 +1,8 @@
 # Source inventory (generated)
 
 - `app/__init__.py`: (package marker)
+- `app/agent_api.py`: register_agent_api
+- `app/agent_models.py`: AgentInput, Agent, AssignmentInput, UnlinkInput, AgentAssignment, AgentRunInput, AgentRun, AgentDeactivateInput
 - `app/ai_api.py`: register_ai_api
 - `app/ai_gateway.py`: GateDenied, fingerprint, scan, origin, ExternalDataGateway, OpenAICompatibleProvider
 - `app/ai_models.py`: ProviderConfig, AIConfig, AIPolicy, ModelRegistration, AIRequest, AIConsent, ModelProvider, AgentProvider, EmbeddingProvider, VisionProvider, SpeechProvider, RerankerProvider
