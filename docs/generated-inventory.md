@@ -13,6 +13,7 @@
 - `app/challenge_rules.py`: normalized, equal_value, analyze
 - `app/challenge_service.py`: digest, latest, current_result, snapshot, make_job, submit_result, claim_job, complete_job, challenge_gate, decide_task, adopt_result
 - `app/challenge_worker.py`: NoRedirects, run_once, main
+- `app/cli.py`: fail, render, main
 - `app/config.py`: Settings
 - `app/context.py`: update, references, index_text, create_memory, retrieve
 - `app/context_api.py`: register_context_api

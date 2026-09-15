@@ -66,6 +66,10 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | CH-015: retrieved decision-memory carries challenge provenance and becomes BLOCK after evidence changes; no stale acceptance in RAG. | [test_challenge.py: test_adopted_memory_retrieval_revalidates_challenge](../../tests/test_challenge.py) |
 | CH-016: accepted challenge does not bypass atomic audit on adoption; audit failure creates no decision-memory or index entry. | [test_challenge.py: test_adoption_audit_failure_rolls_back_memory](../../tests/test_challenge.py) |
 | CH-017: bounded snapshot and finding limits stop the line instead of silently validating a truncated context. | [test_challenge.py: test_scope_limits_block_instead_of_partial_validation](../../tests/test_challenge.py) |
+| CLI-001: the health probe works without a token and reports the real instance mode. | [test_cli.py: test_cli_status_unauthenticated](../../tests/test_cli.py) |
+| CLI-002: authenticated commands return the real records of the running Core; raw equals the API payload. | [test_cli.py: test_cli_lists_real_records](../../tests/test_cli.py) |
+| CLI-003: missing/invalid token and unreachable Core fail with clear errors; never fallback data. | [test_cli.py: test_cli_fail_closed_without_valid_token_or_core](../../tests/test_cli.py) |
+| CLI-004: a rejected token is reported, not bypassed. | [test_cli.py: test_cli_rejects_invalid_token_on_real_core](../../tests/test_cli.py) |
 | STO-001: original UTF-8 whitespace/hash survives storage and restart; duplicate namespace cannot overwrite. | [test_context_storage.py: test_archive_original_namespace_and_restart](../../tests/test_context_storage.py) |
 | STO-002: absolute, traversal, empty, encoded or platform-specific path segments are rejected. | [test_context_storage.py: test_logical_path_rejection](../../tests/test_context_storage.py) |
 | STO-003: reviewer relocation preserves original, hash and namespace; retrieval resolves the new location. | [test_context_storage.py: test_copy_verify_switch_retains_source_and_citations](../../tests/test_context_storage.py) |

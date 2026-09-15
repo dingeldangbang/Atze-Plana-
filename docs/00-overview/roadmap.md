@@ -16,7 +16,7 @@ Stand 2026-09-14; Begriffskorrektur (D1) 2026-09-15 übernommen: „2 GB" bezeic
 | 09 Cloud | NOT IMPLEMENTED | Kein Hybrid-/Multi-Cloud-/Edge-/Provider-Adapter, kein Provisioning |
 | 10 Web Research | PARTIAL | Echtes begrenztes Bright-Data-MCP: Discovery (initialize/tools/list) und reviewerbestätigtes tools/call für genau die zwei allowlisted Kandidaten (search_engine, scrape_as_markdown) mit Argument-/Result-Grenzen ([Vertrag](../22-mcp/brightdata.md)); Live-Provider NOT CONFIGURED; Browser/Crawl/PDF/Cache/Rate-Handling, Zonen, Käufe, Login/Refresh fehlen |
 | 11 3D | NOT IMPLEMENTED | Keine Unity-Version, Module, Pakete, Szenen, Assets, Avatare, Worlds oder Digital Twins; kein Editor-/Headless-Build |
-| 12 Software | PARTIAL | Python-Webkern und statische UI vorhanden; kein universeller CLI-/Softwareprojekt-Builder |
+| 12 Software | PARTIAL | Python-Webkern, statische UI und echte read-only CLI gegen die dokumentierte API ([Vertrag](../12-software/cli.md)); kein universeller CLI-/Softwareprojekt-Builder, keine Mutationsbefehle |
 | 13 Sandbox | PARTIAL Cache / NOT IMPLEMENTED Isolation | Cache TTL/Cleanup und separater Challenge-Prüfprozess; kein Executor oder isolierter Workspace |
 | 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; echter PLAN-Browserlauf ergänzt (Resultate in TEST_REPORT), Geräte/Agenten/Lasttest fehlen |
 | 15 Trends | PARTIAL | Echte deterministische Trend-Checks über ingestierte Telemetrie (Drift, Level-Shift, Varianzänderung, Out-of-Range-/Suspect-Raten) als Query mit dokumentierten Kriterien und VERIFIED TREND vs. INSUFFICIENT EVIDENCE ([Vertrag](../24-trends/trends.md)); kein ML, keine Prognose, keine Lifecycle-/Proaktivitäts-/allgemeine Anomalieengine |

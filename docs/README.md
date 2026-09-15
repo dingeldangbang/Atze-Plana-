@@ -45,6 +45,9 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Agent Builder v1
 [Deklarative Agenten-Registry mit versionierter Konfiguration, Referenz-Zuweisungen und gebundenen Einzel-Runs durch die vollständige AI-Consent-Kette](26-agents/agents.md). Keine autonome Tool-Ausführung; Outputs DRAFT_UNCHALLENGED, nie gespeichert oder adoptiert.
 
+## CLI (read-only)
+[Echte Abfrage-CLI gegen einen laufenden Core: dokumentierte Endpunkte, verlustfreie Ausgabe, Fail-closed ohne Ersatzdaten](12-software/cli.md). Keine Mutationen, kein universeller Builder.
+
 ## Evidence-Analyse
 [Deterministische Widerspruchskandidaten (within/across records) und dokumentierte Quellenrangfolge als CALCULATED-Queries](16-evidence/analysis.md). Kandidaten, kein Urteil; Rangfolge ist keine Wahrheit; kein semantischer Abgleich, kein ML.
 
