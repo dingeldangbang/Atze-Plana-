@@ -7,6 +7,7 @@
 - `app/ai_gateway.py`: GateDenied, fingerprint, scan, origin, ExternalDataGateway, OpenAICompatibleProvider
 - `app/ai_models.py`: ProviderConfig, AIConfig, AIPolicy, ModelRegistration, AIRequest, AIConsent, ModelProvider, AgentProvider, EmbeddingProvider, VisionProvider, SpeechProvider, RerankerProvider
 - `app/ai_service.py`: policy, prepare, check, execute
+- `app/analysis_api.py`: ContradictionQuery, _project_evidence, _observations, _same_value, contradictions, source_ranking, register_analysis_api
 - `app/challenge_api.py`: register_challenge_api
 - `app/challenge_models.py`: Claim, Alternative, ResultInput, Result, ChallengeRequest, Finding, Analysis, WorkItem, Completion, ChallengeReport, JobStatus, Why
 - `app/challenge_rules.py`: normalized, equal_value, analyze

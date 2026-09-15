@@ -28,6 +28,7 @@ from app.agent_api import register_agent_api
 from app.monitoring_api import register_monitoring_api
 from app.lease_api import register_lease_api
 from app.ops_api import register_ops_api
+from app.analysis_api import register_analysis_api
 from app.challenge_service import decide_task
 
 STATIC = Path(__file__).parent / 'static'
@@ -203,6 +204,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     register_monitoring_api(app, settings, actor, operator, reviewer, connection, store, storage, ai_gateway)
     register_lease_api(app, actor, reviewer, connection, store)
     register_ops_api(app, settings, actor, reviewer, connection, store)
+    register_analysis_api(app, actor, connection, store)
     register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)
     register_telemetry_api(app, settings, bearer, actor, operator, reviewer, connection, store, storage)

@@ -40,6 +40,11 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | AI-012 | No action privilege | write task and missing provider | actual APIs | BLOCK with zero transmission. | [test_ai_privacy.py: test_ai_write_task_and_unconfigured_model](../../tests/test_ai_privacy.py) |
 | AI-013 | Startup ambiguity | duplicate configured IDs | load config | reject, not last-wins. | [test_ai_privacy.py: test_ai_duplicate_startup_config](../../tests/test_ai_privacy.py) |
 | AI-014 | Known credentials | raw platform/provider tokens without labels | prepare | BLOCK before persistence/transport. | [test_ai_privacy.py: test_ai_known_unlabelled_credentials](../../tests/test_ai_privacy.py) |
+| EVA-001: differing values for the same (subject, attribute) become CALCULATED candidates, never verdicts. | [test_analysis.py: test_contradiction_candidates_across_and_within_records](../../tests/test_analysis.py) |
+| EVA-002: conflicting observations inside one evidence record are flagged scope within_record. | [test_analysis.py: test_contradiction_within_single_record_flagged](../../tests/test_analysis.py) |
+| EVA-003: identical value+unit across records corroborates; a unit difference alone is a conflict. | [test_analysis.py: test_corroboration_and_unit_mismatch](../../tests/test_analysis.py) |
+| EVA-004: analysis is scoped to one project; unknown projects 404; both roles may query, anonymous 401. | [test_analysis.py: test_contradictions_isolated_per_project_and_validated](../../tests/test_analysis.py) |
+| EVA-005: documented rule order (review state, confidence, recency) with a per-item rule trace; not a truth claim. | [test_analysis.py: test_source_ranking_deterministic_with_trace](../../tests/test_analysis.py) |
 | BKP-001: backups are reviewer-confirmed only; operator and unconfirmed requests are refused. | [test_backups.py: test_backup_roles_and_confirmation](../../tests/test_backups.py) |
 | BKP-002: real snapshot with matching sha256/size, integrity PASS, per-kind counts equal to the live store, durable audit. | [test_backups.py: test_backup_creates_verified_snapshot_record_and_audit](../../tests/test_backups.py) |
 | BKP-003: a read-only snapshot stays allowed while the emergency stop is active (risk-reducing). | [test_backups.py: test_backup_allowed_under_emergency_stop](../../tests/test_backups.py) |

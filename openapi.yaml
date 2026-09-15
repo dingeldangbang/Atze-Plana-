@@ -2361,6 +2361,94 @@ paths:
       x-role: both
       x-side-effects: None; read-only list of verified backup records; a record proves
         only the snapshot at creation time, not an offsite copy or a restore drill
+  /api/analysis/contradictions:
+    post:
+      tags:
+      - analysis
+      summary: Contradictions Endpoint
+      operationId: contradictions_endpoint_api_analysis_contradictions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContradictionQuery'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Contradictions Endpoint Api Analysis Contradictions
+                  Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; deterministic CALCULATED query over stored evidence observations;
+        contradiction output is a candidate set for human resolution, never a verdict,
+        never auto-adopted
+  /api/analysis/source-ranking:
+    get:
+      tags:
+      - analysis
+      summary: Ranking Endpoint
+      operationId: ranking_endpoint_api_analysis_source_ranking_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: project_id
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          title: Project Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Ranking Endpoint Api Analysis Source Ranking Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; deterministic CALCULATED ranking over declared fields
+        (review state, confidence, recency); not a truth or source-quality claim
   /api/results:
     post:
       tags:
@@ -5569,6 +5657,16 @@ components:
       - fingerprint
       - analysis
       title: Completion
+    ContradictionQuery:
+      properties:
+        project_id:
+          type: string
+          title: Project Id
+      additionalProperties: false
+      type: object
+      required:
+      - project_id
+      title: ContradictionQuery
     DeactivateInput:
       properties:
         confirm:

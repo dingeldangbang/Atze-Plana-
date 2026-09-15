@@ -4,7 +4,7 @@ Stand 2026-09-14. Full-platform release **BLOCKED**. A working increment is not 
 
 | Area | Implemented scope | Current release gap |
 |---|---|---|
-| Evidence/Triage/Challenge | real records, deterministic checks, independent HTTP process, bound approvals/adoption | no semantic/physical truth verification or universal execution engine |
+| Evidence/Triage/Challenge | real records, deterministic checks, independent HTTP process, bound approvals/adoption; deterministic contradiction candidates (within/across records) and documented source ranking as CALCULATED queries | no semantic/physical truth verification or universal execution engine; contradictions are candidates for human resolution, ranking is not source-quality truth |
 | PLAN/universal context | immutable task PLAN versions, real evidence/memory/archive manifests, reviewer Context Lock/revoke, Challenge/Triage/AI binding; workspace resource registry (bounded base64 upload, hash/size verified storage, append-only versions, reference links to tasks/projects, byte compare, confirmed deactivation retaining data) | no universal binary/PDF/CAD/3D/device/research/repair engine; no virus/safety scan (NOT IMPLEMENTED, operator responsibility); locks are neither truth nor permission; sources are declared, not verified |
 | AI provider/privacy | compatible text endpoint, four mode categories, default DENY, selected context, consent/secret/role gates | no complete modality providers, model discovery, cost/resource scheduler or universal egress firewall |
 | Real local HF model | pinned separate CI worker candidate; actual CI result in TEST_REPORT | no operational model deployment, autonomy, production model-security/quality approval |

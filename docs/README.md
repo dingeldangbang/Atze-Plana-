@@ -45,6 +45,9 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Agent Builder v1
 [Deklarative Agenten-Registry mit versionierter Konfiguration, Referenz-Zuweisungen und gebundenen Einzel-Runs durch die vollständige AI-Consent-Kette](26-agents/agents.md). Keine autonome Tool-Ausführung; Outputs DRAFT_UNCHALLENGED, nie gespeichert oder adoptiert.
 
+## Evidence-Analyse
+[Deterministische Widerspruchskandidaten (within/across records) und dokumentierte Quellenrangfolge als CALCULATED-Queries](16-evidence/analysis.md). Kandidaten, kein Urteil; Rangfolge ist keine Wahrheit; kein semantischer Abgleich, kein ML.
+
 ## Permission Leases
 [Begrenzte, ablaufende, widerrufbare Vorfreygaben für MCP tools/call](17-security/permission-leases.md): Reviewer gewährt mit Zielbindung, Tool-Bindung, Pflicht-Ablauf und Nutzungslimit; Verbrauch bei Reservierung; Widerruf unter Not-Stop erlaubt; niemals Ersatz technischer Gates.
 
