@@ -16,6 +16,9 @@
 - `app/context.py`: update, references, index_text, create_memory, retrieve
 - `app/context_api.py`: register_context_api
 - `app/context_models.py`: LinkedInput, ArchiveInput, Replica, Archive, ArchiveContent, MoveInput, MemoryInput, Memory, RetrievalQuery, EvidenceState, RetrievalHit, CacheInput, CacheObject, CleanupInput, CleanupResult, TierHealth, StorageHealth, ReindexInput, ReindexResult
+- `app/lease_api.py`: register_lease_api
+- `app/lease_models.py`: LeaseCreate, LeaseRevoke
+- `app/lease_service.py`: _parse_expires, LeaseValidation, effective_state, public, create_lease, consume_lease, revoke_lease
 - `app/main.py`: create_app
 - `app/mcp_api.py`: Discover, Call, gate, register_mcp_api
 - `app/mcp_client.py`: unique_object, DiscoveryClient

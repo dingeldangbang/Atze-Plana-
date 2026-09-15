@@ -752,11 +752,14 @@ paths:
           description: Storage unavailable
       security:
       - HTTPBearer: []
-      x-role: reviewer
-      x-side-effects: Explicit once-per-call external tool execution consent; durable
-        audit before bounded allowlisted tools/call over HTTPS; argument/result bounds;
-        PUBLIC/project/region/Privacy/stop/PLAN gates; 200 envelope may be BLOCKED/UNAVAILABLE;
-        results are EXTERNAL_SOURCE, never verified truth, never allowed for action
+      x-role: reviewer (per-call consent) or operator (active permission lease consumed
+        per use)
+      x-side-effects: 'Explicit external tool execution: reviewer once-per-call consent,
+        or operator use of an active, unexhausted, unexpired lease (consumed at reservation;
+        no refund on transport failure); the lease never bypasses technical gates
+        (allowlist, argument/result bounds, PUBLIC/project/region/Privacy/stop/PLAN);
+        durable audit before bounded tools/call over HTTPS; 200 envelope may be BLOCKED/UNAVAILABLE;
+        results are EXTERNAL_SOURCE, never verified truth, never allowed for action'
   /api/plans:
     post:
       tags:
@@ -2075,6 +2078,193 @@ paths:
       x-side-effects: None; read-only registry of runtime-manageable bindings with
         their real management routes and roles; environment-bound integrations are
         displayed, not runtime-manageable
+  /api/leases:
+    post:
+      tags:
+      - leases
+      summary: Create
+      operationId: create_api_leases_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaseValidation'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Api Leases Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Grant a bounded, expiring, revocable permission lease (Allow
+        Once/Task/Temporary); scope must exist; TTL <= 24h; stop blocks granting,
+        never revoking; a lease substitutes per-call human consent only, never technical
+        gates; audit lease.created
+    get:
+      tags:
+      - leases
+      summary: Leases
+      operationId: leases_api_leases_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Leases Api Leases Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only registry with computed effective state (active/expired/exhausted/revoked);
+        stored records stay append-only
+  /api/leases/{lease_id}:
+    get:
+      tags:
+      - leases
+      summary: Lease
+      operationId: lease_api_leases__lease_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: lease_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Lease Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Lease Api Leases  Lease Id  Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only single lease with computed effective state
+  /api/leases/{lease_id}/revoke:
+    post:
+      tags:
+      - leases
+      summary: Revoke
+      operationId: revoke_api_leases__lease_id__revoke_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: lease_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Lease Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaseRevoke'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Revoke Api Leases  Lease Id  Revoke Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed revocation + audit; allowed under emergency stop (risk-reducing);
+        lease data retained, no deletion endpoint
   /api/results:
     post:
       tags:
@@ -5734,6 +5924,66 @@ components:
       - created_at
       - reason
       title: JobStatus
+    LeaseRevoke:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: LeaseRevoke
+    LeaseValidation:
+      properties:
+        action:
+          type: string
+          const: mcp.tools_call
+          title: Action
+        scope_kind:
+          type: string
+          enum:
+          - task
+          - project
+          title: Scope Kind
+        scope_id:
+          type: string
+          title: Scope Id
+        tool:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tool
+        expires_at:
+          type: string
+          title: Expires At
+        max_uses:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Max Uses
+          default: 1
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - action
+      - scope_kind
+      - scope_id
+      - expires_at
+      - reason
+      title: LeaseValidation
     LinkInput:
       properties:
         target_kind:

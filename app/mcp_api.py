@@ -9,6 +9,7 @@ from app.ai_gateway import ExternalDataGateway, GateDenied, fingerprint
 from app.ai_service import policy
 from app.plan_service import task_gate
 from app.mcp_client import CANDIDATES, MAX_ARGUMENT_BYTES
+from app.lease_service import consume_lease
 
 
 class Discover(Input):
@@ -83,8 +84,8 @@ def register_mcp_api(app, settings, actor, reviewer, connection, store, storage)
                 audit(db, who, 'mcp.discovery_outcome', item['id'], {'state':item['state'], 'reason':item['reason']})
         return {'attempt':item, 'catalog':result, 'allowed_for_action':False}
 
-    @app.post('/api/mcp/brightdata/call', tags=['mcp'], openapi_extra={'x-role':'reviewer', 'x-side-effects':'Explicit once-per-call external tool execution consent; durable audit before bounded allowlisted tools/call over HTTPS; argument/result bounds; PUBLIC/project/region/Privacy/stop/PLAN gates; 200 envelope may be BLOCKED/UNAVAILABLE; results are EXTERNAL_SOURCE, never verified truth, never allowed for action'})
-    def call(body: Call, who=Depends(reviewer)) -> dict:
+    @app.post('/api/mcp/brightdata/call', tags=['mcp'], openapi_extra={'x-role':'reviewer (per-call consent) or operator (active permission lease consumed per use)', 'x-side-effects':'Explicit external tool execution: reviewer once-per-call consent, or operator use of an active, unexhausted, unexpired lease (consumed at reservation; no refund on transport failure); the lease never bypasses technical gates (allowlist, argument/result bounds, PUBLIC/project/region/Privacy/stop/PLAN); durable audit before bounded tools/call over HTTPS; 200 envelope may be BLOCKED/UNAVAILABLE; results are EXTERNAL_SOURCE, never verified truth, never allowed for action'})
+    def call(body: Call, who=Depends(actor)) -> dict:
         # Request-shape security bounds are rejected before any durable attempt or I/O.
         if body.tool not in CANDIDATES:
             raise HTTPException(422, 'Tool is not in the allowlisted candidate set')
@@ -99,7 +100,11 @@ def register_mcp_api(app, settings, actor, reviewer, connection, store, storage)
                         reason=None, reason_hash=fingerprint(body.reason),
                         arguments_sha256=hashlib.sha256(encoded_arguments.encode()).hexdigest())
             try:
-                item['policy_id'] = gate(db, body, storage, consent=body.allow_external_call,
+                consent = body.allow_external_call
+                if who == 'operator':
+                    consume_lease(db, who, 'mcp.tools_call', body.task_id, body.tool)
+                    consent = True
+                item['policy_id'] = gate(db, body, storage, consent=consent,
                                          denied_reason='MCP_EXTERNAL_CALL_DENIED')
                 if not token:
                     raise GateDenied('MCP_OAUTH_NOT_CONFIGURED_OR_INVALID')
@@ -110,7 +115,7 @@ def register_mcp_api(app, settings, actor, reviewer, connection, store, storage)
         if item['state'] != 'BLOCKED':
             with store.connect() as db:
                 try:
-                    if gate(db, body, storage, consent=body.allow_external_call,
+                    if gate(db, body, storage, consent=consent,
                             denied_reason='MCP_EXTERNAL_CALL_DENIED') != item['policy_id']:
                         raise GateDenied('MCP_POLICY_CHANGED')
                     result = gateway.call_brightdata(token, body.tool, body.arguments)

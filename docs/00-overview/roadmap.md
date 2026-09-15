@@ -21,7 +21,7 @@ Stand 2026-09-14; Begriffskorrektur (D1) 2026-09-15 übernommen: „2 GB" bezeic
 | 14 Testing | PARTIAL | Kern-Unit/Integration/API-Smoke; echter PLAN-Browserlauf ergänzt (Resultate in TEST_REPORT), Geräte/Agenten/Lasttest fehlen |
 | 15 Trends | PARTIAL | Echte deterministische Trend-Checks über ingestierte Telemetrie (Drift, Level-Shift, Varianzänderung, Out-of-Range-/Suspect-Raten) als Query mit dokumentierten Kriterien und VERIFIED TREND vs. INSUFFICIENT EVIDENCE ([Vertrag](../24-trends/trends.md)); kein ML, keine Prognose, keine Lifecycle-/Proaktivitäts-/allgemeine Anomalieengine |
 | 16 Evidence | PARTIAL | Manuelle Provenance, Hash, Review; keine Quellenrangfolge, automatische Wahrheit/Aktualität oder Widerspruchserkennung |
-| 17 Security | PARTIAL | Rollen, Fail-closed, Stop; keine individuelle Benutzerverwaltung, MFA, manipulationssicherer Audit |
+| 17 Security | PARTIAL | Rollen, Fail-closed, Stop; Permission-Lease-Engine für MCP tools/call (Allow Once/Task/Temporary + Expiry ≤24 h + Verbrauchslimit + bestätigter Widerruf, unter Stop widerrufbar; [Vertrag](../17-security/permission-leases.md)); keine individuelle Benutzerverwaltung, MFA, manipulationssicherer Audit |
 | 18 Deployment | PARTIAL | Lokaler Start, Build, CI; kein tatsächliches Free-Tier-/Produktionsdeployment |
 | 19 Operations | PARTIAL | Runbooks/Health/SQLite-Backup; reale In-App-Plattformübersicht aus gespeicherten Records plus Anbindungs-Registry mit +/−-Verwaltung (Reviewer-bestätigte Deaktivierung, Daten erhalten; [Vertrag](../27-monitoring/monitoring.md)); keine automatische Überwachung, kein Alerting/Metrics-Backend, keine Backups |
 

@@ -89,6 +89,15 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | SEC-004: storage failure returns redacted 503, not a SQL or filesystem traceback. | [test_core.py: test_storage_error_redacted](../../tests/test_core.py) |
 | DOC-001: authenticated schema reflects supported APIs and bearer authentication. | [test_core.py: test_schema](../../tests/test_core.py) |
 | SEC-005: both roles can inspect real stop state; write is reviewer-only. | [test_core.py: test_stop_read](../../tests/test_core.py) |
+| LEA-001: leases are reviewer-granted only; scope must exist; TTL/expiry/tool bounds enforced. | [test_leases.py: test_lease_creation_validation_and_roles](../../tests/test_leases.py) |
+| LEA-002: operator tool calls without a lease stay 403 (default deny preserved). | [test_leases.py: test_lease_operator_requires_active_lease](../../tests/test_leases.py) |
+| LEA-003: reviewer still needs the explicit per-call consent flag; a lease does not replace the reviewer consent. | [test_leases.py: test_lease_reviewer_consent_path_unchanged](../../tests/test_leases.py) |
+| LEA-004: operator with an active task-scoped lease completes a real TLS-peer tools/call; use consumed + audited. | [test_leases.py: test_lease_operator_executes_via_real_peer](../../tests/test_leases.py) |
+| LEA-005: max_uses bounds the lease; project scope covers tasks of that project, not other projects. | [test_leases.py: test_lease_multi_use_and_project_scope](../../tests/test_leases.py) |
+| LEA-006: a tool-bound lease refuses the other allowlisted tool; expiry is computed, not stored silently. | [test_leases.py: test_lease_tool_bound_and_expired](../../tests/test_leases.py) |
+| LEA-007: confirmed revocation blocks the operator immediately; revoking stays allowed under emergency stop. | [test_leases.py: test_lease_revocation_and_stop](../../tests/test_leases.py) |
+| LEA-008: an active lease does not bypass stop, privacy lock, allowlist or argument bounds. | [test_leases.py: test_lease_never_bypasses_technical_gates](../../tests/test_leases.py) |
+| LEA-009: a use is consumed at reservation time; a transport failure does not refund the lease. | [test_leases.py: test_lease_use_consumed_on_transport_failure](../../tests/test_leases.py) |
 | LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
 | LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
 | LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |
