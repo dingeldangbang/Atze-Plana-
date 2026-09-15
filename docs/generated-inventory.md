@@ -24,6 +24,7 @@
 - `app/mcp_client.py`: unique_object, DiscoveryClient
 - `app/models.py`: Input, ProjectInput, Project, Observation, EvidenceInput, Evidence, Review, Action, TaskInput, Task, Decision, ApprovalInput, Approval, StopInput, Stop, Audit
 - `app/monitoring_api.py`: register_monitoring_api
+- `app/ops_api.py`: BackupInput, _database_backup, register_ops_api
 - `app/plan_api.py`: register_plan_api
 - `app/plan_models.py`: PlanResource, PlanContent, PlanCreate, PlanRevise, PlanLockInput, PlanRevoke, Plan, PlanVersion, PlanLock, PlanStatus
 - `app/plan_service.py`: digest, latest, task_plan, guard, manifest, append_version, create_plan, revise_plan, create_lock, revoke_lock, status, task_gate, locked_context

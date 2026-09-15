@@ -13,6 +13,8 @@ python scripts/backup.py "$ATZE_DB_PATH" /sicherer/pfad/atze-snapshot.db
 
 Der Zielordner muss existieren und zugriffsgeschützt sein. Kein automatischer Zeitplan, kein Offsite-Upload, keine Verschlüsselung/Retention implementiert. Stopflag ist kein globaler Schreibstopp: Projekte und Evidenz können weiter erfasst werden.
 
+**In-App-Backup-Endpunkt (2026-09-15):** `POST /api/operations/backups` (Reviewer, `confirm`+`reason`) erzeugt einen verifizierten SQLite-Snapshot (exklusive 0600-Datei unter `<DB-Verzeichnis>/backups/`, SQLite-Backup-API, `integrity_check`) mit durablem Backup-Record inkl. SHA-256, Größe und je-Kind-Record-Zählern sowie Audit `operations.backup_created`; `GET /api/operations/backups` (beide Rollen) listet. Der Snapshot enthält den Zustand **vor** seinem eigenen Record/Audit. Unter Not-Stop erlaubt (read-only, risikoreduzierend). Scope bleibt **DATABASE_ONLY** — Objektwurzeln wie oben/v0.2 beschrieben separat sichern; ein Record belegt nur den Snapshot-Zeitpunkt, keinen Offsite-Kopien- oder Restore-Drill. Kein Lösch-Endpunkt.
+
 ## Recovery / Rollback
 1. Dienst stoppen; aktuelle DB einschließlich WAL-Zustand aufbewahren, nicht überschreiben.
 2. Backup mit `sqlite3.connect(...).execute('PRAGMA integrity_check')` oder Backup-Werkzeug prüfen.

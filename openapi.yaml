@@ -2265,6 +2265,102 @@ paths:
       x-role: reviewer
       x-side-effects: Confirmed revocation + audit; allowed under emergency stop (risk-reducing);
         lease data retained, no deletion endpoint
+  /api/operations/backups:
+    post:
+      tags:
+      - operations
+      summary: Create Backup
+      operationId: create_backup_api_operations_backups_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Backup Api Operations Backups Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Create a verified SQLite snapshot (exclusive 0o600 file, SQLite
+        backup API, integrity_check) plus a durable backup record and audit; DATABASE-ONLY
+        scope, object roots are documented separately; allowed under emergency stop
+        (read-only snapshot); no deletion endpoint, no automation
+    get:
+      tags:
+      - operations
+      summary: Backups
+      operationId: backups_api_operations_backups_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Backups Api Operations Backups Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only list of verified backup records; a record proves
+        only the snapshot at creation time, not an offsite copy or a restore drill
   /api/results:
     post:
       tags:
@@ -4949,6 +5045,27 @@ components:
       - entity_id
       - details
       title: Audit
+    BackupInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+        note:
+          type: string
+          title: Note
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: BackupInput
     Batch:
       properties:
         id:
