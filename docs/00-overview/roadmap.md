@@ -1,6 +1,6 @@
 # Roadmap und vollständige Modulabgrenzung
 
-Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführbarer Adapter/Workflow. Keine Liefertermine oder Performancezusagen.
+Stand 2026-09-14; Begriffskorrektur (D1) 2026-09-15 übernommen: „2 GB" bezeichnet das RAM der ausführenden Zielhardware (Honeywell CT45P-XON), kein Core-Speicherbudget; „Free Tier" ist eine externe Anbieter-Nutzungs-/Kostenklasse und niemals ein Ersatz für Daten. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführbarer Adapter/Workflow. Keine Liefertermine oder Performancezusagen.
 
 | Master-Bereich | Status | Fehlender Nachweis / nächster Schritt |
 |---|---|---|

@@ -18,7 +18,7 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Agent Builder v1 | IMPLEMENTED / TESTED | [Deklarative Registry, Zuweisungen, Einzel-Runs durch die vollständige Consent-Kette](docs/26-agents/agents.md); keine autonome Tool-Ausführung, kein Orchestrator |
 | Monitoring & Anbindungsverwaltung | IMPLEMENTED / TESTED | [Lesende Plattformübersicht, Integrations-Registry mit echten +/−-Routen](docs/27-monitoring/monitoring.md); kein Alerting, konfiguriert ≠ validiert |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
-| Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
+| Produktionsbetrieb & Ressourcenrahmen | CONDITIONAL | „2 GB" = RAM der ausführenden Zielhardware (Honeywell CT45P-XON), kein Core-Speicherbudget; „Free Tier" = externe Anbieter-Nutzungsklasse, nie Datenersatz ([Begriffstrennung](docs/18-deployment/free-tier.md)). Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
 | Agenten-Orchestrierung, Vollsandbox, Hardware-Repair, 3D, Cloud | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |
 

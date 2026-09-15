@@ -45,6 +45,9 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Agent Builder v1
 [Deklarative Agenten-Registry mit versionierter Konfiguration, Referenz-Zuweisungen und gebundenen Einzel-Runs durch die vollständige AI-Consent-Kette](26-agents/agents.md). Keine autonome Tool-Ausführung; Outputs DRAFT_UNCHALLENGED, nie gespeichert oder adoptiert.
 
+## Statusvokabular-Mapping
+[Verbindliche Zuordnung der neun Konversationszustände (VERIFIED/MEASURED/CALCULATED/CONDITIONAL/ESTIMATED/EXTERNAL_SOURCE/CONTRADICTED/UNKNOWN/BLOCKED) zu realen Modellfeldern und Kennzeichnungspflichten](00-overview/status-vocabulary.md). Keine Aufwertung ohne reale Operation; ESTIMATED bleibt Textpflicht.
+
 ## Monitoring & Anbindungsverwaltung
 [Lesende Plattformübersicht aus echten gespeicherten Records plus Integrations-Registry mit echten Add-/Remove-Routen](27-monitoring/monitoring.md). − ausschließlich Reviewer-bestätigte Deaktivierung mit Begründung, Daten bleiben erhalten; umgebungsgebundene Anbindungen nur einsehbar; kein Alerting, keine Wahrheitsaussagen.
 

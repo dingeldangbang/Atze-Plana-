@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 from pydantic import Field, field_validator
 from app.models import Input, Text
 
-MAX_CONTENT_BYTES = 4 * 1024 * 1024  # bounded single upload for the 2-GB target; split larger files externally
+MAX_CONTENT_BYTES = 4 * 1024 * 1024  # bounded single upload for the target hardware resource frame; split larger files externally
 
 ResourceKind = Literal['file', 'image', 'pdf', 'cad', 'measurement', 'dataset', 'database_result',
                        'query', 'software', 'configuration', 'log']

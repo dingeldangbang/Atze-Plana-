@@ -64,7 +64,7 @@ Auslieferungsformaten (`release/`-Ordner, Release-Checkliste, AAB) und der offen
 | 23 | **GitHub/CI/CD/Tests/Dokumentation**: Actions (Tests/Build/Validierung), README-Statusdisziplin, FINAL_VALIDATION_REPORT.md, Reproduzierbarkeit, keine Secrets | **IMPLEMENTED/TESTED** | 4 Workflows (`validate`, `universe`, `local-model`, `android`), heute grün; 169 lokale Tests PASS (2026-09-14); [FINAL_VALIDATION_REPORT.md](FINAL_VALIDATION_REPORT.md); README-Statustabelle entspricht Abschnitt „README ABSCHLUSSSTATUS"; `docs.py --check` Drift-Prüfung; Secret-Handling in [SECURITY.md](SECURITY.md) |
 | 24 | **Release-Checkliste** (`RELEASE_CHECKLIST.md` mit Statusregeln je Punkt) | **NOT IMPLEMENTED (als Datei)** | Äquivalente Disziplin in [Master-Matrix](docs/00-overview/master-acceptance.md)/[RELEASES.md](RELEASES.md); die aus der Konversation übernehmbare Checklisten-Datei fehlt (Delta D7) |
 | 25 | **Repository-Struktur** (Monorepo `apps/packages/agents/workers/bridge/unity/...` **oder begründete Alternative**), LICENSE | **PARTIAL / ENTSCHEIDUNG OFFEN** | Alternative Struktur (`app/`, `android/`, `docs/`, `scripts/`, `tests/`) ist erlaubt und in [PROJECT_BASELINE](PROJECT_BASELINE.md)/Dokumentation begründet; **LICENSE bewusst nicht erfunden** — Eigentümerentscheidung offen (Delta D8) |
-| 26 | **Ressourcenregelung (final korrigiert)**: „2 GB" = maximaler RAM der **ausführenden Zielhardware (Honeywell CT45P-XON)**, „Free Tier" = Nutzungs-/Kostenklasse **externer Anbieter**; dynamische lokale/externe Ressourcenwahl; kein Free-Tier-Fallback auf Fake-Daten | **ABWEICHUNG** | Repo-Texte verwenden „2-GB-Kapazität/2GB target" noch als Core-/Produktionsbudget (README, Master-Matrix) und nennen CT45P nur als fehlende physische Testhardware; die späte Neuinterpretation der Konversation ist **nicht** in die Doku übernommen (Delta D1) |
+| 26 | **Ressourcenregelung (final korrigiert)**: „2 GB" = maximaler RAM der **ausführenden Zielhardware (Honeywell CT45P-XON)**, „Free Tier" = Nutzungs-/Kostenklasse **externer Anbieter**; dynamische lokale/externe Ressourcenwahl; kein Free-Tier-Fallback auf Fake-Daten | **ÜBERNOMMEN (2026-09-15)** | D1 wurde am 2026-09-15 nachgezogen: README, Master-Matrix, Roadmap und [Free-Tier-Planung](docs/18-deployment/free-tier.md) trennen jetzt Zielhardware-RAM, externe Anbieter-Quotas und Core-Betriebsrahmen; historische Berichte (TEST_REPORT/FINAL_VALIDATION_REPORT) bleiben unverändert |
 
 ## 4. Deltas im Detail
 
@@ -122,9 +122,9 @@ Auslieferungsformaten (`release/`-Ordner, Release-Checkliste, AAB) und der offen
 
 ## 6. Empfohlene Nacharbeit (Vorschläge, keine Zusicherungen)
 
-1. **D1 nachziehen:** 2-GB-/Free-Tier-Begriffskorrektur in Roadmap/Master-Matrix/README (Dokumentationsänderung).
-2. **RELEASE_CHECKLIST.md** aus der Konversation übernehmen (Arbeitsdokument mit Statusregeln je Punkt).
-3. **Statusvokabular-Mapping** dokumentieren (Konversationsstatus ↔ Modellfelder).
+1. **D1 nachziehen:** 2-GB-/Free-Tier-Begriffskorrektur in Roadmap/Master-Matrix/README (Dokumentationsänderung). *Erledigt 2026-09-15.*
+2. **RELEASE_CHECKLIST.md** aus der Konversation übernehmen (Arbeitsdokument mit Statusregeln je Punkt). *Erstellt 2026-09-15 aus den realen Repo-Disziplinen ([RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)).*
+3. **Statusvokabular-Mapping** dokumentieren (Konversationsstatus ↔ Modellfelder). *Erstellt 2026-09-15 ([Statusvokabular-Mapping](docs/00-overview/status-vocabulary.md)).*
 4. **Auslieferungsformat entscheiden:** `release/`-Ordner, AAB, stabile Produktionssignatur — benötigt
    Eigentümerentscheidungen (Signatur-Key ist bewusst kein Agentenrecht).
 5. **Lizenzentscheidung** des Repository-Eigentümers einholen.

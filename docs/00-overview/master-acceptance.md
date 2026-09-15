@@ -25,7 +25,7 @@ Stand 2026-09-14. Full-platform release **BLOCKED**. A working increment is not 
 | CLI | actual dev/test/build commands | no universal project/device/agent/workflow CLI |
 | Security | real scoped negative tests/TLS/role/hash/stop/secret checks | universal privacy, encrypted legacy secretcache, independent pentest and physical security gates remain |
 | CI/docs/build | real Core CI; new independent model/Android jobs | lint/typecheck/browser/physical-device/Unity coverage not inferred from pytest or javac |
-| 2GB target | Core imports no model weights/Unity/Android SDK | no comprehensive memory/load/performance acceptance; separate CI runner specs are not Core guarantees |
+| Target hardware resource frame | "2 GB" is the maximum RAM of the executing target device (Honeywell CT45P-XON), not a Core memory budget; "free tier" is an external provider usage/cost class and never a fallback data source; Core keeps no model weights/Unity/Android SDK | no comprehensive memory/load/performance acceptance on the physical device (NOT RUN); separate CI runner specs are not Core guarantees |
 
 ## Evidence status discipline
 Web model metadata is EXTERNAL_SOURCE. Verified byte hashes prove only matching artifacts. Actual model generation proves only that concrete inference. SDK emulator is a real virtual Android runtime, not a physical Honeywell/ESP32 device. Hardware observations remain UNKNOWN/NOT RUN until actually measured. No torque or other measurement derived from a model answer. Mathematical derivation must be labelled CALCULATED with explicit inputs/units; no universal conversion of existing records to verified facts.
