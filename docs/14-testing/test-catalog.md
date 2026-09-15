@@ -111,6 +111,8 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | LEA-007: confirmed revocation blocks the operator immediately; revoking stays allowed under emergency stop. | [test_leases.py: test_lease_revocation_and_stop](../../tests/test_leases.py) |
 | LEA-008: an active lease does not bypass stop, privacy lock, allowlist or argument bounds. | [test_leases.py: test_lease_never_bypasses_technical_gates](../../tests/test_leases.py) |
 | LEA-009: a use is consumed at reservation time; a transport failure does not refund the lease. | [test_leases.py: test_lease_use_consumed_on_transport_failure](../../tests/test_leases.py) |
+| LOAD-001: without --allow-fixtures the tool blocks instead of writing synthetic success. | [test_loadtest.py: test_loadtest_requires_explicit_fixture_opt_in](../../tests/test_loadtest.py) |
+| LOAD-002: a real bounded run against a disposable Core passes and writes a truthful structured report. | [test_loadtest.py: test_loadtest_real_run_and_structured_report](../../tests/test_loadtest.py) |
 | LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
 | LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
 | LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |

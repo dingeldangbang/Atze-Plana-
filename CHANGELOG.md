@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased — Local load test tool (open-parts series, increment 6)
+- Begrenzter lokaler Lasttest (Roadmap 14 Testing): `scripts/loadtest.py --allow-fixtures` startet eine eigene Wegwerf-Instanz (uvicorn-Subprozess, ephemeraler Port, temporäre DB/Storage, frische Tokens; ohne Opt-in BLOCKED) und führt Arbeitsthreads mit gemischten Reads und 10 % gebundenen Mutationen (eindeutige Projekt-Anlagen) aus; strukturiertes Report reports/loadtest.json mit Anzahl/Fehlern/p50/p95/p99/max/Throughput/Wall-Time; optionale lokale Schwellenprüfung nur mit --assert-p95-ms. Ehrlicher Scope: Ein-Maschinen-/Build-spezifisch, kein verteilter/Cloud-Lastnachweis, SQLite serialisiert Schreibzugriffe (in Report-Limits dokumentiert). Referenzlauf dieser Umgebung: 320 Requests, 0 Fehler, p95 ≈ 52 ms, ≈ 160 rps. 2 neue Tests (LOAD-001..002) mit realem Subprozesslauf, 269 PASS.
+
 ## Unreleased — Read-only CLI (open-parts series, increment 5)
 - Echte read-only CLI (Roadmap 12 Software): `python -m app.cli COMMAND` fragt die dokumentierte API eines laufenden Cores ab (status ohne Token via /health; runtime/monitoring/integrations/projects/evidence/tasks/results/plans/agents/resources/leases/backups mit Token). Verlustfreie Standardausgabe (eine JSON-Zeile je Eintrag bzw. schlüssel:wert-Zeilen, keine beschönigende Feldauswahl), --raw für die exakte Payload; Token nur aus --token/ATZE_TOKEN, wird nie ausgegeben; Fail-closed: fehlendes Token → Exit 1, unerreichbarer Core → Exit 2 ohne Ersatzdaten, 401/403/nicht-200 → Exit 1 mit Status. 4 neue Tests (CLI-001..004) als echte Subprozesse gegen einen echten lokalen Uvicorn-Core auf ephemeralm Port, 267 PASS. Keine Mutationen, kein universeller Builder, kein interaktiver Modus.
 

@@ -34,7 +34,7 @@ Statusregeln: **DONE** = Nachweis-Link vorhanden und aktuell · **OPEN** = Arbei
 | Punkt | Regel | Status | Nachweis |
 |---|---|---|---|
 | Backup/Restore | Backup erstellt **und** Restore inklusive Hashprüfung nachgewiesen | CONDITIONAL | In-App-Backup-Endpunkt + CLI-Skript real und getestet (Datei-SHA/Integrität/Zähler, Restore-Datei-Verifikation in Tests); vollständiger Notfall-Restore-Drill und Offsite-Kopie bleiben Betriebssache ([Betriebshandbuch](docs/19-operations/operations.md)) |
-| 2-GB-Rahmen | „2 GB" = Zielhardware-RAM (Honeywell CT45P-XON); kein Lasttest auf dem Gerät durchgeführt | CONDITIONAL | [Free-Tier-Planung](docs/18-deployment/free-tier.md) |
+| 2-GB-Rahmen | „2 GB" = Zielhardware-RAM (Honeywell CT45P-XON); lokaler Entwicklungs-Lasttest existiert, kein Lasttest auf dem Gerät durchgeführt | CONDITIONAL | [Free-Tier-Planung](docs/18-deployment/free-tier.md), [lokaler Lasttest](docs/14-testing/testing-strategy.md) |
 | Not-Stop & Rollback | Stop-Mechanismus getestet; Rollback-/Downgrade-Grenzen dokumentiert (kein Mischbetrieb Alt/Neu) | CONDITIONAL | [Betriebshandbuch](docs/19-operations/operations.md) |
 
 ## Regel zur Pflege
