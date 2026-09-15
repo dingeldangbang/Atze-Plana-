@@ -9,7 +9,7 @@ Statusregeln: **DONE** = Nachweis-Link vorhanden und aktuell · **OPEN** = Arbei
 |---|---|---|---|
 | Testsuite | `python -m pytest -q` vollständig PASS, keine xfail-Vertuschung | DONE | CI-Run `validate` ([Status](https://github.com/dingeldangbang/Atze-Plana-/actions)) |
 | Dokumentations-Drift | `python scripts/docs.py --check` PASS (OpenAPI/APIs/Testkatalog/Inventory konsistent) | DONE | CI-Run `validate` |
-| Realitätsprüfung | `python scripts/reality_check.py` PASS (keine verbotenen Importe/URLs, kein assert-only Smoke) | DONE | CI-Run `validate` |
+| Realitätsprüfung | `python scripts/reality_check.py` PASS (keine Test-/Mock-Imports im Runtimebaum, keine Target-URLs, kein assert-only Smoke) | DONE | CI-Run `validate` |
 | HTTP-Smoke | `python scripts/smoke.py --allow-fixtures` PASS gegen frische Wegwerf-Instanz | DONE | CI-Run `validate` |
 | Browser-Gate | Echtes Chromium (CDP) gegen die UI in CI, alle Checks PASS | DONE | CI-Run `validate`, Browser-Report im Job-Log |
 | CI gesamt | Alle Workflows (`validate`, `universe`, `local-model`, `android`) grün auf dem Release-Commit | DONE | GitHub Actions |

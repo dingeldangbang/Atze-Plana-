@@ -1,6 +1,6 @@
 # Betrieb mit etwa 2 GB RAM — CONDITIONAL
 
-Begriffskorrektur (2026-09-15): „2 GB" bezeichnet das maximale RAM der **ausführenden Zielhardware (Honeywell CT45P-XON)** — der Rahmen, innerhalb dessen der Core hier geplant wird —, kein Core-Speicherbudget an sich. „Free Tier" ist eine Nutzungs-/Kostenklasse **externer Anbieter**, nie ein Datenersatz oder Fallback auf Beispieldaten. Kein Lasttest auf dem physischen Gerät und kein Free-Tier-Deployment wurden durchgeführt (NOT RUN). Nachfolgend ein **Planungsbudget, keine Messwerte oder Zusage**.
+Begriffskorrektur (2026-09-15): „2 GB" bezeichnet das maximale RAM der **ausführenden Zielhardware (Honeywell CT45P-XON)** — der Rahmen, innerhalb dessen der Core hier geplant wird —, kein Core-Speicherbudget an sich. „Free Tier" ist eine Nutzungs-/Kostenklasse **externer Anbieter**, nie ein Datenersatz oder Fallback auf Beispieldaten. Kein Lasttest auf dem physischen Gerät und kein Free-Tier-Deployment wurden durchgeführt (NOT RUN). Welche externen **Free-Tier-Optionen** es je Bereich gibt und welchen Einrichtungspfad der Core dafür implementiert hat, steht in den [Free-Tier-Optionen](free-tier-options.md). Nachfolgend ein **Planungsbudget, keine Messwerte oder Zusage**.
 
 | Komponente | RAM-Planungsreserve |
 |---|---:|

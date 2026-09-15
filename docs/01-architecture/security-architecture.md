@@ -13,7 +13,7 @@
 
 Authentifizierung ist eine fest konfigurierte Rollenidentität, keine Benutzerverwaltung. Zwei verschiedene Tokens sind technisch vorgeschrieben, die tatsächliche personelle Trennung ist organisatorisch sicherzustellen. Kein Projekt-ACL: beide Rollen können alle Projekte lesen.
 
-Fehler: 401 fehlender/falscher Token, 403 Rolle unzulässig. Domainvalidierung prüft vor dem Commit. Fehlgeschlagene Authentifizierung wird bisher nicht auditiert. Kein Approval-Bypass: approve berechnet unter derselben Schreibtransaktion Triage erneut und akzeptiert nur approval_required.
+Fehler: 401 fehlender/falscher Token, 403 Rolle nicht ausreichend. Domainvalidierung prüft vor dem Commit. Fehlgeschlagene Authentifizierung wird bisher nicht auditiert. Kein Approval-Bypass: approve berechnet unter derselben Schreibtransaktion Triage erneut und akzeptiert nur approval_required.
 
 [Threat Model](../../THREAT_MODEL.md), [Human approval und Grenzen](../../SECURITY.md), [Audit/Stop-Vertrag](../02-core/core.md).
 

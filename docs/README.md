@@ -57,6 +57,9 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Statusvokabular-Mapping
 [Verbindliche Zuordnung der neun Konversationszustände (VERIFIED/MEASURED/CALCULATED/CONDITIONAL/ESTIMATED/EXTERNAL_SOURCE/CONTRADICTED/UNKNOWN/BLOCKED) zu realen Modellfeldern und Kennzeichnungspflichten](00-overview/status-vocabulary.md). Keine Aufwertung ohne reale Operation; ESTIMATED bleibt Textpflicht.
 
+## Free-Tier-Optionen
+[Gleichwertige Anschlussmöglichkeiten je Bereich: OpenAI-kompatible Free-Tier-KI-Anbieter mit exaktem Einrichtungspfad, MCP/OAuth, lokale Gratis-Optionen](18-deployment/free-tier-options.md). OPTION bis Schlüssel + Validierung vorliegen; konfiguriert ≠ validiert; kein Fallback auf Beispieldaten.
+
 ## Monitoring & Anbindungsverwaltung
 [Lesende Plattformübersicht aus echten gespeicherten Records plus Integrations-Registry mit echten Add-/Remove-Routen](27-monitoring/monitoring.md). − ausschließlich Reviewer-bestätigte Deaktivierung mit Begründung, Daten bleiben erhalten; umgebungsgebundene Anbindungen nur einsehbar; kein Alerting, keine Wahrheitsaussagen.
 

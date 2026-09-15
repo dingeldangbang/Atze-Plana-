@@ -9,7 +9,7 @@ Die Master-Anforderung nennt Allow Once / Task / Temporary / Revoke als Freigabe
 - **Verbrauch bei Reservierung:** `uses_count` wird vor dem I/O incrementiert; ein späterer Transportfehler erstattet keine Nutzung (die Erlaubnis wurde ausgeübt, das versuchen ist der Akt).
 - **Append-only Speicher:** der gespeicherte Zustand ist `active`/`revoked`; `expired` und `exhausted` werden **berechnet** (`effective_state`), nie still umgeschrieben.
 - **Nicht aktiv nutzbare Leases** (abgelaufen/erschöpft/widerrufen) führen beim Operator-Call zu 403 mit explizitem Grund; ohne jede Lease ebenfalls 403 (Default-Deny bleibt erhalten).
-- **Stop-Asymmetrie:** Gewähren unter Not-Stop ist blockiert (409); **Widerruf ist unter Not-Stop erlaubt** (risikoreduzierend). Gesperrte Ausführung bleibt in jedem Fall verweigert.
+- **Stop-Asymmetrie:** Gewähren unter Not-Stop ist blockiert (409); **Widerruf ist unter Not-Stop erlaubt** (risikoreduzierend). Ausführung ohne aktive Freigabe bleibt in jedem Fall abgelehnt.
 - Audit: `lease.created` / `lease.used` / `lease.revoked`.
 
 ## API-Vertrag

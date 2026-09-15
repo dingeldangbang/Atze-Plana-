@@ -149,7 +149,7 @@ el('ai-lock').onclick = async () => {
     await api('ai/policy', 'POST', {});
     if (current !== session) return;
     await refresh();
-    if (current === session) status('KI gesperrt: Local-only, External DENY, alle Allowlists geleert. Bereits laufende Übertragung nicht rückrufbar.');
+    if (current === session) status('KI-Richtlinie auf lokal gesetzt: Local-only, External DENY, alle Allowlists geleert. Bereits laufende Übertragung nicht rückrufbar.');
   } catch (error) { if (current === session) status(error.message); }
 };
 
@@ -235,7 +235,7 @@ function renderMonitoring(monitoring) {
     `Telemetrie-Geräte aktiv ${c.telemetry_devices.active} / deaktiviert ${c.telemetry_devices.deactivated} · Sensoren aktiv ${c.telemetry_sensors.active} / deaktiviert ${c.telemetry_sensors.deactivated} · Batches ${c.telemetry_batches} · Samples ${c.telemetry_samples} (davon suspect laut Device: ${c.telemetry_suspect_samples}, außerhalb deklarierter Range: ${c.telemetry_flagged_out_of_range})`,
     `Ressourcen aktiv ${c.resources.active} / deaktiviert ${c.resources.deactivated} · gespeicherte Versionsbytes ${c.resource_versions_stored_bytes} · Agenten aktiv ${c.agents.active} / deaktiviert ${c.agents.deactivated}`,
     `Agent-Runs: Consent ausstehend ${c.agent_runs.awaiting_consent} · DRAFT_UNCHALLENGED ${c.agent_runs.draft_unchallenged} · BLOCKED ${c.agent_runs.blocked} · UNAVAILABLE ${c.agent_runs.unavailable}`,
-    `KI-Provider konfiguriert ${i.ai_providers.length} (konfiguriert ≠ validiert) · Bright-Data-MCP ${i.brightdata_mcp.configured ? 'CONFIGURED (Discovery/Tools-Call möglich; Live-Validierung separat)' : 'NOT_CONFIGURED'} · Telemetrie-Ingest ${i.telemetry_ingest.configured ? 'CONFIGURED (HTTP/HTTPS)' : 'NOT_CONFIGURED (Ingest verweigert)'}`,
+    `KI-Provider konfiguriert ${i.ai_providers.length} (konfiguriert ≠ validiert) · Bright-Data-MCP ${i.brightdata_mcp.configured ? 'CONFIGURED (Discovery/Tools-Call möglich; Live-Validierung separat)' : 'NOT_CONFIGURED'} · Telemetrie-Ingest ${i.telemetry_ingest.configured ? 'CONFIGURED (HTTP/HTTPS)' : 'NOT_CONFIGURED (aktiviert sich mit dem Token)'}`,
     `Speicher: ${monitoring.storage.tiers.map(t => `${t.tier}=${t.status}`).join(' · ')} · Cache aktiv ${monitoring.storage.cache_active_bytes} B / abgelaufen ${monitoring.storage.cache_expired_bytes} B · Archiv logisch ${monitoring.storage.archive_logical_bytes} B`,
   ], (node, row) => { node.textContent = row; });
 }

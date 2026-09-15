@@ -10,12 +10,12 @@ Stand 2026-09-14, Ausgangscommit `f4fedc0`. Verbindliche [Reality Policy](../../
 - README nannte die echte, datenleere Arbeitsoberfläche missverständlich „Demo“. Das wurde korrigiert; keine Funktion entfernt.
 
 ## Technisch verschärft
-1. `ATZE_MODE=operational|test`; SQLite-Tabelle `instance_mode` und `.atze-mode` in tatsächlichen Dateiablagen binden den Modus. Cross-Mode-Zugriff wird verweigert. Kein Testmodus aktiviert Mocks: dieselben echten lokalen Komponenten.
+1. `ATZE_MODE=operational|test`; SQLite-Tabelle `instance_mode` und `.atze-mode` in tatsächlichen Dateiablagen binden den Modus. Cross-Mode-Zugriff wird abgelehnt. Kein Testmodus aktiviert Mocks: dieselben echten lokalen Komponenten.
 2. Smoke nimmt keine Ziel-URL entgegen, startet einen eigenen realen Childprozess auf Loopback mit temporärer DB/Objektwurzel und neuen Tokens. Geerbte ATZE-Konfiguration wird verworfen, HTTP-Proxies deaktiviert. Vor Fixtures prüft er öffentlichen UND authentifizierten Testmodus. Er beendet den Childprozess und entfernt temporäre Daten.
 3. Prüfungen im Smoke sind echte Kontrollflüsse, keine mit `python -O` entfernbaren Assertions. Reports starten NOT_RUN/RUNNING und enden abhängig von Ausführung PASS/FAIL; fehlendes Opt-in BLOCKED. Ausführungsfehler überschreiben vorherige PASS-Reports. Syntaxfehler bei CLI-Argumenten starten keinen Test und erzeugen keinen neuen Testnachweis.
 4. Storage meldet Implemented/Configured sowie AVAILABLE, NOT_CONFIGURED, UNAVAILABLE oder BLOCKED getrennt. Unerreichbare und nicht messbare Kapazität liefert null-Werte. Automatische Erstplatzierung auf einen anderen tatsächlich verfügbaren lokalen Datenträger ist ein echter Storage-Policyweg, **kein Fake-Fallback**.
 5. UI kennzeichnet TESTINSTANZ nach authentifizierter Abfrage, verwirft veraltete Workspacewerte bei Ladefehlern und zeigt keine Ersatzdaten. Nicht implementierte Module bleiben ohne Scheinbedienelemente.
-6. CI prüft verbotene Test-/Mock-Imports im Runtimebaum, fehlende Policy und entfernbare Smoke-Assertions/Target-URL. Diese AST-Prüfung ist eng begrenzt, kein allgemeiner semantischer Fake-Detektor.
+6. CI erkennt Test-/Mock-Imports im Runtimebaum und lässt den Lauf fehlschlagen, fehlende Policy und entfernbare Smoke-Assertions/Target-URL. Diese AST-Prüfung ist eng begrenzt, kein allgemeiner semantischer Fake-Detektor.
 
 ## Getrennte Nachweisachsen
 „lokale Tests“ bezeichnet tatsächlich ausgeführte Softwaretests mit gekennzeichneten Eingaben, niemals Hardware-/Provider-Livevalidierung. Die Konfiguration einer anderen Instanz ist unbekannt.

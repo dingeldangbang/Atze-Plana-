@@ -44,4 +44,4 @@ Symptom in einem externen System: Hersteller-/SDK-Logs mit Zustimmung sichern, H
 | CONDITIONAL trotz verified Evidence | Maße/Identität/Bedingungen/Messung/Alternative/Kausalität fehlen | konkreten Findings mit Originalbelegen/Test nachgehen; Reviewer-Approval kann keine Lücke wegklicken |
 | BLOCK bei Konflikt | identische deklarierte Identität/Bedingungen, abweichende Werte | Variante/Revision/Originalquelle klären, nicht bevorzugten Wert auswählen |
 | Scope-/Finding-Limit BLOCK | vollständige Prüfung überschreitet Bounds | Projekt/Ergebnis fachlich sinnvoll aufteilen und vollständig neu prüfen; kein Teil-PASS |
-| fact/decision Memory 409 | direkter Übernahmeweg gesperrt | aktuelles Result→Challenge→Triage→ggf. Approval→Reviewer Adopt; nur Inferenz manuell untrusted erfassen |
+| fact/decision Memory 409 | direkter Übernahmeweg nicht verfügbar | aktuelles Result→Challenge→Triage→ggf. Approval→Reviewer Adopt; nur Inferenz manuell untrusted erfassen |
