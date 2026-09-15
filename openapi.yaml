@@ -2503,6 +2503,339 @@ paths:
       x-role: both
       x-side-effects: None; deterministic CALCULATED ranking over declared fields
         (review state, confidence, recency); not a truth or source-quality claim
+  /api/structures:
+    post:
+      tags:
+      - structures
+      summary: Create
+      operationId: create_api_structures_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructureCreateInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Create a structure registry entry plus immutable version 1 from
+        the fully specified model; structural validation (unique local ids, edge endpoints,
+        contains forest, unique generated routes) before persistence; stop blocks
+    get:
+      tags:
+      - structures
+      summary: Structures
+      operationId: structures_api_structures_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Structure'
+                title: Response Structures Api Structures Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only registry
+  /api/structures/{structure_id}:
+    get:
+      tags:
+      - structures
+      summary: Structure
+      operationId: structure_api_structures__structure_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; read-only single structure
+  /api/structures/{structure_id}/versions:
+    get:
+      tags:
+      - structures
+      summary: Versions
+      operationId: versions_api_structures__structure_id__versions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StructureVersion'
+                title: Response Versions Api Structures  Structure Id  Versions Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; immutable append-only version history with manifest hashes
+    post:
+      tags:
+      - structures
+      summary: New Version
+      operationId: new_version_api_structures__structure_id__versions_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StructureVersion'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: operator
+      x-side-effects: Append a new immutable fully-specified model version (predecessor
+        chain; identical manifest rejected 409; full validation; stop blocks); previous
+        versions stay unchanged
+  /api/structures/{structure_id}/generate:
+    get:
+      tags:
+      - structures
+      summary: Generate
+      operationId: generate_api_structures__structure_id__generate_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      - name: version
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Version
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Generate Api Structures  Structure Id  Generate Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; deterministic CALCULATED generation of the routing overview
+        and the UI placeholder skeleton from one stored version; no file is written,
+        no code is executed; empty placeholders, never invented content
+  /api/structures/{structure_id}/deactivate:
+    post:
+      tags:
+      - structures
+      summary: Deactivate
+      operationId: deactivate_api_structures__structure_id__deactivate_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructureDeactivateInput'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Confirmed deactivation + audit; all versions and history are
+        retained; no deletion endpoint exists; stop blocks
   /api/results:
     post:
       tags:
@@ -5912,6 +6245,32 @@ components:
       - task_id
       - reason
       title: Discover
+    EdgeInput:
+      properties:
+        source:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Source
+        target:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Target
+        kind:
+          type: string
+          enum:
+          - contains
+          - triggers
+          - depends_on
+          title: Kind
+      additionalProperties: false
+      type: object
+      required:
+      - source
+      - target
+      - kind
+      title: EdgeInput
     Evidence:
       properties:
         observations:
@@ -6506,6 +6865,46 @@ components:
       required:
       - content_base64
       title: NewVersionInput
+    NodeInput:
+      properties:
+        local_id:
+          type: string
+          pattern: ^[a-z0-9][a-z0-9_-]{0,63}$
+          title: Local Id
+        kind:
+          type: string
+          enum:
+          - page
+          - section
+          - component
+          - action
+          - data
+          title: Kind
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        permissions:
+          items:
+            type: string
+            maxLength: 64
+            minLength: 1
+          type: array
+          maxItems: 8
+          title: Permissions
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - local_id
+      - kind
+      - name
+      title: NodeInput
     Observation:
       properties:
         subject:
@@ -7667,6 +8066,158 @@ components:
       - cache_expired_bytes
       - archive_logical_bytes
       title: StorageHealth
+    Structure:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+        id:
+          type: string
+          title: Id
+        version:
+          type: integer
+          title: Version
+        state:
+          type: string
+          enum:
+          - active
+          - deactivated
+          title: State
+        created_at:
+          type: string
+          title: Created At
+        created_by:
+          type: string
+          title: Created By
+        deactivated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Deactivated At
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - id
+      - version
+      - state
+      - created_at
+      - created_by
+      title: Structure
+    StructureCreateInput:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/NodeInput'
+          type: array
+          maxItems: 64
+          minItems: 1
+          title: Nodes
+        edges:
+          items:
+            $ref: '#/components/schemas/EdgeInput'
+          type: array
+          maxItems: 128
+          title: Edges
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+        name:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Name
+        description:
+          type: string
+          maxLength: 2000
+          title: Description
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - nodes
+      - name
+      title: StructureCreateInput
+    StructureDeactivateInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 500
+          minLength: 8
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: StructureDeactivateInput
+    StructureVersion:
+      properties:
+        id:
+          type: string
+          title: Id
+        structure_id:
+          type: string
+          title: Structure Id
+        version:
+          type: integer
+          title: Version
+        predecessor_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Predecessor Id
+        nodes:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Nodes
+        edges:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Edges
+        manifest_hash:
+          type: string
+          title: Manifest Hash
+        note:
+          type: string
+          title: Note
+        created_at:
+          type: string
+          title: Created At
+        created_by:
+          type: string
+          title: Created By
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - structure_id
+      - version
+      - predecessor_id
+      - nodes
+      - edges
+      - manifest_hash
+      - note
+      - created_at
+      - created_by
+      title: StructureVersion
     Task:
       properties:
         project_id:
@@ -7915,6 +8466,31 @@ components:
       - confirm
       - reason
       title: VerifyInput
+    VersionInput:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/NodeInput'
+          type: array
+          maxItems: 64
+          minItems: 1
+          title: Nodes
+        edges:
+          items:
+            $ref: '#/components/schemas/EdgeInput'
+          type: array
+          maxItems: 128
+          title: Edges
+        note:
+          type: string
+          maxLength: 2000
+          title: Note
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - nodes
+      title: VersionInput
     Why:
       properties:
         result:

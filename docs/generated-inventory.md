@@ -35,6 +35,9 @@
 - `app/sandbox.py`: _limits, _tail, run_isolated
 - `app/storage.py`: guard, Storage
 - `app/store.py`: now, identity, Store, get, put, listing, audit, stopped
+- `app/structure_api.py`: register_structure_api
+- `app/structure_models.py`: StructureInput, Structure, NodeInput, EdgeInput, VersionInput, StructureCreateInput, StructureDeactivateInput, StructureVersion
+- `app/structure_service.py`: slug, validate_model, generate_routes, generate_skeleton, manifest_hash, stored_hash
 - `app/telemetry_api.py`: parse_timestamp, register_telemetry_api
 - `app/telemetry_models.py`: DeviceInput, Device, DeclaredRange, SensorInput, Sensor, Sample, IngestInput, Batch, BatchSamples, DeactivateInput
 - `app/trend_api.py`: register_trend_api

@@ -20,7 +20,7 @@ function list(id, rows, render) {
   rows.forEach(row => { const item = document.createElement('li'); if (row) render(item, row); else item.textContent = 'Keine Einträge vorhanden.'; el(id).append(item); });
 }
 function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
-  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers', 'plans', 'monitor-list', 'trend-results', 'integrations'].forEach(id => {
+  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers', 'plans', 'monitor-list', 'trend-results', 'integrations', 'structures', 'structure-routes'].forEach(id => {
     const item = document.createElement('li'); item.textContent = message; el(id).replaceChildren(item);
   });
   const option = document.createElement('option'); option.value = ''; option.textContent = message;
@@ -37,13 +37,14 @@ function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
   el('runtime-mode').textContent = 'Instanzmodus nicht bestätigt.';
   detailRequest++; el('challenge-detail').replaceChildren();
   el('challenge-worker-state').textContent = 'Worker-Konfiguration nicht bestätigt.';
+  structureReset(message);
 }
 async function refresh() {
   const current = session;
   const request = ++refreshRequest;
   status('Lade aktuelle Workspace-Daten…');
   try {
-    const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories, monitoring, integrationRegistry, devices, models] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory', 'monitoring/overview', 'integrations', 'telemetry/devices', 'ai/models'].map(path => api(path)));
+    const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories, monitoring, integrationRegistry, devices, models, structures] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory', 'monitoring/overview', 'integrations', 'telemetry/devices', 'ai/models', 'structures'].map(path => api(path)));
     if (current !== session || request !== refreshRequest) return;
     if (!['test', 'operational'].includes(runtime.mode)) throw new Error('Instanzmodus unbekannt; Daten nicht als Betrieb bestätigt.');
     list('projects', projects, (node, row) => { node.textContent = `${row.name} — ${row.description || 'Ohne Beschreibung'} · ${row.id}`; });
@@ -70,6 +71,15 @@ async function refresh() {
     list('ai-providers', ai.providers, (node, row) => { node.textContent = `${row.id} · ${row.mode} · Region (konfiguriert): ${row.region} · ${row.status}`; });
     renderMonitoring(monitoring);
     renderIntegrations(integrationRegistry, devices, models);
+    list('structures', structures, (node, row) => { node.textContent = `${row.name} · ${row.state === 'active' ? 'aktiv' : 'deaktiviert'} · Version ${row.version} · ${row.id}`; });
+    const structureKeep = structurePendingSelect || el('structure-select').value;
+    structurePendingSelect = '';
+    el('structure-select').replaceChildren();
+    const structureEmpty = document.createElement('option'); structureEmpty.value = ''; structureEmpty.textContent = structures.length ? 'Struktur auswählen' : 'Keine Struktur vorhanden';
+    el('structure-select').append(structureEmpty);
+    structures.forEach(structure => { const option = document.createElement('option'); option.value = structure.id; option.textContent = `${structure.name} · v${structure.version} · ${structure.state}`; el('structure-select').append(option); });
+    if (structures.some(structure => structure.id === structureKeep)) el('structure-select').value = structureKeep;
+    if (el('structure-select').value) loadStructure(el('structure-select').value); else structureReset('Keine Struktur ausgewählt.');
     status('Verbunden. Daten aus dem aktuellen Workspace geladen.');
   } catch (error) { if (current === session && request === refreshRequest) { clearWorkspace('Daten nicht verfügbar — kein Ersatz durch Beispieldaten.'); status(error.message); } }
 }
@@ -383,5 +393,309 @@ el('trend-form').onsubmit = async event => {
       ...report.checks.map(c => `${c.type}: ${c.status} · ${c.statistic} = ${c.value === null ? '—' : c.value} · Schwelle ${c.threshold}${c.failed_criteria.length ? ` · nicht erfüllt: ${c.failed_criteria.join('; ')}` : ''}`),
     ], (node, row) => { node.textContent = row; });
     status('Trend-Analyse abgeschlossen (Query ohne Nebenwirkungen).');
+  } catch (error) { if (current === session) status(error.message); }
+};
+
+/* Struktur-Builder (AXM v0.1) — lokale Staging-Entwürfe, versionierte Commits, CALCULATED-Generierung ohne Nebeneffekte. */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const NODE_W = 180, NODE_H = 64;
+let structureSelected = '';
+let structurePendingSelect = '';
+let structureInfo = null;
+let structureVersion = null;
+let structureWorking = null;
+let structurePositions = new Map();
+let structureSelectedNode = null;
+let structureRequest = 0;
+let structureSuppressClick = false;
+
+function svgElement(tag, attributes) {
+  const node = document.createElementNS(SVG_NS, tag);
+  Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value));
+  return node;
+}
+function svgPoint(svg, clientX, clientY) {
+  const point = svg.createSVGPoint(); point.x = clientX; point.y = clientY;
+  return point.matrixTransform(svg.getScreenCTM().inverse());
+}
+function structureHint(text) {
+  const hint = document.createElement('p'); hint.className = 'muted'; hint.textContent = text;
+  el('structure-inspector').replaceChildren(hint);
+}
+function structureReset(message) {
+  structureRequest++; structureInfo = null; structureVersion = null; structureWorking = null;
+  structureSelectedNode = null; structurePositions = new Map();
+  const option = document.createElement('option'); option.value = ''; option.textContent = message;
+  el('structure-select').replaceChildren(option);
+  el('structure-version-line').textContent = 'Keine Struktur geladen.';
+  el('structure-canvas').replaceChildren();
+  structureHint('Knoten im Canvas anklicken.');
+  el('structure-staging').textContent = 'Keine lokalen Änderungen.';
+  const skeleton = el('structure-skeleton'); skeleton.replaceChildren();
+  const placeholder = document.createElement('p'); placeholder.className = 'muted'; placeholder.textContent = 'Noch nicht generiert.';
+  skeleton.append(placeholder);
+  fillStructureEdgeSelects();
+}
+function fillStructureEdgeSelects() {
+  const ids = structureWorking ? structureWorking.nodes.map(n => n.local_id).sort() : [];
+  ['structure-edge-source', 'structure-edge-target'].forEach(id => {
+    const keep = el(id).value;
+    el(id).replaceChildren();
+    ids.forEach(local => { const option = document.createElement('option'); option.value = local; option.textContent = local; el(id).append(option); });
+    if (ids.includes(keep)) el(id).value = keep;
+  });
+}
+function renderStagingNote() {
+  if (!structureVersion || !structureWorking) { el('structure-staging').textContent = 'Keine lokalen Änderungen.'; return; }
+  const saved = JSON.stringify({n: structureVersion.nodes, e: structureVersion.edges});
+  const local = JSON.stringify({n: structureWorking.nodes, e: structureWorking.edges});
+  el('structure-staging').textContent = saved === local
+    ? `Keine lokalen Änderungen gegenüber Version ${structureVersion.version}.`
+    : `Lokal vorbereitet — noch nicht versioniert: ${structureWorking.nodes.length} Knoten, ${structureWorking.edges.length} Beziehungen (gespeicherte Version ${structureVersion.version}: ${structureVersion.nodes.length}/${structureVersion.edges.length}).`;
+}
+function renderStructureCanvas() {
+  const svg = el('structure-canvas');
+  svg.replaceChildren();
+  if (!structureWorking) return;
+  const nodes = structureWorking.nodes, edges = structureWorking.edges;
+  const parent = new Map(), kids = new Map();
+  edges.filter(edge => edge.kind === 'contains').forEach(edge => { parent.set(edge.target, edge.source); kids.set(edge.source, [...(kids.get(edge.source) || []), edge.target]); });
+  const roots = nodes.map(node => node.local_id).filter(id => !parent.has(id)).sort();
+  const width = id => { const children = kids.get(id) || []; return children.length ? children.reduce((sum, child) => sum + width(child), 0) : 1; };
+  structurePositions = new Map();
+  const place = (id, depth, left) => {
+    structurePositions.set(id, {x: left + width(id) * (NODE_W + 48) / 2, y: 40 + depth * (NODE_H + 100)});
+    let childLeft = left;
+    (kids.get(id) || []).slice().sort().forEach(child => { place(child, depth + 1, childLeft); childLeft += width(child) * (NODE_W + 48); });
+  };
+  let cursor = 0;
+  roots.forEach(root => { place(root, 0, cursor * (NODE_W + 48)); cursor += width(root); });
+  let stored = {};
+  try { stored = JSON.parse(localStorage.getItem('atze-structure-positions-' + structureSelected) || '{}') || {}; } catch (error) { stored = {}; }
+  Object.keys(stored).forEach(id => { if (structurePositions.has(id)) structurePositions.set(id, {x: stored[id].x, y: stored[id].y}); });
+  if (!nodes.length) return;
+  const xs = [...structurePositions.values()].map(p => p.x), ys = [...structurePositions.values()].map(p => p.y);
+  const minX = Math.min(...xs) - NODE_W / 2 - 24, maxX = Math.max(...xs) + NODE_W / 2 + 24;
+  const minY = Math.min(...ys) - NODE_H / 2 - 24, maxY = Math.max(...ys) + NODE_H / 2 + 24;
+  svg.setAttribute('viewBox', `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+  const defs = svgElement('defs', {});
+  const marker = svgElement('marker', {id: 'structure-arrow', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse'});
+  marker.append(svgElement('path', {d: 'M 0 0 L 10 5 L 0 10 z', fill: '#c9a86a'}));
+  defs.append(marker); svg.append(defs);
+  edges.forEach(edge => {
+    const from = structurePositions.get(edge.source), to = structurePositions.get(edge.target);
+    if (!from || !to) return;
+    if (edge.kind === 'contains') {
+      svg.append(svgElement('line', {x1: from.x, y1: from.y + NODE_H / 2, x2: to.x, y2: to.y - NODE_H / 2, stroke: '#6fae9c', 'stroke-width': '2'}));
+    } else {
+      const line = svgElement('line', {x1: from.x, y1: from.y, x2: to.x, y2: to.y, stroke: '#c9a86a', 'stroke-width': '1.5', 'stroke-dasharray': '6 5', 'marker-end': 'url(#structure-arrow)'});
+      svg.append(line);
+      const label = svgElement('text', {x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 - 6, fill: '#c9a86a', 'font-size': '10', 'text-anchor': 'middle'});
+      label.textContent = edge.kind;
+      svg.append(label);
+    }
+  });
+  const fills = {page: '#1d3a3f', section: '#233329', component: '#2a2333', action: '#33292a', data: '#23283a'};
+  nodes.forEach(node => {
+    const position = structurePositions.get(node.local_id) || {x: 0, y: 0};
+    const group = svgElement('g', {transform: `translate(${position.x - NODE_W / 2},${position.y - NODE_H / 2})`, style: 'cursor:move'});
+    group.append(svgElement('rect', {width: NODE_W, height: NODE_H, rx: 10, fill: fills[node.kind] || '#1d3a3f', stroke: structureSelectedNode === node.local_id ? '#f4d090' : '#53656a', 'stroke-width': '1.5'}));
+    const title = svgElement('text', {x: 12, y: 26, fill: '#e4ecea', 'font-size': '13', 'font-weight': '600'});
+    title.textContent = (node.name || '').slice(0, 22) + ((node.name || '').length > 22 ? '…' : '');
+    const subtitle = svgElement('text', {x: 12, y: 46, fill: '#a1b4b5', 'font-size': '11'});
+    subtitle.textContent = `${node.kind} · ${node.local_id}`;
+    group.append(title, subtitle);
+    group.addEventListener('pointerdown', structureNodeDrag(node.local_id, group));
+    group.addEventListener('click', () => { if (structureSuppressClick) { structureSuppressClick = false; return; } inspectStructureNode(node.local_id); });
+    svg.append(group);
+  });
+}
+function persistStructurePositions() {
+  if (!structureSelected) return;
+  const data = {};
+  structurePositions.forEach((position, id) => { data[id] = position; });
+  try { localStorage.setItem('atze-structure-positions-' + structureSelected, JSON.stringify(data)); } catch (error) { /* Ansichtspositionen sind optional; Modell bleibt unberührt. */ }
+}
+function structureNodeDrag(localId, group) {
+  return event => {
+    if (!structureWorking) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    event.preventDefault();
+    const svg = el('structure-canvas');
+    const start = svgPoint(svg, event.clientX, event.clientY);
+    const origin = structurePositions.get(localId) || {x: 0, y: 0};
+    let moved = false;
+    const move = moveEvent => {
+      const current = svgPoint(svg, moveEvent.clientX, moveEvent.clientY);
+      const next = {x: origin.x + current.x - start.x, y: origin.y + current.y - start.y};
+      if (Math.abs(current.x - start.x) + Math.abs(current.y - start.y) > 3) moved = true;
+      structurePositions.set(localId, next);
+      group.setAttribute('transform', `translate(${next.x - NODE_W / 2},${next.y - NODE_H / 2})`);
+    };
+    const finish = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', finish);
+      if (moved) { structureSuppressClick = true; persistStructurePositions(); renderStructureCanvas(); status('Ansichtsposition verschoben — das Modell selbst ist unverändert.'); }
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', finish);
+  };
+}
+function inspectStructureNode(localId) {
+  const box = el('structure-inspector');
+  box.replaceChildren();
+  const node = structureWorking && structureWorking.nodes.find(candidate => candidate.local_id === localId);
+  if (!node) { structureHint('Knoten nicht im lokalen Modell vorhanden.'); return; }
+  structureSelectedNode = localId;
+  const head = document.createElement('p');
+  head.textContent = `${node.kind} · ${node.local_id}` + (node.permissions && node.permissions.length ? ` · Berechtigungen (deklarativ): ${node.permissions.join(', ')}` : ' · keine Berechtigungen deklariert');
+  box.append(head);
+  const form = document.createElement('form');
+  const nameLabel = document.createElement('label'); nameLabel.textContent = 'Name';
+  const name = document.createElement('input'); name.required = true; name.maxLength = 120; name.value = node.name || '';
+  nameLabel.append(name);
+  const permissionsLabel = document.createElement('label'); permissionsLabel.textContent = 'Berechtigungen (Komma-getrennt, deklarativ — keine durchgesetzte Autorisierung)';
+  const permissions = document.createElement('input'); permissions.maxLength = 200; permissions.value = (node.permissions || []).join(', ');
+  permissionsLabel.append(permissions);
+  const noteLabel = document.createElement('label'); noteLabel.textContent = 'Notiz';
+  const note = document.createElement('textarea'); note.maxLength = 2000; note.value = node.note || '';
+  noteLabel.append(note);
+  const apply = document.createElement('button'); apply.textContent = 'Änderung übernehmen (Staging)';
+  const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Knoten entfernen (Staging)';
+  form.append(nameLabel, permissionsLabel, noteLabel, apply, remove);
+  form.onsubmit = submitEvent => {
+    submitEvent.preventDefault();
+    const target = structureWorking.nodes.find(candidate => candidate.local_id === localId);
+    if (!target) return;
+    target.name = name.value.trim();
+    target.permissions = permissions.value.split(',').map(entry => entry.trim()).filter(Boolean);
+    target.note = note.value;
+    renderStructureCanvas(); renderStagingNote(); inspectStructureNode(localId);
+    status('Knoten lokal übernommen — noch nicht versioniert.');
+  };
+  remove.onclick = () => {
+    structureWorking.nodes = structureWorking.nodes.filter(candidate => candidate.local_id !== localId);
+    structureWorking.edges = structureWorking.edges.filter(edge => edge.source !== localId && edge.target !== localId);
+    structureSelectedNode = null;
+    structureHint('Knoten im Canvas anklicken.');
+    renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects();
+    status('Knoten und seine Beziehungen lokal entfernt — noch nicht versioniert.');
+  };
+  box.append(form);
+  const relations = document.createElement('p');
+  const touching = structureWorking.edges.filter(edge => edge.source === localId || edge.target === localId);
+  relations.textContent = touching.length ? 'Beziehungen: ' + touching.map(edge => `${edge.source} —${edge.kind}→ ${edge.target}`).join(' · ') : 'Keine Beziehungen.';
+  box.append(relations);
+}
+async function renderGenerated(id) {
+  const generated = await api(`structures/${id}/generate`);
+  list('structure-routes', generated.routes, (node, route) => { node.textContent = `${route.path} → ${route.title} (${route.node})`; });
+  const skeleton = el('structure-skeleton');
+  skeleton.replaceChildren();
+  const meta = document.createElement('p'); meta.className = 'muted';
+  meta.textContent = `Version ${generated.version} · CALCULATED aus STRUCTURE_VERSION_MANIFEST · SHA-256 ${generated.manifest_hash} · Platzhalter EMPTY · keine Prognose, keine Aktionsfreigabe.`;
+  skeleton.append(meta);
+  const addLevel = (children, container) => {
+    const listNode = document.createElement('ul');
+    children.forEach(child => {
+      const item = document.createElement('li');
+      item.textContent = `${child.title} [${child.kind}] EMPTY` +
+        (child.permissions && child.permissions.length ? ` · Berechtigungen (deklarativ): ${child.permissions.join(', ')}` : '') +
+        (child.relations && child.relations.length ? ` · ${child.relations.map(relation => `${relation.kind} von ${relation.from}`).join(' · ')}` : '');
+      if (child.children) addLevel(child.children, item);
+      listNode.append(item);
+    });
+    container.append(listNode);
+  };
+  addLevel(generated.ui_skeleton.roots, skeleton);
+  return generated;
+}
+async function loadStructure(id) {
+  const current = session, request = ++structureRequest;
+  structureSelected = id; structureSelectedNode = null;
+  el('structure-version-line').textContent = 'Lade Struktur…';
+  structureHint('Knoten im Canvas anklicken.');
+  try {
+    const [structure, versions] = await Promise.all([api(`structures/${id}`), api(`structures/${id}/versions?limit=1`)]);
+    if (current !== session || request !== structureRequest || id !== structureSelected) return;
+    const version = versions[0];
+    structureInfo = structure; structureVersion = version;
+    structureWorking = {nodes: version.nodes.map(node => ({...node, permissions: [...(node.permissions || [])]})), edges: version.edges.map(edge => ({...edge}))};
+    el('structure-version-line').textContent = `Struktur ${structure.name} · ${structure.state === 'active' ? 'aktiv' : 'deaktiviert'} · Version ${version.version} · SHA-256 ${version.manifest_hash.slice(0, 12)}…`;
+    renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects();
+    await renderGenerated(id);
+  } catch (error) {
+    if (current === session && request === structureRequest) { structureReset('Struktur nicht verfügbar.'); status(error.message); }
+  }
+}
+el('structure-select').onchange = () => {
+  const id = el('structure-select').value;
+  if (id) loadStructure(id); else structureReset('Keine Struktur ausgewählt.');
+};
+el('structure-add').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  const data = Object.fromEntries(new FormData(event.target));
+  try {
+    const structure = await api('structures', 'POST', {name: data.name, description: data.description || '',
+      nodes: [{local_id: 'root', kind: 'page', name: data.root_name.trim(), permissions: [], note: 'Wurzel-Seite aus der Oberfläche'}],
+      edges: [], note: 'Angelegt über die Oberfläche'});
+    if (current !== session) return;
+    event.target.reset();
+    structurePendingSelect = structure.id;
+    status(`Struktur angelegt (+): ${structure.id} · Version 1. Weitere Knoten jetzt lokal vorbereiten und als neue Version committen.`);
+    await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('structure-node-add').onsubmit = event => {
+  event.preventDefault();
+  if (!structureWorking) { status('Zuerst eine Struktur laden.'); return; }
+  const data = Object.fromEntries(new FormData(event.target));
+  const localId = data.local_id.trim();
+  if (!/^[a-z0-9][a-z0-9_-]{0,63}$/.test(localId)) { status('Kennung: Kleinbuchstaben, Ziffern, „-“ und „_“; Beginn mit Buchstabe oder Ziffer.'); return; }
+  if (structureWorking.nodes.some(node => node.local_id === localId)) { status('Diese Kennung existiert bereits im lokalen Modell.'); return; }
+  structureWorking.nodes.push({local_id: localId, kind: data.kind, name: data.name.trim(),
+    permissions: data.permissions.split(',').map(entry => entry.trim()).filter(Boolean), note: data.note || ''});
+  event.target.reset();
+  renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects();
+  status('Knoten lokal vorbereitet — noch nicht versioniert.');
+};
+el('structure-edge-add').onsubmit = event => {
+  event.preventDefault();
+  if (!structureWorking) { status('Zuerst eine Struktur laden.'); return; }
+  const data = Object.fromEntries(new FormData(event.target));
+  const source = el('structure-edge-source').value, target = el('structure-edge-target').value;
+  if (!source || !target) { status('Quelle und Ziel auswählen.'); return; }
+  if (source === target) { status('Quelle und Ziel müssen unterschiedlich sein.'); return; }
+  if (structureWorking.edges.some(edge => edge.source === source && edge.target === target && edge.kind === data.kind)) { status('Diese Beziehung existiert bereits im lokalen Modell.'); return; }
+  structureWorking.edges.push({source, target, kind: data.kind});
+  renderStructureCanvas(); renderStagingNote();
+  status('Beziehung lokal vorbereitet — noch nicht versioniert.');
+};
+el('structure-discard').onclick = () => {
+  if (!structureVersion) { status('Keine gespeicherte Version zum Wiederherstellen geladen.'); return; }
+  structureWorking = {nodes: structureVersion.nodes.map(node => ({...node, permissions: [...(node.permissions || [])]})), edges: structureVersion.edges.map(edge => ({...edge}))};
+  structureSelectedNode = null;
+  structureHint('Knoten im Canvas anklicken.');
+  renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects();
+  status('Lokale Entwürfe verworfen — gespeicherte Version wiederhergestellt.');
+};
+el('structure-commit').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  if (!structureSelected || !structureWorking) { status('Zuerst eine Struktur laden.'); return; }
+  const note = Object.fromEntries(new FormData(event.target)).note;
+  try {
+    const version = await api(`structures/${structureSelected}/versions`, 'POST', {nodes: structureWorking.nodes, edges: structureWorking.edges, note});
+    if (current !== session) return;
+    event.target.reset();
+    status(`Version ${version.version} committet (Manifest SHA-256 ${version.manifest_hash.slice(0, 12)}…). Vorherige Versionen bleiben unverändert.`);
+    await loadStructure(structureSelected);
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('structure-generate').onclick = async () => {
+  if (!structureSelected) { status('Zuerst eine Struktur laden.'); return; }
+  const current = session;
+  try {
+    const generated = await renderGenerated(structureSelected);
+    if (current === session) status(`Generierung abgeschlossen: ${generated.routes.length} Routen · Version ${generated.version} (Query ohne Nebenwirkungen).`);
   } catch (error) { if (current === session) status(error.message); }
 };

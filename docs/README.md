@@ -63,5 +63,8 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Monitoring & Anbindungsverwaltung
 [Lesende Plattformübersicht aus echten gespeicherten Records plus Integrations-Registry mit echten Add-/Remove-Routen](27-monitoring/monitoring.md). − ausschließlich Reviewer-bestätigte Deaktivierung mit Begründung, Daten bleiben erhalten; umgebungsgebundene Anbindungen nur einsehbar; kein Alerting, keine Wahrheitsaussagen.
 
+## Struktur-Builder (AXM v0.1)
+[Versionierte visuelle Sitemap-/Komponentenmodelle mit SVG-Editor, append-only-Versionierung und CALCULATED-Routing-/Skeleton-Generierung](28-structure-builder/structure-builder.md) · [AXM-Analyse als konservierte Spezifikationsgrundlage](28-structure-builder/axm-analysis.md). Keine Code-/UI-Generierung; Berechtigungen deklarativ; Drag&Drop nur Ansichtsposition.
+
 ## Bright Data MCP discovery + begrenztes tools/call
 [Enger Vertrag: Authentifizierung, API, Datenschutz, Allowlist-Ausführung und offene Live-Abnahme](22-mcp/brightdata.md). tools/call nur für die zwei allowlisted Kandidaten mit Reviewer-Einzelfreigabe; kein allgemeiner Tool-Executor, keine Live-Provider-Validierung.
