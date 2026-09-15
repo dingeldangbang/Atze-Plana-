@@ -2789,6 +2789,65 @@ paths:
       x-side-effects: None; deterministic CALCULATED generation of the routing overview
         and the UI placeholder skeleton from one stored version; no file is written,
         no code is executed; empty placeholders, never invented content
+  /api/structures/{structure_id}/compare:
+    get:
+      tags:
+      - structures
+      summary: Compare
+      operationId: compare_api_structures__structure_id__compare_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: structure_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Structure Id
+      - name: from_version
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: From Version
+      - name: to_version
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: To Version
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Compare Api Structures  Structure Id  Compare Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: both
+      x-side-effects: None; deterministic directional CALCULATED diff of two stored
+        immutable versions (nodes matched by local_id, edges by source/target/kind,
+        generated routes by path); review aid only — never a merge, migration or repair;
+        no version is modified
   /api/structures/{structure_id}/deactivate:
     post:
       tags:

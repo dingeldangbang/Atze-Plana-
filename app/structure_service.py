@@ -2,12 +2,52 @@
 import hashlib
 import json
 import re
+from types import SimpleNamespace
 
 from fastapi import HTTPException
 
 from app.structure_models import MAX_EDGES, MAX_NODES, EdgeKind, NodeKind
 
 CONTAINERS = {'page', 'section'}  # only pages and sections may contain other nodes
+
+
+def stored_model(record: dict) -> tuple:
+    """Attribute view of a stored version body for reuse by generation and comparison."""
+    return ([SimpleNamespace(**item) for item in record['nodes']],
+            [SimpleNamespace(**item) for item in record['edges']])
+
+
+def compare_versions(from_record: dict, to_record: dict) -> dict:
+    """Deterministic directional diff of two stored version manifests; CALCULATED review aid, never a merge/repair."""
+    from_nodes = {item['local_id']: item for item in from_record['nodes']}
+    to_nodes = {item['local_id']: item for item in to_record['nodes']}
+    node_fields = ('kind', 'name', 'permissions', 'note')
+    nodes = {'added': sorted(set(to_nodes) - set(from_nodes)),
+             'removed': sorted(set(from_nodes) - set(to_nodes)),
+             'changed': []}
+    for local_id in sorted(set(from_nodes) & set(to_nodes)):
+        before, after = from_nodes[local_id], to_nodes[local_id]
+        changes = {field: {'from': before[field], 'to': after[field]}
+                   for field in node_fields if before[field] != after[field]}
+        if changes:
+            nodes['changed'].append({'local_id': local_id, 'changes': changes})
+
+    def key(item):
+        return (item['source'], item['target'], item['kind'])
+    from_edges = {key(item) for item in from_record['edges']}
+    to_edges = {key(item) for item in to_record['edges']}
+    edges = {'added': [list(item) for item in sorted(to_edges - from_edges)],
+             'removed': [list(item) for item in sorted(from_edges - to_edges)]}
+
+    from_routes = {route['path']: route for route in generate_routes(*stored_model(from_record))}
+    to_routes = {route['path']: route for route in generate_routes(*stored_model(to_record))}
+    routes = {'added': sorted(set(to_routes) - set(from_routes)),
+              'removed': sorted(set(from_routes) - set(to_routes)),
+              'changed': [{'path': path, 'title': {'from': from_routes[path]['title'], 'to': to_routes[path]['title']}}
+                          for path in sorted(set(from_routes) & set(to_routes))
+                          if from_routes[path]['title'] != to_routes[path]['title']]}
+    return {'identical': from_record['manifest_hash'] == to_record['manifest_hash'],
+            'nodes': nodes, 'edges': edges, 'route_changes': routes}
 
 
 def slug(name: str) -> str:

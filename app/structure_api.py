@@ -1,12 +1,12 @@
 """Structure builder API: operator-created versioned models, both-role reads, deterministic generation, confirmed deactivation."""
 import json
-from types import SimpleNamespace
 
 from fastapi import Depends, HTTPException
 
 from app.structure_models import (Structure, StructureCreateInput, StructureDeactivateInput,
                                   StructureVersion, VersionInput)
-from app.structure_service import generate_routes, generate_skeleton, manifest_hash, stored_hash, validate_model
+from app.structure_service import (compare_versions, generate_routes, generate_skeleton, manifest_hash,
+                                   stored_hash, stored_model, validate_model)
 from app.store import get, listing, put, audit, identity, now, stopped
 
 
@@ -20,6 +20,12 @@ def register_structure_api(app, actor, operator, reviewer, connection, store):
         if row is None:
             raise HTTPException(409, 'Structure has no version yet')
         return json.loads(row[0])
+
+    def version_record(db, structure_id, number):
+        row = db.execute("SELECT body FROM records WHERE kind='structure_version' "
+                         "AND json_extract(body,'$.\"structure_id\"')=? "
+                         "AND json_extract(body,'$.\"version\"')=?", (structure_id, number)).fetchone()
+        return json.loads(row[0]) if row else None
 
     @app.post('/api/structures', response_model=Structure, status_code=201, tags=['structures'],
               openapi_extra={'x-role': 'operator', 'x-side-effects': 'Create a structure registry entry plus immutable version 1 from the fully specified model; structural validation (unique local ids, edge endpoints, contains forest, unique generated routes) before persistence; stop blocks'})
@@ -93,24 +99,51 @@ def register_structure_api(app, actor, operator, reviewer, connection, store):
     def generate(structure_id: str, version: int = 0, who=Depends(actor), db=DB) -> dict:
         get(db, 'structure', structure_id)
         if version:
-            row = db.execute("SELECT body FROM records WHERE kind='structure_version' "
-                             "AND json_extract(body,'$.\"structure_id\"')=? "
-                             "AND json_extract(body,'$.\"version\"')=?", (structure_id, version)).fetchone()
-            if row is None:
+            record = version_record(db, structure_id, version)
+            if record is None:
                 raise HTTPException(404, 'Requested structure version not found')
-            record = json.loads(row[0])
         else:
             record = current_version(db, structure_id)
         if stored_hash(record) != record['manifest_hash']:
             raise HTTPException(503, 'Stored version does not match its manifest hash; generation refused')
-        nodes = [SimpleNamespace(**item) for item in record['nodes']]
-        edges = [SimpleNamespace(**item) for item in record['edges']]
+        nodes, edges = stored_model(record)
         return {'structure_id': structure_id, 'version': record['version'], 'manifest_hash': record['manifest_hash'],
                 'routes': generate_routes(nodes, edges),
                 'ui_skeleton': generate_skeleton(nodes, edges),
                 'result_class': 'CALCULATED', 'prediction': 'NONE',
                 'basis': 'STRUCTURE_VERSION_MANIFEST',
                 'limits': 'Routing overview and empty UI placeholders derived deterministically from the stored model version; placeholders carry no content, permissions are declared metadata (not enforced authorization), generation writes no files'}
+
+    @app.get('/api/structures/{structure_id}/compare', tags=['structures'],
+             openapi_extra={'x-role': 'both', 'x-side-effects': 'None; deterministic directional CALCULATED diff of two stored immutable versions (nodes matched by local_id, edges by source/target/kind, generated routes by path); review aid only — never a merge, migration or repair; no version is modified'})
+    def compare(structure_id: str, from_version: int = 0, to_version: int = 0, who=Depends(actor), db=DB) -> dict:
+        get(db, 'structure', structure_id)
+        if to_version:
+            to_record = version_record(db, structure_id, to_version)
+            if to_record is None:
+                raise HTTPException(404, 'Requested target structure version not found')
+        else:
+            to_record = current_version(db, structure_id)
+        if from_version:
+            from_record = version_record(db, structure_id, from_version)
+            if from_record is None:
+                raise HTTPException(404, 'Requested source structure version not found')
+        elif to_record['version'] > 1:
+            from_record = version_record(db, structure_id, to_record['version'] - 1)
+        else:
+            raise HTTPException(409, 'Only one version exists; nothing to compare yet')
+        for record in (from_record, to_record):
+            if stored_hash(record) != record['manifest_hash']:
+                raise HTTPException(503, 'Stored version does not match its manifest hash; comparison refused')
+        result = compare_versions(from_record, to_record)
+        result.update(structure_id=structure_id,
+                      **{'from': {'version': from_record['version'], 'manifest_hash': from_record['manifest_hash'],
+                                  'created_at': from_record['created_at'], 'created_by': from_record['created_by']},
+                         'to': {'version': to_record['version'], 'manifest_hash': to_record['manifest_hash'],
+                                'created_at': to_record['created_at'], 'created_by': to_record['created_by']}},
+                      result_class='CALCULATED', prediction='NONE', basis='STRUCTURE_VERSION_MANIFEST',
+                      limits='Directional diff of two stored version manifests for review; comparison output is never a merge or migration instruction, changes no data, and proves only stored-content differences, not intent or correctness')
+        return result
 
     @app.post('/api/structures/{structure_id}/deactivate', response_model=Structure, tags=['structures'],
               openapi_extra={'x-role': 'reviewer', 'x-side-effects': 'Confirmed deactivation + audit; all versions and history are retained; no deletion endpoint exists; stop blocks'})

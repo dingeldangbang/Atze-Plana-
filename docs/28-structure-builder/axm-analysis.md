@@ -10,7 +10,7 @@ Die Analyse matrixierte Baukasten-Optionen (u. a. Graph-Speicherung: **JSON-Grap
 
 ## Roadmap der Analyse (Personenmonate-Schätzungen, keine Terminzusagen)
 - **MVP (v0.1, ~8 PM):** ① visueller Struktur-Builder (Sitemap + Komponentenbaum) mit Drag&Drop ② Knoten-Inspektor (Name, Typ, Berechtigungen) ③ automatische Generierung: Routing-Übersicht + leere UI-Placeholders ④ Live-Vorschau (statische Sitemap-Anzeige). **→ umgesetzt als dieses Inkrement** ([Vertrag](structure-builder.md)), inkl. ehrlicher Grenzen (Drag&Drop nur Ansichtsposition, Berechtigungen nur deklarativ).
-- **v1.0 (~18 PM):** u. a. A2UI-/Agenten-Integration, kausale Validierung, Versionsvergleichs-UI, adaptive Präsentation. **PLANNED, nicht implementiert.**
+- **v1.0 (~18 PM):** u. a. A2UI-/Agenten-Integration, kausale Validierung, Versionsvergleichs-UI, adaptive Präsentation. **Erster Teilschritt umgesetzt:** die Versionsvergleichs-Ansicht als gerichteter, deterministischer Diff zweier gespeicherter Versionen (CALCULATED-Query + UI, [Vertrag](structure-builder.md)). A2UI-/Agenten-Integration, kausale Validierung und adaptive Präsentation bleiben **PLANNED, nicht implementiert**.
 - **v2.0 (~24 PM):** u. a. Unsicherheits-Visualisierung, Multi-Agenten. **PLANNED, nicht implementiert.**
 - **Gantt ab 2027:** zeitliche Einordnung der Ausbaustufen; bewusst **ohne Liefertermin- oder Performancezusagen** (konsistent mit der Roadmap-Disziplin des Repos).
 

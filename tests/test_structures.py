@@ -189,3 +189,90 @@ def test_structure_pages_below_sections_stay_in_skeleton(client):
     assert home['children'][0]['children'][0]['local_id'] == 'sub'
     assert client.get('/api/structures/missing/generate').status_code == 404
     assert client.get('/api/structures/missing').status_code == 404
+
+
+def two_version_structure(client):
+    """v1: Start + Alt; v2: Start umbenannt + Kontakt neu, Alt entfernt, Berechtigungen geändert."""
+    structure = create_structure(client, name='Compare fixture',
+                                 nodes=[node('home', name='Start'), node('old', name='Alt')],
+                                 edges=[edge('home', 'old')])
+    second = client.post(f"/api/structures/{structure['id']}/versions",
+                         json=model([node('home', name='Startseite', permissions=['reviewer']),
+                                     node('contact', name='Kontakt')],
+                                    [edge('home', 'contact')], note='Second revision'))
+    assert second.status_code == 201, second.text
+    return structure
+
+
+def test_structure_version_compare_diff_and_roles(client, reviewer, settings):
+    """STR-011: default compare is previous→latest; node/edge/route diffs exact; both roles; anonymous 401."""
+    structure = two_version_structure(client)
+    diff = client.get(f"/api/structures/{structure['id']}/compare").json()
+    assert diff['from']['version'] == 1 and diff['to']['version'] == 2
+    assert diff['result_class'] == 'CALCULATED' and diff['prediction'] == 'NONE'
+    assert diff['basis'] == 'STRUCTURE_VERSION_MANIFEST' and diff['identical'] is False
+    assert diff['nodes']['added'] == ['contact'] and diff['nodes']['removed'] == ['old']
+    assert diff['nodes']['changed'] == [{'local_id': 'home', 'changes': {
+        'name': {'from': 'Start', 'to': 'Startseite'},
+        'permissions': {'from': [], 'to': ['reviewer']}}}]
+    assert diff['edges']['added'] == [['home', 'contact', 'contains']]
+    assert diff['edges']['removed'] == [['home', 'old', 'contains']]
+    assert diff['route_changes']['added'] == ['/kontakt'] and diff['route_changes']['removed'] == ['/alt']
+    assert diff['route_changes']['changed'] == [{'path': '/', 'title': {'from': 'Start', 'to': 'Startseite'}}]
+    assert 'never a merge or migration instruction' in diff['limits']
+    assert client.get(f"/api/structures/{structure['id']}/compare", headers=reviewer).status_code == 200
+    from fastapi.testclient import TestClient
+    from app.main import create_app
+    anonymous = TestClient(create_app(settings))
+    assert anonymous.get(f"/api/structures/{structure['id']}/compare").status_code == 401
+    single = create_structure(client, name='Single version')
+    assert client.get(f"/api/structures/{single['id']}/compare").status_code == 409
+
+
+def test_structure_version_compare_directional_and_identical(client):
+    """STR-012: explicit from/to is directional; unknown versions 404; same version → identical with empty diffs."""
+    structure = two_version_structure(client)
+    base = f"/api/structures/{structure['id']}/compare"
+    reversed_diff = client.get(base, params={'from_version': 2, 'to_version': 1}).json()
+    assert reversed_diff['nodes']['added'] == ['old'] and reversed_diff['nodes']['removed'] == ['contact']
+    assert reversed_diff['route_changes']['added'] == ['/alt'] and reversed_diff['route_changes']['removed'] == ['/kontakt']
+    assert client.get(base, params={'from_version': 9, 'to_version': 2}).status_code == 404
+    assert client.get(base, params={'from_version': 1, 'to_version': 9}).status_code == 404
+    assert client.get(base, params={'from_version': 9}).status_code == 404
+    same = client.get(base, params={'from_version': 2, 'to_version': 2}).json()
+    assert same['identical'] is True
+    assert same['nodes'] == {'added': [], 'removed': [], 'changed': []}
+    assert same['edges'] == {'added': [], 'removed': []}
+    assert same['route_changes'] == {'added': [], 'removed': [], 'changed': []}
+    repeated = client.get(base).json()
+    assert repeated == client.get(base).json()  # deterministic, no hidden state
+
+
+def test_structure_version_compare_hash_mismatch_refused(client, settings):
+    """STR-013: a stored version body that no longer matches its manifest hash refuses comparison (503)."""
+    import json as jsonlib
+    import sqlite3
+    structure = two_version_structure(client)
+    tampered = jsonlib.dumps({**client.get(f"/api/structures/{structure['id']}/versions").json()[0],
+                              'nodes': [node('home', name='Manipuliert', permissions=['reviewer']),
+                                        node('contact', name='Kontakt')]}, ensure_ascii=False)
+    db = sqlite3.connect(settings.db_path)
+    db.execute("UPDATE records SET body=? WHERE kind='structure_version' "
+               "AND json_extract(body,'$.\"structure_id\"')=? AND json_extract(body,'$.\"version\"')=2",
+               (tampered, structure['id']))
+    db.commit(); db.close()
+    assert client.get(f"/api/structures/{structure['id']}/compare").status_code == 503
+    assert client.get(f"/api/structures/{structure['id']}/generate").status_code == 503
+    assert client.get(f"/api/structures/{structure['id']}/compare",
+                      params={'from_version': 1, 'to_version': 1}).status_code == 200  # untouched version stays comparable
+
+
+def test_structure_version_compare_after_deactivation(client, reviewer):
+    """STR-014: comparison stays available for deactivated structures; permission changes surface as field diffs."""
+    structure = two_version_structure(client)
+    assert client.post(f"/api/structures/{structure['id']}/deactivate", headers=reviewer,
+                       json={'confirm': True, 'reason': 'Compare after deactivation'}).status_code == 200
+    diff = client.get(f"/api/structures/{structure['id']}/compare",
+                      params={'from_version': 1, 'to_version': 2}).json()
+    assert diff['nodes']['changed'][0]['changes']['permissions'] == {'from': [], 'to': ['reviewer']}
+    assert diff['to']['version'] == 2 and diff['from']['version'] == 1

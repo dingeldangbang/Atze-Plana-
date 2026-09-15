@@ -408,6 +408,7 @@ let structurePositions = new Map();
 let structureSelectedNode = null;
 let structureRequest = 0;
 let structureSuppressClick = false;
+let structureVersionsList = [];
 
 function svgElement(tag, attributes) {
   const node = document.createElementNS(SVG_NS, tag);
@@ -434,6 +435,14 @@ function structureReset(message) {
   const skeleton = el('structure-skeleton'); skeleton.replaceChildren();
   const placeholder = document.createElement('p'); placeholder.className = 'muted'; placeholder.textContent = 'Noch nicht generiert.';
   skeleton.append(placeholder);
+  structureVersionsList = [];
+  ['structure-compare-from', 'structure-compare-to'].forEach(id => {
+    const compareEmpty = document.createElement('option'); compareEmpty.value = ''; compareEmpty.textContent = message;
+    el(id).replaceChildren(compareEmpty);
+  });
+  const compareResult = el('structure-compare-result'); compareResult.replaceChildren();
+  const compareHint = document.createElement('p'); compareHint.className = 'muted'; compareHint.textContent = 'Noch kein Vergleich.';
+  compareResult.append(compareHint);
   fillStructureEdgeSelects();
 }
 function fillStructureEdgeSelects() {
@@ -616,13 +625,13 @@ async function loadStructure(id) {
   el('structure-version-line').textContent = 'Lade Struktur…';
   structureHint('Knoten im Canvas anklicken.');
   try {
-    const [structure, versions] = await Promise.all([api(`structures/${id}`), api(`structures/${id}/versions?limit=1`)]);
+    const [structure, versions] = await Promise.all([api(`structures/${id}`), api(`structures/${id}/versions?limit=100`)]);
     if (current !== session || request !== structureRequest || id !== structureSelected) return;
     const version = versions[0];
-    structureInfo = structure; structureVersion = version;
+    structureInfo = structure; structureVersion = version; structureVersionsList = versions;
     structureWorking = {nodes: version.nodes.map(node => ({...node, permissions: [...(node.permissions || [])]})), edges: version.edges.map(edge => ({...edge}))};
     el('structure-version-line').textContent = `Struktur ${structure.name} · ${structure.state === 'active' ? 'aktiv' : 'deaktiviert'} · Version ${version.version} · SHA-256 ${version.manifest_hash.slice(0, 12)}…`;
-    renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects();
+    renderStructureCanvas(); renderStagingNote(); fillStructureEdgeSelects(); fillStructureCompareSelects();
     await renderGenerated(id);
   } catch (error) {
     if (current === session && request === structureRequest) { structureReset('Struktur nicht verfügbar.'); status(error.message); }
@@ -697,5 +706,49 @@ el('structure-generate').onclick = async () => {
   try {
     const generated = await renderGenerated(structureSelected);
     if (current === session) status(`Generierung abgeschlossen: ${generated.routes.length} Routen · Version ${generated.version} (Query ohne Nebenwirkungen).`);
+  } catch (error) { if (current === session) status(error.message); }
+};
+
+function fillStructureCompareSelects() {
+  const numbers = structureVersionsList.map(version => version.version);
+  ['structure-compare-from', 'structure-compare-to'].forEach(id => {
+    el(id).replaceChildren();
+    numbers.forEach(number => { const option = document.createElement('option'); option.value = number; option.textContent = `Version ${number}`; el(id).append(option); });
+  });
+  if (numbers.length) {
+    el('structure-compare-to').value = numbers[0];
+    el('structure-compare-from').value = numbers.length > 1 ? numbers[1] : numbers[0];
+  }
+}
+function renderStructureCompare(diff) {
+  const box = el('structure-compare-result');
+  box.replaceChildren();
+  const line = text => { const entry = document.createElement('p'); entry.textContent = text; box.append(entry); };
+  line(`Version ${diff.from.version} (SHA-256 ${diff.from.manifest_hash.slice(0, 12)}…) → Version ${diff.to.version} (SHA-256 ${diff.to.manifest_hash.slice(0, 12)}…) · CALCULATED aus STRUCTURE_VERSION_MANIFEST.`);
+  if (diff.identical) { line('Identischer Manifest-Inhalt — keine Unterschiede.'); return; }
+  line(`Knoten: +${diff.nodes.added.length} hinzugefügt · −${diff.nodes.removed.length} entfernt · ~${diff.nodes.changed.length} geändert`);
+  diff.nodes.added.forEach(localId => line(`+ Knoten ${localId}`));
+  diff.nodes.removed.forEach(localId => line(`− Knoten ${localId}`));
+  diff.nodes.changed.forEach(change => line(`~ Knoten ${change.local_id}: ` + Object.entries(change.changes)
+    .map(([field, values]) => `${field}: ${JSON.stringify(values.from)} → ${JSON.stringify(values.to)}`).join(' · ')));
+  line(`Beziehungen: +${diff.edges.added.length} · −${diff.edges.removed.length}`);
+  diff.edges.added.forEach(edge => line(`+ ${edge[0]} —${edge[2]}→ ${edge[1]}`));
+  diff.edges.removed.forEach(edge => line(`− ${edge[0]} —${edge[2]}→ ${edge[1]}`));
+  line(`Routen: +${diff.route_changes.added.length} · −${diff.route_changes.removed.length} · ~${diff.route_changes.changed.length} Titel geändert`);
+  diff.route_changes.added.forEach(path => line(`+ Route ${path}`));
+  diff.route_changes.removed.forEach(path => line(`− Route ${path}`));
+  diff.route_changes.changed.forEach(change => line(`~ Route ${change.path}: Titel „${change.title.from}“ → „${change.title.to}“`));
+  line('Vergleich ist Durchsicht-Grundlage, kein Merge-/Migrationsbefehl; keine Version wurde verändert.');
+}
+el('structure-compare').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  if (!structureSelected) { status('Zuerst eine Struktur laden.'); return; }
+  const fromVersion = el('structure-compare-from').value, toVersion = el('structure-compare-to').value;
+  if (!fromVersion || !toVersion) { status('Beide Versionen auswählen.'); return; }
+  try {
+    const diff = await api(`structures/${structureSelected}/compare?from_version=${fromVersion}&to_version=${toVersion}`);
+    if (current !== session) return;
+    renderStructureCompare(diff);
+    status(`Vergleich abgeschlossen: Version ${diff.from.version} → ${diff.to.version} (Query ohne Nebenwirkungen).`);
   } catch (error) { if (current === session) status(error.message); }
 };
