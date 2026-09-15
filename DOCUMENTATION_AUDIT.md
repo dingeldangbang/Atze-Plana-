@@ -1,6 +1,6 @@
 ## 2026-09-15 — Native Workspace scope synchronization
 
-Android-Vertrag, README, Roadmap, Changelog, APK-/Test-/Validierungsbericht synchronisiert. Testkatalog tatsächlich neu generiert; OpenAPI unverändert (nur vorhandene Endpunkte angebunden). `python scripts/docs.py --check` PASS lokal. Historische APK-Berichte klar von neuem, noch ungeprüftem Java-Quellstand getrennt. Vollplattform, native TLS-Mutationsabnahme und physische Geräte weiterhin offen. Keine implementierten fehlenden Module oder Releaseerfolge behauptet.
+Android-Vertrag, README, Roadmap, Changelog, APK-/Test-/Validierungsbericht synchronisiert. Testkatalog tatsächlich neu generiert; OpenAPI unverändert (nur vorhandene Endpunkte angebunden). `python scripts/docs.py --check` PASS lokal. Historische APK-Berichte klar vom neuen ausgewählten Build 34962325843 getrennt; lokale Datei/Hash, CI-Signatur/Emulatornachweis, erster fehlgeschlagener und zweiter erfolgreicher Download dokumentiert. Vollplattform, native TLS-Mutationsabnahme und physische Geräte weiterhin offen. Keine implementierten fehlenden Module oder Releaseerfolge behauptet.
 
 ## Bright Data MCP discovery addendum — 2026-09-14
 

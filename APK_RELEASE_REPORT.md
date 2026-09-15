@@ -1,10 +1,76 @@
-# Aktueller Arbeitsstand — 2026-09-15 · Core Workspace 0.2-dev
+# Ausgewählte Entwicklungs-APK — Core Workspace 0.2-dev · 2026-09-15
+
+**APK tatsächlich gebaut, entwicklungssigniert, im SDK-Emulator installiert/gestartet/getestet und als lokale Datei mit geprüftem Hash bereitgestellt. Vollplattformziel weiterhin NICHT erreicht.** Kein Produktionsrelease, keine physische Geräteabnahme und kein stabiler Signierschlüssel.
+
+## Download und Provenance
+
+- Lokale Benutzerdatei: `reports/android-download/atze-app-debug.apk` — **25.003 Bytes**. Nur diese App-APK installieren, nicht die Instrumentation-APK. Dateien unter `reports/` bleiben absichtlich außerhalb von Git.
+- [Originales CI-Archiv](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34962325843/artifacts/10393128900), GitHub-Anmeldung ggf. erforderlich; Ablauf laut geprüften Metadaten **2026-09-29T11:19:13Z**. Kein dauerhaftes Release-Asset.
+- [Tatsächlich erfolgreicher Android-CI-Lauf 34962325843](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34962325843), 3m40s.
+- Branch-Source: `cf59dc7bc4d0ca47ee1c7c68dd7bab7995227531`.
+- Tatsächlich gebauter PR-Merge: `efb3c73368312e3b463778edd725955a0c392dc7`; Elternbindung durch die GitHub-Commit-API unabhängig von den Artefaktmeldungen geprüft.
+- Originalarchiv: `android-debug-efb3c73368312e3b463778edd725955a0c392dc7`, 35.418 Bytes, GitHub-Digest `sha256:243e83411c41203519cd5478af6ce870ddb77f750fca6b65cc9bcb119a238a06`. Dieser Archivhash ist **nicht** der APK-Hash.
+
+**SHA-256 der gelieferten App-APK:**
+
+```text
+e94dcc41605c713ef7f17390a4eb8790c04d4ffc505c5fb3446be51573d09096
+```
+
+Signatur: RSA2048, APK Signature Scheme **v2 und v3 geprüft**, ein Signierer, `CN=Atze Ephemeral Development, OU=CI`. Zertifikat-SHA256:
+
+```text
+9fbc05fcb821bc476f30b968e7a86bd7017bb36cbe47d326fa81ae45812305c2
+```
+
+Der temporäre Entwicklungsschlüssel wurde im Build entfernt und nicht hochgeladen. Eine spätere APK ist nicht automatisch updatekompatibel; bestehende Installation/Daten nicht ungefragt löschen. Debuggable-Build nicht mit produktiven Credentials/Daten verwenden. Keine AAB-/Store-/Lizenz-/Produktionsfreigabe.
+
+## Ausgeführte Prüfungen und Grenzen
+
+| Nachweisachse / Gate | Tatsächliches Ergebnis |
+|---|---|
+| Implemented | Native Projekt-/Aufgabenanlage, paginierte Verzeichnisse, bestätigte Triage und PLAN-Status über bestehende Core-APIs |
+| Configured | Kein Betriebs-Core/Token eingebettet; vom Nutzer gewählter HTTPS-Core erforderlich, derzeit **NOT CONFIGURED** für eine konkrete Betriebsinstanz |
+| SDK35 Java→DEX→APK / zipalign | PASS im ausgewählten CI-Lauf |
+| `apksigner verify` | PASS im CI, v2/v3; keine lokale apksigner-Ausführung behauptet |
+| Emulatorinstallation, Activity-Start | PASS; Android35 SDK-Emulator, kein physisches Gerät |
+| Instrumentation | `atze_result=PASS`, `INSTRUMENTATION_CODE: -1`; Empty State, Lifecycle-/Tokenleeren, ungültige Origins/Routes/Tokens, JSON-Verträge, TLS-Protokolle |
+| API-Mirror → lokale APK | PASS: vollständige zehn Chunks, exakter Quellstand, Größe und SHA256 gegen separaten Buildnachweis geprüft |
+| Lokale Datei | ZIP-CRC aller Einträge PASS, echte `AndroidManifest.xml`/`classes.dex`; DEX-Header geprüft |
+| Quellgleichheit | Lokale Native-App-/Testquellen, Manifeste und Buildskript SHA256 stimmen mit ausgewähltem Build überein |
+| Python-Regression | **187 PASS**, **97,81%** App-Coverage; 13 neue Android-Delivery-/Core-Vertragsfälle, keine Android-Code-Coverage daraus abgeleitet |
+| Docs / Reality / Python build / dependency audit | PASS lokal; keine bekannten Dependency-Schwachstellen im ausgeführten Audit |
+| Isolierter HTTP-Smoke + `python -O` | Je **43 Antworten PASS**, echte temporäre Core-/SQLite-/Challenge-Prozesse; synthetische Testeingaben, keine Betriebsdaten |
+| Core-/Browser-CI | [34962325926](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34962325926) PASS; reale isolierte Browserpipeline, nicht native Android-Mutationsabnahme |
+| Native HTTPS-End-to-End / erfolgreiche UI-Mutationen | **NOT VALIDATED**: Client und Core-Verträge separat getestet, kein realer Core-TLS-Roundtrip aus Android nachgewiesen |
+| Physisches Android/Honeywell/USB/BLE/Repair, Agenten, Cloud, Unity, IoT | **NOT VALIDATED / NOT IMPLEMENTED**, siehe Modulmatrix |
+| Vollplattform / Production Ready | **BLOCKED** |
+
+## Nachweise erneut abrufen / installieren
+
+```sh
+python scripts/download_android.py --run-id 34962325843 --revision efb3c73368312e3b463778edd725955a0c392dc7
+cd reports/android-download
+sha256sum -c SHA256SUMS
+```
+
+Der erfolgreiche lokale Abruf enthält App-APK, `SHA256SUMS`, `artifact-evidence.json`, `app-signature.txt` und `source-sha256.txt`. Der optionale lokale Downloadpack `atze-plana-0.2-dev.zip` enthält dieselbe APK plus Nachweise und Installationshinweise; kein Schlüssel/Token. Test-APK verbleibt im Original-CI-Archiv (12.715 Bytes, SHA256 `53cb9d317836b183aedc2cb7754c3eff0d3e14cf65b1d68c4f0ecdf74586c736`).
+
+Auf eigenem autorisiertem Android8+-Gerät die App-APK öffnen; Installationsberechtigung nur für die verwendete Quelle erlauben. Einen eigenen Core mit Android-vertrauenswürdigem HTTPS-Zertifikat nach [Quickstart](QUICKSTART.md) betreiben. App öffnen, Origin ohne Pfad und separaten Operator-/Reviewer-Token eingeben. Sichtbare Sitzung ausdrücklich autorisieren. Projekt anlegen/auswählen, Aufgabe registrieren; jede Mutation bestätigen. Ohne vorhandene Evidenz und Challenge bleibt Triage blockiert. Hintergrundwechsel/Trennen löscht lokale Sitzung, Anzeige und Entwürfe; gesendete Requests können nicht zurückgerufen werden. [Vollständiger begrenzter Appvertrag](android/README.md).
+
+**Nächste Abnahme, nicht als umgesetzt ausgeben:** isolierter echter Android↔Core-TLS-Test mit vertrauenswürdigem Zertifikat, Rollen-/Fehler-/Mutations-/Lebenszyklusfällen; danach weitere native Core-Workflows. Fehlende Plattformmodule benötigen jeweils echte Adapter, Isolation/Policy und Geräte-/Providerzugang. Keine funktionslosen Modulschaltflächen hinzugefügt.
+
+[Draft-PR #3](https://github.com/dingeldangbang/Atze-Plana-/pull/3); kein Merge, Release oder Deployment. Nachfolgende reine Berichtsänderungen ersetzen nicht dieses ausdrücklich ausgewählte APK-Artefakt.
+
+---
+
+# Verlauf des Workspace-Inkrements — 2026-09-15 · Core Workspace 0.2-dev
 
 Ziel des Nutzers: vollständige Plattform, zunächst Entwicklungssignatur. **Dieses Inkrement erfüllt das Gesamtziel noch nicht.** Neu implementiert: native Projekt-/Aufgabenanlage und paginierte Verzeichnisse, bestätigte Triage-Anfrage, PLAN-Verzeichnis/Live-Status; ausschließlich bestehende Core-APIs. Kein gebündelter Core/Executor, keine Geräte-/Agenten-/Cloudintegration. [Exakter Clientvertrag](android/README.md).
 
 Erster neuer [Android-CI-Lauf 34961828041](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34961828041): **Build, Signatur v2/v3, Emulatorinstallation/-start und Instrumentation PASS**. Branch-Source `b2c12ee`, gebauter PR-Merge `2e89ae703e4210ce0ee20a872bd0e9890fc2de80`. Core-/Browser-CI [34961828096](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34961828096) und Universe-CI [34961828167](https://github.com/dingeldangbang/Atze-Plana-/actions/runs/34961828167) ebenfalls PASS. Kein neuer lokaler Modelllauf.
 
-**Dateiauslieferung dieses ersten Laufs fehlgeschlagen:** GitHub kürzt Check-Annotationen nach 4096 Zeichen. Der Downloader hat die unvollständigen 16000-Zeichen-Chunks abgelehnt; keine APK geschrieben. Korrektur: maximal 3600 Base64-Zeichen je Chunk, zehn Chunks / 27KB APK, eigener Trunkierungs-Negativtest. PR-Merge-Elternbindung des Downloaders ebenfalls ergänzt und getestet. Neuer CI-/Downloadnachweis steht noch aus; der Installations-PASS des ersten Laufs wird nicht als Download-PASS ausgegeben.
+**Dateiauslieferung dieses ersten Laufs fehlgeschlagen:** GitHub kürzt Check-Annotationen nach 4096 Zeichen. Der Downloader hat die unvollständigen 16000-Zeichen-Chunks abgelehnt; keine APK geschrieben. Korrektur: maximal 3600 Base64-Zeichen je Chunk, zehn Chunks / 27KB APK, eigener Trunkierungs-Negativtest. PR-Merge-Elternbindung des Downloaders ebenfalls ergänzt und getestet. Der nachfolgende zweite Lauf (aktueller Nachweis oben) hat die korrigierte Übertragung tatsächlich bestanden; der erste fehlgeschlagene Download bleibt als Fehler dokumentiert.
 
 Lokaler SDK/JDK-Preflight blockiert; offizieller SDK-Download TLS-Verbindungsfehler, SDK-Emulator/KVM fehlt lokal. Direkter Actions-Blobdownload mit EOF gescheitert. Workflow-Dispatch hat mit Integrationsberechtigung HTTP403 abgelehnt; tatsächliche Ausführung wurde durch [Draft-PR #3](https://github.com/dingeldangbang/Atze-Plana-/pull/3) ausgelöst. Keine TLS-Prüfung abgeschaltet, keine GitHub-Veröffentlichung oder Produktionseinführung.
 
