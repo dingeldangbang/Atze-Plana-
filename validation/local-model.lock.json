@@ -1,6 +1,7 @@
 {
   "schema": 1,
   "scope": "Explicit isolated development validation, never product seed configuration",
+  "execution": "NOT_RUN_BY_LOCK; require a commit-bound workflow report",
   "model": {
     "id": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
     "revision": "9217f5db79a29953eb74d5343926648285ec7e67",

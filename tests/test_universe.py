@@ -35,17 +35,41 @@ class UniverseTests(unittest.TestCase):
         (self.root / '.env.py').write_text('SECRET_MARKER')
         (self.root / 'source.py').write_text('# TODO PRIVATE_MARKER\ndef value():\n    return None\n')
         rows = inventory(self.root)['files']
-        self.assertEqual([r['path'] for r in rows], ['source.py'])
-        self.assertEqual(rows[0]['git'], 'untracked')
+        self.assertEqual([r['path'] for r in rows], ['.gitignore', 'source.py'])
+        self.assertEqual(rows[1]['git'], 'untracked')
         text = audit(self.root).read_text()
         self.assertNotIn('PRIVATE_MARKER', text)
         self.assertNotIn('SECRET_MARKER', text)
+
+    def test_inventory_covers_cross_language_and_contract_sources(self):
+        """UNI-010: CJS, workflow/API/build/docs contracts and safe env template are inventoried; real env remains excluded."""
+        fixtures = {
+            'runner.cjs': "'use strict';\n",
+            'workflow.yml': 'name: isolated workflow\n',
+            'schema.yaml': 'openapi: 3.1.0\n',
+            'contract.json': '{}\n',
+            'manifest.xml': '<manifest/>\n',
+            'pyproject.toml': '[project]\nname="fixture"\n',
+            'requirements.lock': 'example==1.0\n',
+            'README.md': '# Isolated contract\n',
+            '.env.example': 'ATZE_OPERATOR_TOKEN=\n',
+        }
+        for name, content in fixtures.items():
+            (self.root / name).write_text(content)
+        (self.root / '.env').write_text('must-not-inventory')
+        rows = {row['path']: row for row in inventory(self.root)['files']}
+        self.assertTrue(set(fixtures).issubset(rows))
+        self.assertNotIn('.env', rows)
+        self.assertTrue(all(rows[name]['status'] == 'REAL' for name in fixtures))
+        self.assertEqual(backup(self.root, 'runner.cjs').read_text(), fixtures['runner.cjs'])
 
     def test_legitimate_pass_and_syntax(self):
         """UNI-002: exception pass not a stub; whole empty function candidate, syntax distinct."""
         self.assertEqual(findings('try:\n    x()\nexcept ValueError:\n    pass\n', '.py'), [])
         self.assertIn((1, 'STUB_CANDIDATE'), findings('def empty():\n    pass\n', '.py'))
         self.assertTrue(any(code == 'SYNTAX_ERROR' for _, code in findings('def (', '.py')))
+        self.assertEqual(findings('Use `assert True` only as an example.\n', '.md'), [])
+        self.assertIn((1, 'TODO'), findings('# TODO real documentation gap\n', '.md'))
 
     def test_backup_integrity_and_symlinks(self):
         """UNI-003: actual byte copy, idempotent backup, corrupt backup/symlink rejected."""
@@ -86,6 +110,18 @@ class UniverseTests(unittest.TestCase):
         self.assertNotIn('--no-run', repr(commands))
         self.assertNotIn('--collect-only', repr(commands))
 
+    def test_android_all_scope_uses_explicit_build_contract(self):
+        """UNI-011: all-scope Android detection runs the declared build script rather than claiming a platform result."""
+        (self.root / 'android/app').mkdir(parents=True)
+        (self.root / 'android/app/AndroidManifest.xml').write_text('<manifest/>')
+        (self.root / 'scripts').mkdir()
+        (self.root / 'scripts/build_android.sh').write_text('exit 0\n')
+        stacks, commands, blockers = harness.plan(self.root, 'all')
+        self.assertEqual(stacks, ['android'])
+        self.assertEqual(commands, [('Android debug build', ['bash', 'scripts/build_android.sh'])])
+        self.assertEqual(blockers, [])
+        self.assertEqual(harness.run_command(self.root, *commands[0], 2)['status'], 'PASS')
+
     def test_actual_process_exit_and_timeout(self):
         """UNI-006: real failing/successful/timeout processes, no shell; no stdout leak."""
         ok = harness.run_command(self.root, 'success', [sys.executable, '-c', 'print("SECRET_MARKER")'], 2)
@@ -117,6 +153,23 @@ class UniverseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             write_report(self.root, 'hardlink.md', 'replacement')
         self.assertEqual(target.read_text(), 'untouched')
+
+    def test_token_aware_markers_and_inherited_hooks(self):
+        """UNI-009: Python strings and inherited no-op callbacks stay REAL; actual markers and unimplemented bodies stay visible."""
+        callback = 'class Callback(Base):\n    def log_message(self, *args):\n        pass\n'
+        self.assertEqual(findings('example = "# TODO fixture text"\n', '.py'), [])
+        self.assertEqual(findings(callback, '.py'), [])
+        self.assertIn((1, 'TODO'), findings('# TODO real source marker\n', '.py'))
+        self.assertIn((1, 'REVIEW_LITERAL'), findings('assert True\n', '.py'))
+        self.assertIn((2, 'STUB_CANDIDATE'), findings('def missing():\n    raise NotImplementedError("not implemented")\n', '.py'))
+
+        (self.root / 'callback.py').write_text(callback)
+        (self.root / 'marker.py').write_text('# TODO real source marker\n')
+        (self.root / 'missing.py').write_text('def missing():\n    raise NotImplementedError("not implemented")\n')
+        rows = {row['path']: row for row in inventory(self.root)['files']}
+        self.assertEqual(rows['callback.py']['status'], 'REAL')
+        self.assertEqual(rows['marker.py']['status'], 'TODO')
+        self.assertEqual(rows['missing.py']['status'], 'STUB')
 
 
 if __name__ == '__main__':

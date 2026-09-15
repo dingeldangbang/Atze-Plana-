@@ -11,8 +11,8 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Challenge Worker / Result Packages | IMPLEMENTED / begrenzt | [Eigener Prozess, Token, fünf Checks, Staleness-/Adopt-Gate](docs/02-core/challenge-worker.md); keine unabhängige Online-Recherche |
 | Modell-Policy / Text-Gateway | IMPLEMENTED / transportgetestet | Default DENY; separate reale HF-Modell-CI; kein operativer Modellworker, MCP oder Agentensandbox |
 | PLAN / Context Lock | IMPLEMENTED / API- und browsergetestet | [Versionen, echte Quellen, Lock/Widerruf, Challenge-/Triage-/AI-Bindung](docs/21-plan/context-lock.md); keine Wahrheit oder Ausführungsrechte |
-| Dashboard | IMPLEMENTED | Reale PLAN-Bedienung ergänzt; 7 echte Chromium-PLAN-Prüfungen PASS; Resultate im Testbericht |
-| GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
+| Dashboard | IMPLEMENTED | Reale Dashboard-/PLAN-Bedienung; 15 Chromium-Prüfungen sind als CI-Gate gegen einen eigenen Test-Core implementiert. Diese Sandbox hat keinen lokalen Chromium-Nachweis. |
+| GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #2](https://github.com/dingeldangbang/Atze-Plana-/pull/2); kein Merge/Release |
 | Produktionsbetrieb, 2-GB-Kapazität | CONDITIONAL | Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |
 | Agenten, Vollsandbox, Hardware-Repair, 3D, Cloud, Bright Data, Trends | PLANNED / NOT IMPLEMENTED | [Modulmatrix](docs/00-overview/roadmap.md) |

@@ -183,3 +183,30 @@ def test_late_unmarked_tier_is_unavailable_until_reviewed_restart(settings, tmp_
         client.headers['Authorization'] = 'Bearer ' + config.operator_token
         assert client.get('/api/storage/health').json()['tiers'][2]['status'] == 'AVAILABLE'
     assert (root / '.atze-mode').read_text() == 'test'
+
+
+def test_browser_dashboard_harness_declares_all_real_dom_gates():
+    """REAL-016: executable Chromium/CDP harness retains all dashboard mutations as explicit real-DOM gates."""
+    source = (Path(__file__).parents[1] / 'scripts' / 'browser_plan.cjs').read_text()
+    expected = {
+        'BROWSER-DASHBOARD-01-LOGIN-REFRESH',
+        'BROWSER-DASHBOARD-02-PROJECT-CREATE',
+        'BROWSER-DASHBOARD-03-TRIAGE-NO-EXECUTION',
+        'BROWSER-DASHBOARD-04-CONTEXT-SEARCH',
+        'BROWSER-DASHBOARD-05-RESULT-WHY-SOURCES',
+        'BROWSER-DASHBOARD-06-RESULT-RECHALLENGE',
+        'BROWSER-DASHBOARD-07-AI-LOCAL-LOCK',
+        'BROWSER-PLAN-00-RESET-DRAFT',
+        'BROWSER-PLAN-01-CREATE-TWO-REAL-SOURCES',
+        'BROWSER-PLAN-02-TEXTCONTENT-XSS',
+        'BROWSER-PLAN-03-ROLE-DENY',
+        'BROWSER-PLAN-04-REVIEWER-LOCK',
+        'BROWSER-PLAN-05-REVOKE',
+        'BROWSER-PLAN-06-IMMUTABLE-REVISION',
+        'BROWSER-PLAN-07-LOGOUT-CLEAR',
+    }
+    assert source.count("check('") == len(expected)
+    assert all(check in source for check in expected)
+    assert 'JSON.stringify(task.title)' in source  # Task rows intentionally render title/action, not an identifier.
+    assert "--remote-debugging-pipe" in source and "'--no-sandbox'" not in source
+    assert 'Fünfzehn Browserprüfungen' in (Path(__file__).parents[1] / 'docs/14-testing/testing-strategy.md').read_text()

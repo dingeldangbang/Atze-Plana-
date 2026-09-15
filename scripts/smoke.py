@@ -189,7 +189,7 @@ def run(report_path=Path('reports/smoke.json'), *, allow_fixtures=False, browser
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--allow-fixtures', action='store_true', help='Explicit synthetic inputs in a new temporary test instance')
-    parser.add_argument('--browser', action='store_true', help='Require installed sandboxed Chromium; exercise actual PLAN UI in same disposable instance')
+    parser.add_argument('--browser', action='store_true', help='Require installed sandboxed Chromium; exercise actual dashboard and PLAN UI in same disposable instance')
     parser.add_argument('--report', default='reports/smoke.json')
     args = parser.parse_args()
     try:

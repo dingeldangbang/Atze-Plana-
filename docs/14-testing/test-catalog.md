@@ -80,6 +80,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | LM-001 | opt-in gate | previous PASS report | run without consent | overwritten BLOCKED before I/O, no model success. | [test_local_model_runner.py: test_local_model_requires_opt_in](../../tests/test_local_model_runner.py) |
 | LM-002 | real missing file | opt-in | preflight | BLOCKED, not simulated success. | [test_local_model_runner.py: test_local_model_missing_artifacts](../../tests/test_local_model_runner.py) |
 | LM-003 | byte integrity helper | explicitly synthetic small file | size/hash/symlink checks | genuine hash checks, NOT model proof. | [test_local_model_runner.py: test_local_model_artifact_hash](../../tests/test_local_model_runner.py) |
+| LM-004 | static manifest status | checked-in lock | inspect execution marker | NOT_RUN, never a fabricated model result. | [test_local_model_runner.py: test_local_model_lock_never_claims_executed_inference](../../tests/test_local_model_runner.py) |
 | MCP-001: actual verified TLS/JSON or SSE → ordered RPC and cleanup, only candidate names, no tools/call. | [test_mcp.py: test_mcp_real_tls_handshake_and_cleanup](../../tests/test_mcp.py) |
 | MCP-002: real adverse TLS replies → reject redirect/format/scope/injection/cleanup; no fallback or tool execution. | [test_mcp.py: test_mcp_response_fail_closed](../../tests/test_mcp.py) |
 | MCP-003: actual API auth/default policy/absent OAuth; no network and durable BLOCKED evidence. | [test_mcp.py: test_mcp_api_default_deny_roles_and_config](../../tests/test_mcp.py) |
@@ -121,6 +122,7 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | REAL-013: runtime mock imports and assert-only test success are rejected by the narrow guardrail. | [test_reality.py: test_reality_boundary_guard](../../tests/test_reality.py) |
 | REAL-014: a filesystem capacity probe without total size yields UNAVAILABLE/null, not an invented 100 percent. | [test_reality.py: test_zero_capacity_has_no_invented_percentage](../../tests/test_reality.py) |
 | REAL-015: newly appearing unlabelled tier is not initialized by GET; reviewed restart binds its mode explicitly. | [test_reality.py: test_late_unmarked_tier_is_unavailable_until_reviewed_restart](../../tests/test_reality.py) |
+| REAL-016: executable Chromium/CDP harness retains all dashboard mutations as explicit real-DOM gates. | [test_reality.py: test_browser_dashboard_harness_declares_all_real_dom_gates](../../tests/test_reality.py) |
 | OPS-001: backup integrity and restored project read work; existing destination is never overwritten. | [test_tools.py: test_backup_restore](../../tests/test_tools.py) |
 | DOC-002: OpenAPI, generated references, local links and environment coverage pass the worker gate. | [test_tools.py: test_docs_consistent](../../tests/test_tools.py) |
 | CFG-001: documented environment names configure startup and persistent path without defaults for secrets. | [test_tools.py: test_environment_config](../../tests/test_tools.py) |
@@ -128,10 +130,13 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | DOC-004: missing local reference is detected and existing reference is accepted. | [test_tools.py: test_broken_link_detection](../../tests/test_tools.py) |
 | DB-THREAD-001 | FastAPI lifecycle handoff | real SQLite/two threads | enter/use/exit separately | commit and rollback correct. | [test_tools.py: test_connection_dependency_thread_handoff](../../tests/test_tools.py) |
 | UNI-001: ignored/secret files excluded, pending source seen, no source excerpt. | [test_universe.py: test_inventory_exclusions_and_pending_files](../../tests/test_universe.py) |
+| UNI-010: CJS, workflow/API/build/docs contracts and safe env template are inventoried; real env remains excluded. | [test_universe.py: test_inventory_covers_cross_language_and_contract_sources](../../tests/test_universe.py) |
 | UNI-002: exception pass not a stub; whole empty function candidate, syntax distinct. | [test_universe.py: test_legitimate_pass_and_syntax](../../tests/test_universe.py) |
 | UNI-003: actual byte copy, idempotent backup, corrupt backup/symlink rejected. | [test_universe.py: test_backup_integrity_and_symlinks](../../tests/test_universe.py) |
 | UNI-004: report writer cannot overwrite symlink target. | [test_universe.py: test_report_symlink_refused](../../tests/test_universe.py) |
 | UNI-005: multiple stacks, actual commands without collect/dry-run; unknown blocked. | [test_universe.py: test_multi_stack_and_unknown](../../tests/test_universe.py) |
+| UNI-011: all-scope Android detection runs the declared build script rather than claiming a platform result. | [test_universe.py: test_android_all_scope_uses_explicit_build_contract](../../tests/test_universe.py) |
 | UNI-006: real failing/successful/timeout processes, no shell; no stdout leak. | [test_universe.py: test_actual_process_exit_and_timeout](../../tests/test_universe.py) |
 | UNI-007: no --execute means no code runs, saved report BLOCKED, nonzero exit. | [test_universe.py: test_plan_only_fails_closed](../../tests/test_universe.py) |
 | UNI-008: FIFO source cannot hang scanner; hardlinked report cannot truncate data. | [test_universe.py: test_nonregular_and_hardlinked_output](../../tests/test_universe.py) |
+| UNI-009: Python strings and inherited no-op callbacks stay REAL; actual markers and unimplemented bodies stay visible. | [test_universe.py: test_token_aware_markers_and_inherited_hooks](../../tests/test_universe.py) |
