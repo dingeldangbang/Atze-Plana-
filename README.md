@@ -17,6 +17,12 @@ Evidence- und Freigaberegister für einen einzelnen Workspace. **Entwicklungssta
 | Resource-Manager | IMPLEMENTED / TESTED | [Versionierte Datei-Registry mit SHA-256, Referenz-Links, Byte-Vergleich](docs/25-resources/resources.md); kein Virenscan, keine Inhaltsinterpretation |
 | Agent Builder v1 | IMPLEMENTED / TESTED | [Deklarative Registry, Zuweisungen, Einzel-Runs durch die vollständige Consent-Kette](docs/26-agents/agents.md); keine autonome Tool-Ausführung, kein Orchestrator |
 | Monitoring & Anbindungsverwaltung | IMPLEMENTED / TESTED | [Lesende Plattformübersicht, Integrations-Registry mit echten +/−-Routen](docs/27-monitoring/monitoring.md); kein Alerting, konfiguriert ≠ validiert |
+| Permission Leases | IMPLEMENTED / TESTED | [Begrenzte, ablaufende, widerrufbare Vorfreygaben für MCP tools/call](docs/17-security/permission-leases.md); ersetzen nie technische Gates; nur mcp.tools_call |
+| Verifizierte Backups | IMPLEMENTED / TESTED | [Reviewer-getriggerter SQLite-Snapshot mit SHA-256/Integrität/Record-Zählern](docs/19-operations/operations.md); DATABASE_ONLY, keine Automatisierung |
+| Evidence-Analyse | IMPLEMENTED / TESTED | [Deterministische Widerspruchskandidaten + Quellenrangfolge](docs/16-evidence/analysis.md); CALCULATED, kein Urteil, kein ML |
+| Read-Only-CLI | IMPLEMENTED / TESTED | [python -m app.cli: dokumentierte Abfragen, verlustfreie Ausgabe, Fail-closed](docs/12-software/cli.md); keine Mutationen |
+| Isolierte Re-Verifikation | IMPLEMENTED / TESTED | [Subprozess-Sandbox mit RLimits/Hard-Timeout für Objekt-Re-Verifikation](docs/19-operations/operations.md); kein Netz-/Dateisystem-Namespace |
+| Lokaler Lasttest | IMPLEMENTED / TESTED | [scripts/loadtest.py: begrenzter Ein-Maschinen-Lastnachweis mit strukturiertem Report](docs/14-testing/testing-strategy.md); kein Cloud-/verteilter Nachweis |
 | GitHub-CI / Review-PR | siehe aktuellen Bericht | [PR #1](https://github.com/dingeldangbang/Atze-Plana-/pull/1); kein Merge/Release |
 | Produktionsbetrieb & Ressourcenrahmen | CONDITIONAL | „2 GB" = RAM der ausführenden Zielhardware (Honeywell CT45P-XON), kein Core-Speicherbudget; „Free Tier" = externe Anbieter-Nutzungsklasse, nie Datenersatz ([Begriffstrennung](docs/18-deployment/free-tier.md)). Kein Lasttest, kein Deployment, Ingress erforderlich |
 | Vollplattform-Release | BLOCKED | Module, Hardware- und Produktionsnachweise fehlen |

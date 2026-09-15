@@ -47,6 +47,11 @@ def register_monitoring_api(app, settings, actor, operator, reviewer, connection
                                'draft_unchallenged': count(db, 'agent_run', 'state', 'DRAFT_UNCHALLENGED'),
                                'blocked': count(db, 'agent_run', 'state', 'BLOCKED'),
                                'unavailable': count(db, 'agent_run', 'state', 'UNAVAILABLE')},
+                'leases': {'total': count(db, 'lease'), 'stored_active': count(db, 'lease', 'state', 'active'),
+                           'revoked': count(db, 'lease', 'state', 'revoked')},
+                'backups': count(db, 'backup'),
+                'verifications': {'match': count(db, 'verification', 'outcome', 'MATCH'),
+                                  'mismatch': count(db, 'verification', 'outcome', 'MISMATCH')},
             },
             'integrations': {
                 'ai_providers': [{'id': p.id, 'mode': p.mode, 'region': p.region,

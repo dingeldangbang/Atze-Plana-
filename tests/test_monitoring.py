@@ -87,6 +87,8 @@ def test_monitoring_overview_counts_real_records_exactly(client, device_headers)
     assert counts['resource_versions_stored_bytes'] == resource['size_bytes']
     assert counts['agents'] == {'active': 0, 'deactivated': 0}
     assert counts['agent_runs'] == {'awaiting_consent': 0, 'draft_unchallenged': 0, 'blocked': 0, 'unavailable': 0}
+    assert counts['leases'] == {'total': 0, 'stored_active': 0, 'revoked': 0}
+    assert counts['backups'] == 0 and counts['verifications'] == {'match': 0, 'mismatch': 0}
     assert overview['stop_active'] is False
     assert 'no device/provider health' in overview['disclaimer']
     assert overview['integrations']['telemetry_ingest'] == {'configured': True, 'transport': 'HTTPS_ONLY',
