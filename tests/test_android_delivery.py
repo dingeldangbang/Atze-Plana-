@@ -39,7 +39,7 @@ def test_apk_mirror_integrity():
     assert assemble(run, list(reversed(annotations)), revision)[0] == data
 
 
-@pytest.mark.parametrize('damage', ['missing', 'duplicate', 'revision', 'failed', 'hash', 'signature', 'install', 'corruption'])
+@pytest.mark.parametrize('damage', ['missing', 'duplicate', 'revision', 'failed', 'hash', 'signature', 'install', 'corruption', 'truncated'])
 def test_apk_mirror_fail_closed(damage):
     """APK-TRANSPORT-002: incomplete, mixed, failed or corrupted synthetic CI evidence never produces a deliverable."""
     _, revision, run, annotations = mirror_fixture()
@@ -51,6 +51,8 @@ def test_apk_mirror_fail_closed(damage):
         run['head_sha'] = 'b' * 40
     elif damage == 'failed':
         run['conclusion'] = 'failure'
+    elif damage == 'truncated':
+        annotations[-1]['message'] = annotations[-1]['message'][:40]
     elif damage in {'signature', 'install'}:
         evidence = json.loads(annotations[0]['message'])
         evidence['app-signature.txt' if damage == 'signature' else 'validation-status.txt'] = 'NOT_RUN'
@@ -115,3 +117,12 @@ def test_android_workspace_core_contract(client, reviewer):
     events = client.get('/api/audit', headers=reviewer).json()
     assert sum(e['event'] == 'task.created' for e in events) == 7
     assert sum(e['event'] == 'task.triaged' for e in events) == 7
+
+
+def test_apk_mirror_pr_merge_binding():
+    """APK-TRANSPORT-003: PR merge build binds to independently verified source parent, not an arbitrary revision."""
+    data, revision, run, annotations = mirror_fixture()
+    run['head_sha'] = 'b' * 40
+    assert assemble(run, annotations, revision, built_parents=['b' * 40])[0] == data
+    with pytest.raises(ValueError):
+        assemble(run, annotations, revision, built_parents=['c' * 40])

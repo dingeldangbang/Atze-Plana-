@@ -94,10 +94,12 @@ jobs:
           if root.joinpath('validation-status.txt').read_text().strip() != 'EMULATOR_INSTALL_START_TEST_PASS':
               raise SystemExit('No APK mirror without actual install/start/instrumentation PASS')
           data = root.joinpath('atze-app-debug.apk').read_bytes()
-          if len(data) > 96000:
+          if len(data) > 27000:
               raise SystemExit('APK mirror exceeds bounded API transport; use original artifact')
           encoded = base64.b64encode(data).decode('ascii')
-          chunks = [encoded[i:i+16000] for i in range(0, len(encoded), 16000)]
+          # GitHub truncates annotation messages at 4096 characters. Keep JSON
+          # envelope + data below that limit and at most ten notices per step.
+          chunks = [encoded[i:i+3600] for i in range(0, len(encoded), 3600)]
           for index, chunk in enumerate(chunks):
               envelope = dict(source_revision=os.environ['GITHUB_SHA'], file='atze-app-debug.apk',
                               bytes=len(data), sha256=hashlib.sha256(data).hexdigest(),

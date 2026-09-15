@@ -20,13 +20,13 @@ def api(path):
     return json.loads(subprocess.check_output(['gh', 'api', f'repos/{REPOSITORY}/{path}'], text=True))
 
 
-def assemble(run, annotations, revision):
-    if (run.get('head_sha') != revision or run.get('conclusion') != 'success'
+def assemble(run, annotations, revision, built_parents=()):
+    if (run.get('head_sha') not in {revision, *built_parents} or run.get('conclusion') != 'success'
             or run.get('status') != 'completed' or run.get('path') != '.github/workflows/android.yml'):
         raise ValueError('Expected successful Android workflow at exact revision')
     evidence = [json.loads(a['message']) for a in annotations if a.get('title') == 'ANDROID_ARTIFACT_EVIDENCE']
     chunks = [json.loads(a['message']) for a in annotations if a.get('title') == 'ANDROID_APK_BYTES']
-    if len(evidence) != 1 or not chunks or len(chunks) > 8:
+    if len(evidence) != 1 or not chunks or len(chunks) > 10:
         raise ValueError('Missing or ambiguous CI APK evidence')
     evidence = evidence[0]
     if (evidence.get('source_revision') != revision
@@ -39,14 +39,14 @@ def assemble(run, annotations, revision):
     if len(artifacts) != 1:
         raise ValueError('Missing unambiguous app digest')
     artifact = artifacts[0]
-    if not 0 < artifact['bytes'] <= 96000:
+    if not 0 < artifact['bytes'] <= 27000:
         raise ValueError('APK exceeds mirror bound')
     chunks.sort(key=lambda c: c['index'])
     for index, chunk in enumerate(chunks):
         if (chunk['index'] != index or chunk['count'] != len(chunks)
                 or chunk['source_revision'] != revision or chunk['file'] != artifact['file']
                 or chunk['bytes'] != artifact['bytes'] or chunk['sha256'] != artifact['sha256']
-                or len(chunk['base64']) > 16000):
+                or len(chunk['base64']) > 3600):
             raise ValueError('Mixed, duplicated, missing or oversized APK chunks')
     data = base64.b64decode(''.join(c['base64'] for c in chunks), validate=True)
     if len(data) != artifact['bytes'] or hashlib.sha256(data).hexdigest() != artifact['sha256']:
@@ -68,7 +68,12 @@ def main():
         raise ValueError('Expected single successful Android job')
     check_id = int(jobs[0]['check_run_url'].rsplit('/', 1)[1])
     annotations = api(f'check-runs/{check_id}/annotations?per_page=100')
-    data, evidence = assemble(run, annotations, args.revision)
+    # PR workflows build GitHub's synthetic merge revision, not necessarily head_sha.
+    # Verify parentage independently through the commit API, never from APK annotations.
+    commit = api(f'commits/{args.revision}')
+    if commit['sha'] != args.revision:
+        raise ValueError('Unexpected built commit')
+    data, evidence = assemble(run, annotations, args.revision, [p['sha'] for p in commit['parents']])
     args.output_dir.mkdir(parents=True, exist_ok=True)
     destination = args.output_dir / 'atze-app-debug.apk'
     # No APK is written at all unless all evidence/integrity gates passed.

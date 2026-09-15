@@ -43,13 +43,13 @@ Official SDK platform android-35, build-tools35.0.0, javac/jar/keytool and zip. 
 
 CI `.github/workflows/android.yml` runs build, real SDK emulator installation/launch and instrumentation. Merely defining it is not a success result. Signing key is temporary and removed, never uploaded. Every new build has a different identity; updates over previously signed versions may fail. Do not uninstall/delete existing app data without explicit consent. No stable release signing, AAB, store submission or GitHub release.
 
-Original Actions artifact is the primary download (14-day retention). For clients whose network cannot reach the Actions blob host, the workflow additionally mirrors the **validated non-secret app APK only**, at most 96KB, in bounded check annotations. No signing key, token or user data is mirrored. Retrieve with:
+Original Actions artifact is the primary download (14-day retention). For clients whose network cannot reach the Actions blob host, the workflow additionally mirrors the **validated non-secret app APK only**, at most 27KB, in bounded check annotations. No signing key, token or user data is mirrored. Retrieve with:
 
 ```sh
 python scripts/download_android.py --run-id ACTUAL_RUN_ID --revision FULL_SOURCE_SHA
 ```
 
-Uses configured `gh` authentication and verifies selected successful workflow, exact source revision, build/signature/emulator evidence, chunk consistency, byte size and SHA256 against the independent build annotation. Writes `reports/android-download/atze-app-debug.apk` only after those gates pass. This local byte verification is **not** a local apksigner or installation test. Consult the APK report for actual run ID/hash and outcomes.
+Uses configured `gh` authentication and verifies selected successful workflow, exact built revision (for PR merge builds, its source parent is independently checked through the commit API), build/signature/emulator evidence, chunk consistency, byte size and SHA256 against the independent build annotation. Writes `reports/android-download/atze-app-debug.apk` only after those gates pass. This local byte verification is **not** a local apksigner or installation test. Consult the APK report for actual run ID/hash and outcomes.
 
 ## Test boundaries
 
