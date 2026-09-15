@@ -23,7 +23,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 16 Evidence | PARTIAL | Manuelle Provenance, Hash, Review; keine Quellenrangfolge, automatische Wahrheit/Aktualität oder Widerspruchserkennung |
 | 17 Security | PARTIAL | Rollen, Fail-closed, Stop; keine individuelle Benutzerverwaltung, MFA, manipulationssicherer Audit |
 | 18 Deployment | PARTIAL | Lokaler Start, Build, CI; kein tatsächliches Free-Tier-/Produktionsdeployment |
-| 19 Operations | PARTIAL | Runbooks/Health/SQLite-Backup; keine automatische Überwachung oder Backups |
+| 19 Operations | PARTIAL | Runbooks/Health/SQLite-Backup; reale In-App-Plattformübersicht aus gespeicherten Records plus Anbindungs-Registry mit +/−-Verwaltung (Reviewer-bestätigte Deaktivierung, Daten erhalten; [Vertrag](../27-monitoring/monitoring.md)); keine automatische Überwachung, kein Alerting/Metrics-Backend, keine Backups |
 
 ## Reihenfolge weiterer Arbeit
 1. [Mobile/Context/Storage-Architektur](../20-context-storage/architecture.md) und [MCP-/Offline-/Remote-Roadmap](../20-context-storage/mobile-roadmap.md) weiter umsetzen; Identitäts-/Policy-Modell, widerrufbare und ablaufende zielgebundene Freigaben, Migrationen, Request-Limits, Browser-E2E und Recovery-Abnahme.

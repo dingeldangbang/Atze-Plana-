@@ -2002,6 +2002,79 @@ paths:
       x-role: reviewer
       x-side-effects: Confirmed family-wide deactivation + audit; retains configuration,
         assignments and run history; blocks new runs/assignments/versions
+  /api/monitoring/overview:
+    get:
+      tags:
+      - monitoring
+      summary: Overview
+      operationId: overview_api_monitoring_overview_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Overview Api Monitoring Overview Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; read-only aggregation of stored records; configured is
+        never validated; no device/provider health or truth claims
+  /api/integrations:
+    get:
+      tags:
+      - integrations
+      summary: Integrations
+      operationId: integrations_api_integrations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Integrations Api Integrations Get
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      security:
+      - HTTPBearer: []
+      x-role: both
+      x-side-effects: None; read-only registry of runtime-manageable bindings with
+        their real management routes and roles; environment-bound integrations are
+        displayed, not runtime-manageable
   /api/results:
     post:
       tags:

@@ -20,11 +20,15 @@ function list(id, rows, render) {
   rows.forEach(row => { const item = document.createElement('li'); if (row) render(item, row); else item.textContent = 'Keine Einträge vorhanden.'; el(id).append(item); });
 }
 function clearWorkspace(message = 'Nicht geladen — keine aktuellen Daten.') {
-  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers', 'plans'].forEach(id => {
+  ['projects', 'evidence', 'tasks', 'storage', 'context-hits', 'results', 'ai-providers', 'plans', 'monitor-list', 'trend-results', 'integrations'].forEach(id => {
     const item = document.createElement('li'); item.textContent = message; el(id).replaceChildren(item);
   });
   const option = document.createElement('option'); option.value = ''; option.textContent = message;
   el('context-project').replaceChildren(option);
+  ['trend-sensor', 'sensor-device', 'agent-model'].forEach(id => {
+    const empty = document.createElement('option'); empty.value = ''; empty.textContent = message; el(id).replaceChildren(empty);
+  });
+  el('trend-run').disabled = true; el('agent-add-submit').disabled = true;
   planRequest++; planSources = []; planTasks = []; resetPlanEditor();
   el('plan-task').replaceChildren(); el('plan-resources').replaceChildren(); el('plan-detail').replaceChildren();
   el('cache-summary').textContent = 'Keine aktuellen Speicherwerte verfügbar.';
@@ -39,7 +43,7 @@ async function refresh() {
   const request = ++refreshRequest;
   status('Lade aktuelle Workspace-Daten…');
   try {
-    const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory'].map(path => api(path)));
+    const [projects, evidence, tasks, stop, storage, runtime, results, ai, plans, archives, memories, monitoring, integrationRegistry, devices, models] = await Promise.all(['projects', 'evidence', 'tasks', 'control/stop', 'storage/health', 'runtime', 'results', 'ai/status', 'plans', 'archive', 'memory', 'monitoring/overview', 'integrations', 'telemetry/devices', 'ai/models'].map(path => api(path)));
     if (current !== session || request !== refreshRequest) return;
     if (!['test', 'operational'].includes(runtime.mode)) throw new Error('Instanzmodus unbekannt; Daten nicht als Betrieb bestätigt.');
     list('projects', projects, (node, row) => { node.textContent = `${row.name} — ${row.description || 'Ohne Beschreibung'} · ${row.id}`; });
@@ -64,6 +68,8 @@ async function refresh() {
     resetPlanEditor(); list('plans', plans, renderPlan);
     el('ai-policy-state').textContent = `KI Privacy Lock: ${ai.policy.privacy_lock ? 'AN' : 'AUS'} · Local-only: ${ai.policy.local_only ? 'JA' : 'NEIN'} · External AI: ${ai.policy.external_ai ? 'ALLOW (weitere Gates erforderlich)' : 'DENY'} · Modellvalidierung: ${ai.model_inference}`;
     list('ai-providers', ai.providers, (node, row) => { node.textContent = `${row.id} · ${row.mode} · Region (konfiguriert): ${row.region} · ${row.status}`; });
+    renderMonitoring(monitoring);
+    renderIntegrations(integrationRegistry, devices, models);
     status('Verbunden. Daten aus dem aktuellen Workspace geladen.');
   } catch (error) { if (current === session && request === refreshRequest) { clearWorkspace('Daten nicht verfügbar — kein Ersatz durch Beispieldaten.'); status(error.message); } }
 }
@@ -219,5 +225,163 @@ el('plan-editor').onsubmit = async event => {
     else await api('plans', 'POST', {...body,task_id:el('plan-task').value});
     if (current !== session) return;
     resetPlanEditor(); await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+
+function renderMonitoring(monitoring) {
+  const c = monitoring.counts, i = monitoring.integrations;
+  list('monitor-list', [
+    `Projekte ${c.projects} · Aufgaben ${c.tasks} · Evidenz ${c.evidence} · Resultate ${c.results} · Not-Stop ${monitoring.stop_active ? 'AKTIV' : 'inaktiv'}`,
+    `Telemetrie-Geräte aktiv ${c.telemetry_devices.active} / deaktiviert ${c.telemetry_devices.deactivated} · Sensoren aktiv ${c.telemetry_sensors.active} / deaktiviert ${c.telemetry_sensors.deactivated} · Batches ${c.telemetry_batches} · Samples ${c.telemetry_samples} (davon suspect laut Device: ${c.telemetry_suspect_samples}, außerhalb deklarierter Range: ${c.telemetry_flagged_out_of_range})`,
+    `Ressourcen aktiv ${c.resources.active} / deaktiviert ${c.resources.deactivated} · gespeicherte Versionsbytes ${c.resource_versions_stored_bytes} · Agenten aktiv ${c.agents.active} / deaktiviert ${c.agents.deactivated}`,
+    `Agent-Runs: Consent ausstehend ${c.agent_runs.awaiting_consent} · DRAFT_UNCHALLENGED ${c.agent_runs.draft_unchallenged} · BLOCKED ${c.agent_runs.blocked} · UNAVAILABLE ${c.agent_runs.unavailable}`,
+    `KI-Provider konfiguriert ${i.ai_providers.length} (konfiguriert ≠ validiert) · Bright-Data-MCP ${i.brightdata_mcp.configured ? 'CONFIGURED (Discovery/Tools-Call möglich; Live-Validierung separat)' : 'NOT_CONFIGURED'} · Telemetrie-Ingest ${i.telemetry_ingest.configured ? 'CONFIGURED (HTTP/HTTPS)' : 'NOT_CONFIGURED (Ingest verweigert)'}`,
+    `Speicher: ${monitoring.storage.tiers.map(t => `${t.tier}=${t.status}`).join(' · ')} · Cache aktiv ${monitoring.storage.cache_active_bytes} B / abgelaufen ${monitoring.storage.cache_expired_bytes} B · Archiv logisch ${monitoring.storage.archive_logical_bytes} B`,
+  ], (node, row) => { node.textContent = row; });
+}
+
+function fillSelect(id, rows, selected, render) {
+  const keep = el(id).value;
+  el(id).replaceChildren();
+  rows.forEach(row => { const option = document.createElement('option'); option.value = row.id; option.textContent = render(row); el(id).append(option); });
+  if (rows.some(row => row.id === (selected ?? keep))) el(id).value = selected ?? keep;
+  return rows.length;
+}
+function renderIntegrations(registry, devices, models) {
+  const activeDevices = devices.filter(d => d.state === 'active');
+  if (!fillSelect('sensor-device', activeDevices)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Geräte'; el('sensor-device').append(empty); }
+  const sensors = registry.manageable.filter(b => b.binding === 'telemetry_device').flatMap(d => d.sensors || []);
+  const activeSensors = sensors.filter(s => s.state === 'active');
+  if (!fillSelect('trend-sensor', activeSensors)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Sensoren'; el('trend-sensor').append(empty); }
+  el('trend-run').disabled = activeSensors.length === 0;
+  if (!fillSelect('agent-model', models)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Kein Modell registriert (AI-Status/Modelle prüfen)'; el('agent-model').append(empty); }
+  el('agent-add-submit').disabled = models.length === 0;
+  const rows = [...registry.manageable, ...registry.environment_bound];
+  list('integrations', rows, renderBinding);
+}
+function renderBinding(node, binding) {
+  if (binding.binding === 'ai_provider') {
+    node.textContent = `[ai_provider] ${binding.id} · ${binding.state} · Server-Umgebung (Umgebungsvariable) · keine Verwaltung zur Laufzeit`;
+    return;
+  }
+  if (binding.binding === 'brightdata_mcp') {
+    node.textContent = `[brightdata_mcp] Bright-Data-MCP · ${binding.state} · ${binding.management}`;
+    return;
+  }
+  if (binding.binding === 'telemetry_device_fleet') {
+    node.textContent = `[telemetry_token] Ingest-Token · ${binding.state} · ${binding.management}`;
+    return;
+  }
+  node.textContent = `[${binding.binding}] ${binding.name}${binding.kind ? ` (${binding.kind})` : ''}${binding.purpose ? ` (${binding.purpose})` : ''} · ${binding.state}${binding.version ? ` · v${binding.version}` : ''} · ${binding.id} `;
+  if (binding.state === 'active') {
+    const remove = document.createElement('button'); remove.textContent = 'Entfernen (−)';
+    remove.onclick = () => confirmRemove(node, binding);
+    node.append(remove);
+  }
+  if (binding.sensors && binding.sensors.length) {
+    const nested = document.createElement('ul');
+    binding.sensors.forEach(sensor => {
+      const item = document.createElement('li');
+      item.textContent = `[telemetry_sensor] ${sensor.name} (${sensor.kind})${sensor.unit ? ` [${sensor.unit}]` : ''} · ${sensor.state} · ${sensor.id} `;
+      if (sensor.state === 'active') {
+        const remove = document.createElement('button'); remove.textContent = 'Entfernen (−)';
+        remove.onclick = () => confirmRemove(item, sensor);
+        item.append(remove);
+      }
+      nested.append(item);
+    });
+    node.append(nested);
+  }
+}
+function confirmRemove(node, binding) {
+  if (node.querySelector('form')) return;
+  const current = session;
+  const form = document.createElement('form');
+  const label = document.createElement('label'); label.textContent = `"${binding.name || binding.binding}" wirklich deaktivieren? Begründung (Pflicht):`;
+  const reason = document.createElement('input'); reason.required = true; reason.maxLength = 2000; label.append(reason);
+  const yes = document.createElement('button'); yes.textContent = 'Bestätigt deaktivieren (−)';
+  const no = document.createElement('button'); no.type = 'button'; no.textContent = 'Abbrechen';
+  form.append(label, yes, no); node.append(form); reason.focus();
+  no.onclick = () => form.remove();
+  form.onsubmit = async event => {
+    event.preventDefault(); yes.disabled = true;
+    try {
+      await api(binding.actions.remove.route.split(' ')[1].replace(/^\/api\//, ''), 'POST', {confirm: true, reason: reason.value});
+      if (current !== session) return;
+      status(`Anbindung [${binding.binding}] deaktiviert (−). Daten und Historie bleiben vollständig erhalten; kein Lösch-Endpunkt existiert.`);
+      await refresh();
+    } catch (error) { yes.disabled = false; if (current === session) status(error.message); }
+  };
+}
+
+el('device-add').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  try {
+    const data = Object.fromEntries(new FormData(event.target));
+    const device = await api('telemetry/devices', 'POST', {name: data.name, description: data.description});
+    if (current !== session) return;
+    event.target.reset();
+    status(`Telemetrie-Gerät registriert (+): ${device.id}. Deklarative Identität, keine Hardwareverbindung hergestellt.`);
+    await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('sensor-add').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  try {
+    const data = Object.fromEntries(new FormData(event.target));
+    const body = {name: data.name, kind: data.kind};
+    if (data.unit) body.unit = data.unit;
+    if (data.minimum !== '' && data.maximum !== '') body.declared_range = {minimum: Number(data.minimum), maximum: Number(data.maximum)};
+    else if (data.minimum !== '' || data.maximum !== '') throw new Error('Deklarierte Range benötigt beide Grenzen (Minimum < Maximum) oder keine.');
+    await api(`telemetry/devices/${data.device_id}/sensors`, 'POST', body);
+    if (current !== session) return;
+    event.target.reset();
+    status('Sensor deklariert (+). declared_range ist eine Owner-Angabe, keine Kalibrierung.');
+    await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('resource-add').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  const file = el('resource-file').files[0];
+  try {
+    if (!file) throw new Error('Keine Datei ausgewählt.');
+    if (file.size > 4 * 1024 * 1024) throw new Error('Datei überschreitet die 4-MiB-Grenze eines einzelnen Uploads.');
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = ''; for (let i = 0; i < bytes.length; i += 32768) binary += String.fromCharCode(...bytes.subarray(i, i + 32768));
+    const data = Object.fromEntries(new FormData(event.target));
+    const resource = await api('resources', 'POST', {name: data.name, kind: data.kind, source: data.source, description: `Upload über die Oberfläche · Datei ${file.name} · ${file.type || 'Typ unbekannt'}`, content_base64: btoa(binary)});
+    if (current !== session) return;
+    event.target.reset();
+    status(`Ressource hochgeladen (+): ${resource.id} · ${resource.size_bytes} Bytes · Kein Virenscan durchgeführt (nicht implementiert, Betreiberverantwortung).`);
+    await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('agent-add').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  try {
+    const data = Object.fromEntries(new FormData(event.target));
+    const body = {name: data.name, model_id: data.model_id, purpose: data.purpose, instruction: data.instruction, description: 'Über die Oberfläche deklariert'};
+    const tools = data.tools.split(',').map(t => t.trim()).filter(Boolean);
+    if (tools.length) body.allowed_tools = tools;
+    const agent = await api('agents', 'POST', body);
+    if (current !== session) return;
+    event.target.reset();
+    status(`Agent deklariert (+): ${agent.id}. Runs erfordern separate Reviewer-Freigabe je Ausführung; keine autonome Tool-Ausführung.`);
+    await refresh();
+  } catch (error) { if (current === session) status(error.message); }
+};
+el('trend-form').onsubmit = async event => {
+  event.preventDefault(); const current = session;
+  try {
+    const data = Object.fromEntries(new FormData(event.target));
+    const body = {sensor_id: data.sensor_id};
+    if (data.session) body.session = data.session;
+    const report = await api('telemetry/trends', 'POST', body);
+    if (current !== session) return;
+    list('trend-results', [
+      `Sensor ${report.sensor_id} · Samples ${report.sample_count}${report.session ? ` · Session ${report.session}` : ''} · ${report.summary_status} · CALCULATED aus eingereichten Samples, keine Prognose, keine Aktionsfreigabe`,
+      ...report.checks.map(c => `${c.type}: ${c.status} · ${c.statistic} = ${c.value === null ? '—' : c.value} · Schwelle ${c.threshold}${c.failed_criteria.length ? ` · nicht erfüllt: ${c.failed_criteria.join('; ')}` : ''}`),
+    ], (node, row) => { node.textContent = row; });
+    status('Trend-Analyse abgeschlossen (Query ohne Nebenwirkungen).');
   } catch (error) { if (current === session) status(error.message); }
 };

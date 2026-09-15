@@ -45,5 +45,8 @@ Design/Code/Test/Änderung benötigen im selben PR Dokumentationsänderung oder 
 ## Agent Builder v1
 [Deklarative Agenten-Registry mit versionierter Konfiguration, Referenz-Zuweisungen und gebundenen Einzel-Runs durch die vollständige AI-Consent-Kette](26-agents/agents.md). Keine autonome Tool-Ausführung; Outputs DRAFT_UNCHALLENGED, nie gespeichert oder adoptiert.
 
+## Monitoring & Anbindungsverwaltung
+[Lesende Plattformübersicht aus echten gespeicherten Records plus Integrations-Registry mit echten Add-/Remove-Routen](27-monitoring/monitoring.md). − ausschließlich Reviewer-bestätigte Deaktivierung mit Begründung, Daten bleiben erhalten; umgebungsgebundene Anbindungen nur einsehbar; kein Alerting, keine Wahrheitsaussagen.
+
 ## Bright Data MCP discovery + begrenztes tools/call
 [Enger Vertrag: Authentifizierung, API, Datenschutz, Allowlist-Ausführung und offene Live-Abnahme](22-mcp/brightdata.md). tools/call nur für die zwei allowlisted Kandidaten mit Reviewer-Einzelfreigabe; kein allgemeiner Tool-Executor, keine Live-Provider-Validierung.
