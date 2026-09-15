@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import org.json.JSONObject;
 
-/** Only implemented Android outbound path: explicit authenticated HTTPS Core read. */
+/** Only Android outbound path: consent-bound HTTPS, fixed Core routes, no fallback. */
 public final class ExternalDataGateway {
     public static URI validateOrigin(String value) throws Exception {
         URI uri = new URI(value.trim());
@@ -25,39 +25,75 @@ public final class ExternalDataGateway {
         }
         return uri;
     }
-    public static String runtime(String origin, String token) throws Exception {
+    public static void validateRoute(String method, String path) {
+        boolean read = "GET".equals(method) && (
+            path.equals("/api/runtime")
+            || path.matches("/api/(projects|tasks|plans)\\?limit=20&offset=[0-9]{1,9}")
+            || path.matches("/api/plans/[a-f0-9-]{36}/status"));
+        boolean write = "POST".equals(method) && (
+            path.equals("/api/projects") || path.equals("/api/tasks")
+            || path.matches("/api/tasks/[a-f0-9-]{36}/triage"));
+        if (!read && !write) throw new IllegalArgumentException("CORE_ROUTE_DENIED");
+    }
+    public static String request(String origin, String token, String method, String path, JSONObject body) throws Exception {
         URI uri = validateOrigin(origin);
-        if (token.length() < 32 || token.contains("\r") || token.contains("\n")) {
+        validateRoute(method, path);
+        if (token == null || token.length() < 32 || token.length() > 4096 || !token.matches("[!-~]+")) {
             throw new IllegalArgumentException("VALID_TOKEN_REQUIRED");
         }
-        HttpsURLConnection connection = (HttpsURLConnection) uri.resolve("/api/runtime").toURL().openConnection();
-        connection.setSSLSocketFactory(tlsFactory());
-        connection.setInstanceFollowRedirects(false);
-        connection.setConnectTimeout(10000);
-        connection.setReadTimeout(10000);
-        // Android 8+ system TLS/CA/hostname verification. Never install trust-all callbacks.
-        connection.setRequestProperty("Authorization", "Bearer " + token);
-        connection.setRequestProperty("Accept", "application/json");
+        if ("GET".equals(method) && body != null) throw new IllegalArgumentException("GET_BODY_DENIED");
+        byte[] payload = body == null ? new byte[0] : body.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (payload.length > 65536) throw new IllegalArgumentException("REQUEST_LIMIT");
+        HttpsURLConnection connection = (HttpsURLConnection) uri.resolve(path).toURL().openConnection();
         try {
+            connection.setSSLSocketFactory(tlsFactory());
+            connection.setInstanceFollowRedirects(false);
+            connection.setUseCaches(false);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            connection.setRequestMethod(method);
+            // System CA and hostname verification; never install trust-all callbacks.
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+            connection.setRequestProperty("Accept", "application/json");
+            if ("POST".equals(method)) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                connection.setFixedLengthStreamingMode(payload.length);
+                try (java.io.OutputStream output = connection.getOutputStream()) { output.write(payload); }
+            }
             int status = connection.getResponseCode();
-            if (status != 200) throw new IllegalStateException("HTTP_" + status + "_NO_FALLBACK");
+            int expected = "POST".equals(method) && (path.equals("/api/projects") || path.equals("/api/tasks")) ? 201 : 200;
+            if (status != expected) throw new CoreHttpException(status);
+            String type = connection.getContentType();
+            if (type == null || !"application/json".equalsIgnoreCase(type.split(";", 2)[0].trim())) {
+                throw new IllegalStateException("JSON_REQUIRED");
+            }
             ByteArrayOutputStream result = new ByteArrayOutputStream();
+            long deadline = android.os.SystemClock.elapsedRealtime() + 30000;
             try (InputStream stream = connection.getInputStream()) {
-                byte[] bytes = new byte[1024];
+                byte[] bytes = new byte[4096];
                 int count;
                 while ((count = stream.read(bytes)) != -1) {
-                    if (result.size() + count > 16384) throw new IllegalStateException("RESPONSE_LIMIT");
+                    if (android.os.SystemClock.elapsedRealtime() > deadline) throw new IOException("RESPONSE_DEADLINE");
+                    if (result.size() + count > 262144) throw new IllegalStateException("RESPONSE_LIMIT");
                     result.write(bytes, 0, count);
                 }
             }
-            JSONObject data = new JSONObject(result.toString("UTF-8"));
-            String mode = data.getString("mode");
-            if (!"operational".equals(mode) && !"test".equals(mode)) throw new IllegalStateException("UNKNOWN_MODE");
-            return "Core-Modus: " + mode + "\nDatenbereich: " + data.getString("data_scope")
-                + "\nProduktionsstatus: " + data.getString("production_readiness")
-                + "\nChallenge Worker: " + data.getString("challenge_worker")
-                + "\nNur Status gelesen. Keine Ausführung oder Freigabe.";
+            return result.toString("UTF-8");
         } finally { connection.disconnect(); }
+    }
+    public static final class CoreHttpException extends IOException {
+        public final int status;
+        CoreHttpException(int status) { super("HTTP_" + status); this.status = status; }
+    }
+    public static String runtime(String origin, String token) throws Exception {
+        JSONObject data = new JSONObject(request(origin, token, "GET", "/api/runtime", null));
+        String mode = data.getString("mode");
+        if (!"operational".equals(mode) && !"test".equals(mode)) throw new IllegalStateException("UNKNOWN_MODE");
+        return "Core-Modus: " + mode + "\nDatenbereich: " + data.getString("data_scope")
+            + "\nProduktionsstatus: " + data.getString("production_readiness")
+            + "\nChallenge Worker: " + data.getString("challenge_worker")
+            + "\nKeine Geräteausführung. Freigabe ist keine Ausführung.";
     }
     public static SSLSocketFactory tlsFactory() throws Exception {
         SSLContext context = SSLContext.getInstance("TLS");

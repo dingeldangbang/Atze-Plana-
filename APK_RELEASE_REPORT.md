@@ -1,3 +1,15 @@
+# Aktueller Arbeitsstand — 2026-09-15 · Core Workspace 0.2-dev
+
+Ziel des Nutzers: vollständige Plattform, zunächst Entwicklungssignatur. **Dieses Inkrement erfüllt das Gesamtziel noch nicht.** Neu implementiert: native Projekt-/Aufgabenanlage und paginierte Verzeichnisse, bestätigte Triage-Anfrage, PLAN-Verzeichnis/Live-Status; ausschließlich bestehende Core-APIs. Kein gebündelter Core/Executor, keine Geräte-/Agenten-/Cloudintegration. [Exakter Clientvertrag](android/README.md).
+
+Aktueller neuer Build/Emulatorlauf: **NOT RUN (in Vorbereitung)**. Frühere Debug-APK-/CI-Ergebnisse weiter unten beweisen nicht den neuen Quellstand. Lokaler SDK/JDK-Preflight blockiert; Download vom offiziellen SDK-Host scheitert mit TLS-Verbindungsfehler. SDK-Emulator/KVM fehlt lokal. CI-Ausführung und tatsächlich gelieferte Datei werden nach Prüfung hier eingetragen. Direkter Actions-Blobdownload ebenfalls mit EOF gescheitert; verifizierbarer API-Mirror für kleine getestete APKs ergänzt. Keine TLS-Prüfung abgeschaltet.
+
+Native HTTPS-End-to-End-Verbindung, erfolgreiche Anlage aus dem Android-UI, physisches Gerät, Vollplattform und Produktionsfreigabe bleiben **NOT VALIDATED / BLOCKED**. Ein signierter Build allein ersetzt diese Gates nicht.
+
+---
+
+## Historische Nachweise vor dem Workspace-Inkrement (nicht aktueller Quellstand)
+
 ## MCP discovery scope addendum — 2026-09-14
 
 Core-only metadata integration; no native Android source changes, no OS proxy/APN manipulation and no native MCP/tool client. Existing selected APK source/hashes below remain unchanged. New Android regression CI is separate from live Bright Data/device proof; no new physical install or provider validation claimed.

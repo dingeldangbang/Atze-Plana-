@@ -1,3 +1,11 @@
+## Android Workspace-Inkrement — 2026-09-15
+
+Tatsächlich lokal ausgeführt (Python 3.11.2, isolierte Testdaten): **185 pytest-Fälle PASS**, App-Coverage **97,81%**, zwei vorhandene FastAPI/Starlette-Deprecation-Warnungen. Darunter 11 neue Fälle für APK-Transportintegrität, Stale-Artefakt-Invaliderung und tatsächlichen Core-/SQLite-Vertrag der nativen Operationen. `docs.py --check`, `reality_check.py`, Python sdist/wheel Build und pip-audit (keine bekannten Schwachstellen) PASS. Isolierter HTTP-Smoke mit separatem Challenge-Prozess: **43 Antworten geprüft, PASS** (`reports/workspace-smoke.json`). Kein Betriebssystem-/Hardware-/Providerbeweis.
+
+Lokaler Android-Buildpreflight tatsächlich ausgeführt: **BLOCKED: Android SDK not configured**; JDK/SDK/ADB/KVM fehlen, offizieller SDK-Download TLS-Verbindungsfehler. Neuer echter Android-CI-Build/Emulatorlauf in Vorbereitung; Ergebnisse ausschließlich im [aktuellen APK-Bericht](APK_RELEASE_REPORT.md). Alte Nachweise unten gelten nicht für neues Android-Java. Native End-to-End-HTTPS-Mutationen, physisches Gerät, neue Modell-/Browserabnahme in dieser lokalen Ausführung **NOT RUN**. Keine Vollplattformfreigabe.
+
+---
+
 ## Bright Data MCP discovery addendum — 2026-09-14
 
 Bounded real Streamable HTTP client/API added: OAuth bearer only, fixed TLS endpoint, initialize/initialized/tools-list plus session cleanup. Existing gateway, explicit reviewer/project/PUBLIC/provider-region permission, Privacy Lock, stop and current PLAN gate precede dispatch. Durable audit before I/O; no source/context/credentials in metadata reports. Only candidate names search_engine/scrape_as_markdown surfaced, **no tools/call or enabled tool permissions**. [Contract, sources, operations and limitations](docs/22-mcp/brightdata.md).

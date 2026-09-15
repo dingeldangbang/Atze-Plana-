@@ -1,3 +1,11 @@
+## 2026-09-15 — Android Core Workspace 0.2-dev (partial)
+
+- Native project/task creation and paginated real Core directories; explicit mutation confirmation, triage and read-only PLAN status. No action executor or gate bypass.
+- Explicit foreground-only RAM session; logout/background clears credentials/drafts/results; route allowlist and bounded JSON transport, no redirects/cache/retry.
+- SDK build invalidates stale APK/PASS artifacts before preflight. Exact source hashes and bounded post-emulator-PASS APK API mirror support restricted download networks; retrieval checks provenance/completeness/SHA256.
+- New instrumentation/input/transport/build-preflight/Core-contract regressions. Actual run results are recorded separately in APK_RELEASE_REPORT/TEST_REPORT, not inferred here.
+- Full-platform/production and native live HTTPS mutation acceptance remain open. Development signature only, no stable update identity.
+
 # Changelog
 
 ## Unreleased — Privacy-first model boundary, partial integration

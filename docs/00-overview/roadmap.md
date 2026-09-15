@@ -10,7 +10,7 @@ Stand 2026-09-14. PLANNED bedeutet Ziel, NOT IMPLEMENTED bedeutet kein ausführb
 | 03 Plan | PARTIAL | Task-PLAN-Versionen, echte Archive-/Memory-/Evidence-Referenzen, Context Lock/Widerruf und Gateintegration; kein universeller Workflow-/Query-/Binary-Builder |
 | 04 Agents | NOT IMPLEMENTED | Kein Agent Builder, Runtime, Tools, Lifecycle; vor Implementierung Tool→Permission→Task→Triage→Execution-Vertrag und isolierte Negativtests |
 | 05 Devices | NOT IMPLEMENTED | USB, WiFi, BLE, Serial, Discovery, Device Bridge fehlen; reale Testgeräte und Adaptermodell nötig |
-| 06 Android | PARTIAL | Nativer read-only HTTPS-Statusclient, echtes SDK-/Debug-APK-/Emulatortest-CI; keine physische Honeywell/Repair-/Fastboot-/EDL-/Firmwarevalidierung |
+| 06 Android | PARTIAL | Nativer HTTPS-Core-Workspace mit Projekt-/Aufgabenanlage, Verzeichnissen, Triage und PLAN-Status; native HTTPS-End-to-End-Abnahme noch offen, echte SDK-/Debug-APK-/Emulatortest-CI; keine physische Honeywell/Repair-/Fastboot-/EDL-/Firmwarevalidierung |
 | 07 IoT | NOT IMPLEMENTED | ESP32, Sensoren, Telemetrie, Kalibrierung, Echtzeit nicht angeschlossen |
 | 08 Network | PARTIAL | Eigene HTTP-API vorhanden; kein Monitoring/Discovery/MQTT/SSH/Incident-Executor |
 | 09 Cloud | NOT IMPLEMENTED | Kein Hybrid-/Multi-Cloud-/Edge-/Provider-Adapter, kein Provisioning |
