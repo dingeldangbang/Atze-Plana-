@@ -188,6 +188,11 @@ Actual results are in `reports/junit.xml` after running pytest, not inferred by 
 | RES-014: audit trail records upload, versioning, linking, unlinking and confirmed deactivation with actors. | [test_resources.py: test_audit_covers_resource_lifecycle](../../tests/test_resources.py) |
 | RES-015: text preview truncates at 200 characters while reporting the true character count. | [test_resources.py: test_preview_truncates_long_text](../../tests/test_resources.py) |
 | RES-016: returned sha256/size match an independent recomputation over the downloaded bytes. | [test_resources.py: test_hash_is_verifiable_against_returned_metadata](../../tests/test_resources.py) |
+| SBX-001: an intact object re-verifies byte-exact in a separate process with a durable record and audit. | [test_sandbox.py: test_sandbox_reverification_match_and_audit](../../tests/test_sandbox.py) |
+| SBX-002: tampering with the stored object bytes on disk yields MISMATCH (fail-closed detection, no fake PASS). | [test_sandbox.py: test_sandbox_reverification_detects_real_corruption](../../tests/test_sandbox.py) |
+| SBX-003: a missing object file reports UNAVAILABLE, never a silent PASS. | [test_sandbox.py: test_sandbox_reverification_unavailable_object](../../tests/test_sandbox.py) |
+| SBX-004: verification is reviewer-confirmed; unknown resources 404; the emergency stop blocks execution. | [test_sandbox.py: test_sandbox_roles_stop_and_targets](../../tests/test_sandbox.py) |
+| SBX-005: the memory rlimit kills an over-allocating child; the hard timeout kills a hanging child. | [test_sandbox.py: test_sandbox_rlimits_are_real](../../tests/test_sandbox.py) |
 | TEL-001: settings reject short or platform-shared telemetry tokens; separate >=32 char credential enforced. | [test_telemetry.py: test_settings_require_separate_long_telemetry_token](../../tests/test_telemetry.py) |
 | TEL-002: blank ATZE_TELEMETRY_TOKEN keeps ingest fail-closed (403 not configured, 401 without bearer); registry still works. | [test_telemetry.py: test_ingest_fail_closed_without_configured_token](../../tests/test_telemetry.py) |
 | TEL-003: ingest requires the exact device token; missing/unknown bearer rejected 401, valid token accepted. | [test_telemetry.py: test_ingest_rejects_wrong_or_missing_token](../../tests/test_telemetry.py) |

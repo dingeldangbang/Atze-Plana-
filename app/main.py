@@ -203,7 +203,7 @@ def create_app(settings: Settings | None = None, *, schema_only=False):
     register_agent_api(app, actor, operator, reviewer, connection, store, storage, ai_gateway)
     register_monitoring_api(app, settings, actor, operator, reviewer, connection, store, storage, ai_gateway)
     register_lease_api(app, actor, reviewer, connection, store)
-    register_ops_api(app, settings, actor, reviewer, connection, store)
+    register_ops_api(app, settings, actor, reviewer, connection, store, storage)
     register_analysis_api(app, actor, connection, store)
     register_challenge_api(app, settings, actor, operator, reviewer, connection, storage)
     register_context_api(app, store, storage, actor, operator, reviewer, connection)

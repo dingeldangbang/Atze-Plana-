@@ -2361,6 +2361,60 @@ paths:
       x-role: both
       x-side-effects: None; read-only list of verified backup records; a record proves
         only the snapshot at creation time, not an offsite copy or a restore drill
+  /api/operations/verify/resource/{resource_id}:
+    post:
+      tags:
+      - operations
+      summary: Verify Resource
+      operationId: verify_resource_api_operations_verify_resource__resource_id__post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: resource_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Resource Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Verify Resource Api Operations Verify Resource  Resource
+                  Id  Post
+        '401':
+          description: Missing or invalid token
+        '403':
+          description: Role denied
+        '404':
+          description: Entity not found
+        '409':
+          description: State conflict
+        '410':
+          description: Disposable cache expired
+        '507':
+          description: Insufficient eligible storage capacity
+        '422':
+          description: Invalid input
+        '503':
+          description: Storage unavailable
+      x-role: reviewer
+      x-side-effects: Re-verify one stored resource object in an isolated subprocess
+        (separate process, rlimits address space/CPU/file size, hard timeout, minimal
+        env, read-only inputs); durable verification record + audit; process isolation
+        only, NOT a network/filesystem namespace or seccomp sandbox; stop blocks execution;
+        MATCH proves byte equality with the stored hash only, never content safety
+        or truth
   /api/analysis/contradictions:
     post:
       tags:
@@ -7844,6 +7898,23 @@ components:
       - result_class
       - prediction
       title: TrendReport
+    VerifyInput:
+      properties:
+        confirm:
+          type: boolean
+          const: true
+          title: Confirm
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - confirm
+      - reason
+      title: VerifyInput
     Why:
       properties:
         result:
