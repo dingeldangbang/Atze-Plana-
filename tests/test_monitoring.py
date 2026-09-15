@@ -192,6 +192,8 @@ def test_agent_run_states_counted(ai):
     assert result['agent_run']['state'] == 'BLOCKED' and seen == []
     counts = client.get('/api/monitoring/overview').json()['counts']
     assert counts['agent_runs'] == {'awaiting_consent': 0, 'draft_unchallenged': 0, 'blocked': 1, 'unavailable': 0}
+    entry = next(e for e in client.get('/api/integrations').json()['manageable'] if e['binding'] == 'agent')
+    assert entry['purpose'] == 'analysis' and entry['model_id'] == body['model_id'] and entry['state'] == 'active'
 
 
 def test_environment_bound_integrations_display_only(client, settings):

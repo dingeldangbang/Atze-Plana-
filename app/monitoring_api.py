@@ -81,8 +81,9 @@ def register_monitoring_api(app, settings, actor, operator, reviewer, connection
                                               if device['state'] == 'active' else {})},
                                'sensors': sensors_by_device.get(device['id'], [])})
         for agent in bodies(db, 'agent'):
-            manageable.append({'binding': 'agent', 'id': agent['id'], 'name': agent['name'], 'state': agent['state'],
-                               'created_at': agent['created_at'],
+            manageable.append({'binding': 'agent', 'id': agent['id'], 'name': agent['name'],
+                               'purpose': agent['purpose'], 'model_id': agent['model_id'],
+                               'state': agent['state'], 'created_at': agent['created_at'],
                                'actions': {'add': {'route': 'POST /api/agents', 'role': 'operator'},
                                            **({'remove': {'route': f"POST /api/agents/{agent['id']}/deactivate",
                                                           'role': 'reviewer', 'requires': 'confirm+reason', 'data': 'retained'}}

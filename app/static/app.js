@@ -240,21 +240,21 @@ function renderMonitoring(monitoring) {
   ], (node, row) => { node.textContent = row; });
 }
 
-function fillSelect(id, rows, selected, render) {
+function fillSelect(id, rows, render) {
   const keep = el(id).value;
   el(id).replaceChildren();
   rows.forEach(row => { const option = document.createElement('option'); option.value = row.id; option.textContent = render(row); el(id).append(option); });
-  if (rows.some(row => row.id === (selected ?? keep))) el(id).value = selected ?? keep;
+  if (rows.some(row => row.id === keep)) el(id).value = keep;
   return rows.length;
 }
 function renderIntegrations(registry, devices, models) {
   const activeDevices = devices.filter(d => d.state === 'active');
-  if (!fillSelect('sensor-device', activeDevices)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Geräte'; el('sensor-device').append(empty); }
+  if (!fillSelect('sensor-device', activeDevices, d => `${d.name} · ${d.id}`)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Geräte'; el('sensor-device').append(empty); }
   const sensors = registry.manageable.filter(b => b.binding === 'telemetry_device').flatMap(d => d.sensors || []);
   const activeSensors = sensors.filter(s => s.state === 'active');
-  if (!fillSelect('trend-sensor', activeSensors)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Sensoren'; el('trend-sensor').append(empty); }
+  if (!fillSelect('trend-sensor', activeSensors, s => `${s.name} (${s.kind}) · ${s.id}`)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Keine aktiven Sensoren'; el('trend-sensor').append(empty); }
   el('trend-run').disabled = activeSensors.length === 0;
-  if (!fillSelect('agent-model', models)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Kein Modell registriert (AI-Status/Modelle prüfen)'; el('agent-model').append(empty); }
+  if (!fillSelect('agent-model', models, m => `${m.model} · ${m.provider_id} · ${m.capabilities.join('/')}`)) { const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Kein Modell registriert (AI-Status/Modelle prüfen)'; el('agent-model').append(empty); }
   el('agent-add-submit').disabled = models.length === 0;
   const rows = [...registry.manageable, ...registry.environment_bound];
   list('integrations', rows, renderBinding);
