@@ -1,3 +1,7 @@
+## 2026-09-15 — Native Workspace scope synchronization
+
+Android-Vertrag, README, Roadmap, Changelog, APK-/Test-/Validierungsbericht synchronisiert. Testkatalog tatsächlich neu generiert; OpenAPI unverändert (nur vorhandene Endpunkte angebunden). `python scripts/docs.py --check` PASS lokal. Historische APK-Berichte klar vom neuen ausgewählten Build 34962325843 getrennt; lokale Datei/Hash, CI-Signatur/Emulatornachweis, erster fehlgeschlagener und zweiter erfolgreicher Download dokumentiert. Vollplattform, native TLS-Mutationsabnahme und physische Geräte weiterhin offen. Keine implementierten fehlenden Module oder Releaseerfolge behauptet.
+
 ## Bright Data MCP discovery addendum — 2026-09-14
 
 Bounded real Streamable HTTP client/API added: OAuth bearer only, fixed TLS endpoint, initialize/initialized/tools-list plus session cleanup. Existing gateway, explicit reviewer/project/PUBLIC/provider-region permission, Privacy Lock, stop and current PLAN gate precede dispatch. Durable audit before I/O; no source/context/credentials in metadata reports. Only candidate names search_engine/scrape_as_markdown surfaced, **no tools/call or enabled tool permissions**. [Contract, sources, operations and limitations](docs/22-mcp/brightdata.md).

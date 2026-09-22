@@ -60,10 +60,14 @@ Verbindlich: [REALITY_POLICY](REALITY_POLICY.md), [Integrations-/Realitätsaudit
 Separater [lokaler Modell-Integrationslauf](docs/14-testing/local-model-validation.md) mit gepinnten Gewichten/Runtime und ein [nativer Android-Core-Client](android/README.md) mit echter Build-/Emulator-Pipeline. Diese Pipelines sind keine Erfolgsmeldung: [Testbericht](TEST_REPORT.md), [APK-Bericht](APK_RELEASE_REPORT.md), [Finale Validierung](FINAL_VALIDATION_REPORT.md) nennen nur ausgeführte Ergebnisse. Keine Dummy-Verzeichnisse für fehlende Geräte-/Unity-/MCP-/Cloudmodule. Gesamtplattform bleibt bis zur vollständigen Abnahme BLOCKED.
 
 ### Tatsächlich geprüfte neue Deliverables
-[Lokaler Modell-CI-Nachweis](TEST_REPORT.md): gepinnte Qwen-Inferenz, keine externe Inferenz, nicht-root/Loopback-only. [Android-Debug-APK und SHA256](APK_RELEASE_REPORT.md): echt gebaut/signiert, installiert/gestartet/getestet im SDK-Emulator. Native App ist ein kleiner Read-only-Core-Statusclient, keine volle Device-/Repair-/Agentplattform. Gesamtfreigabe bleibt BLOCKED.
+[Lokaler Modell-CI-Nachweis](TEST_REPORT.md): gepinnte Qwen-Inferenz, keine externe Inferenz, nicht-root/Loopback-only. [Android-Debug-APK und SHA256](APK_RELEASE_REPORT.md): echt gebaut/signiert, installiert/gestartet/getestet im SDK-Emulator. Die damalige Native App war ein kleiner Read-only-Core-Statusclient. Das neue Workspace-Inkrement (siehe unten) benötigt eigene Nachweise; keine volle Device-/Repair-/Agentplattform. Gesamtfreigabe bleibt BLOCKED.
 
 ## PLAN-Inkrement
 [Context-Lock-Vertrag](docs/21-plan/context-lock.md): genau ein PLAN je Task, unveränderliche Quellenfassungen, Reviewer-Sperre/Widerruf. Neue Challenge-Policy `challenge-2-context` erfordert erneute Gegenprüfung vorhandener Results. Kein universeller Object Workspace/Executor. Aktuelle tatsächlich ausgeführte Gates im [Testbericht](TEST_REPORT.md).
 
 ## Bright Data MCP: begrenzte Tool-Erkennung
 [OAuth-Bearer-Handshake und begrenzte MCP-Erkennung](docs/22-mcp/brightdata.md) implementiert; standardmäßig gesperrt. **Keine tools/call-Ausführung, keine Webabfrage oder Live-Bright-Data-Abnahme.** Ein isolierter TLS-Protokolltest ist kein Provider-Nachweis. Bestehende Tool-/Permission-Lease-/Sandbox-Gates bleiben offen.
+
+## Android Workspace-Inkrement · 2026-09-15
+
+[Native Core Workspace 0.2-dev](android/README.md) bindet bestehende APIs aktiv an: Projekte/Aufgaben anlegen und paginiert lesen, Triage explizit anfordern, PLAN-Verzeichnis/Context-Lock-Status lesen. Kein Executor oder gebündelter Python-Core. Challenge-/Reviewer-Gates bleiben unverändert. Token nur in explizit autorisierter sichtbarer RAM-Sitzung; Hintergrundwechsel leert Sitzung/Anzeige/Entwürfe. Entwicklungssignierung, kein stabiler Updatekey. **Aktuelle ausgeführte Nachweise und Download ausschließlich im [APK-Bericht](APK_RELEASE_REPORT.md); native HTTPS-End-to-End-Abnahme und Gesamtplattform weiterhin offen.**

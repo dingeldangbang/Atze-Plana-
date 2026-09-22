@@ -3,11 +3,17 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/reports/android"; mkdir -p "$OUT"
+# Invalidate only known generated artifacts before preflight; failed rebuilds must not
+# leave an older signed APK or emulator PASS looking like this run's deliverable.
+rm -f "$OUT"/atze-*-debug.apk "$OUT"/SHA256SUMS "$OUT"/*-signature.txt \
+  "$OUT"/validation-status.txt "$OUT"/instrumentation.txt "$OUT"/launch.txt \
+  "$OUT"/installed-package.txt "$OUT"/artifact-evidence.json "$OUT"/source-sha256.txt
+printf '%s\n' 'INSTALL_NOT_RUN' > "$OUT/validation-status.txt"
 printf '%s\n' 'BUILD_NOT_RUN; INSTALL_NOT_RUN' > "$OUT/build-status.txt"
 WORK=""
 cleanup() {
   rc=$?
-  if [ "$rc" -ne 0 ]; then printf '%s\n' 'BUILD_BLOCKED_OR_FAILED; INSTALL_NOT_RUN' > "$OUT/build-status.txt"; fi
+  if [ "$rc" -ne 0 ]; then rm -f "$OUT"/atze-*-debug.apk "$OUT"/SHA256SUMS "$OUT"/*-signature.txt; printf '%s\n' 'BUILD_BLOCKED_OR_FAILED; INSTALL_NOT_RUN' > "$OUT/build-status.txt"; fi
   if [ -n "$WORK" ]; then rm -rf "$WORK"; fi
   unset ATZE_ANDROID_TEMP_KEY_PASSWORD
 }
@@ -39,6 +45,7 @@ build() {
 }
 build app ''
 build test "$WORK/app/classes.jar"
+(cd "$ROOT" && find android -type f -print0 | sort -z | xargs -0 sha256sum; cd "$ROOT" && sha256sum scripts/build_android.sh) > "$OUT/source-sha256.txt"
 (cd "$OUT" && sha256sum atze-*-debug.apk > SHA256SUMS)
 printf '%s\n' 'BUILD_PASS; INSTALL_NOT_RUN' > "$OUT/build-status.txt"
 printf '%s\n' 'BUILD PASS: actual debug APKs, ephemeral signing identity; installation NOT YET VALIDATED.'

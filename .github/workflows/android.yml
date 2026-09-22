@@ -69,19 +69,43 @@ jobs:
           import hashlib,json
           from pathlib import Path
           root=Path('reports/android'); root.mkdir(parents=True,exist_ok=True)
-          data={'scope':'real debug artifacts; emulator test not physical hardware','apks':[]}
+          data={'source_revision':__import__('os').environ['GITHUB_SHA'], 'scope':'real debug artifacts; emulator test not physical hardware','apks':[]}
           for path in sorted(root.glob('atze-*-debug.apk')):
               data['apks'].append({'file':path.name,'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
-          for filename in ['build-status.txt','validation-status.txt','instrumentation.txt']:
+          for filename in ['build-status.txt','validation-status.txt','instrumentation.txt','app-signature.txt','source-sha256.txt']:
               path=root/filename
               data[filename]=path.read_text(errors='replace')[-3000:] if path.exists() else 'NOT_RUN'
-          if data['validation-status.txt']=='NOT_RUN' and (root/'emulator.log').exists():
+          if 'EMULATOR_INSTALL_START_TEST_PASS' not in data['validation-status.txt'] and (root/'emulator.log').exists():
               lines=(root/'emulator.log').read_text(errors='replace').splitlines()
               data['emulator_errors']='\n'.join(line for line in lines if line.lstrip().startswith(('ERROR','FATAL')))[:2000]
           (root/'artifact-evidence.json').write_text(json.dumps(data,indent=2)+'\n')
           summary=json.dumps(data,ensure_ascii=True)
           print('::notice title=ANDROID_ARTIFACT_EVIDENCE::'+summary.replace('%','%25').replace('\n','%0A').replace('\r','%0D'))
           PYCODE
+      # Some clients can access api.github.com but not the Actions blob host.
+      # Only the small, already validated, non-secret development APP APK is mirrored
+      # as bounded check annotations. Original artifact remains the primary download.
+      - name: API-accessible copy of validated development APK
+        run: |
+          python - <<'PYAPK'
+          import base64, hashlib, json, os
+          from pathlib import Path
+          root = Path('reports/android')
+          if root.joinpath('validation-status.txt').read_text().strip() != 'EMULATOR_INSTALL_START_TEST_PASS':
+              raise SystemExit('No APK mirror without actual install/start/instrumentation PASS')
+          data = root.joinpath('atze-app-debug.apk').read_bytes()
+          if len(data) > 27000:
+              raise SystemExit('APK mirror exceeds bounded API transport; use original artifact')
+          encoded = base64.b64encode(data).decode('ascii')
+          # GitHub truncates annotation messages at 4096 characters. Keep JSON
+          # envelope + data below that limit and at most ten notices per step.
+          chunks = [encoded[i:i+3600] for i in range(0, len(encoded), 3600)]
+          for index, chunk in enumerate(chunks):
+              envelope = dict(source_revision=os.environ['GITHUB_SHA'], file='atze-app-debug.apk',
+                              bytes=len(data), sha256=hashlib.sha256(data).hexdigest(),
+                              index=index, count=len(chunks), base64=chunk)
+              print('::notice title=ANDROID_APK_BYTES::' + json.dumps(envelope))
+          PYAPK
       - name: Upload actual APKs and evidence (never the temporary signing key)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -96,4 +120,5 @@ jobs:
             reports/android/instrumentation.txt
             reports/android/installed-package.txt
             reports/android/artifact-evidence.json
+            reports/android/source-sha256.txt
           retention-days: 14
